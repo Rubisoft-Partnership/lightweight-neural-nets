@@ -1,0 +1,3 @@
+[submodule "tinn"]
+	path = tinn
+	url = https://github.com/Rubisoft-Partnership/tinn
