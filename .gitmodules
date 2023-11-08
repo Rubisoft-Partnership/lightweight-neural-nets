@@ -1,3 +1,6 @@
 [submodule "tinn"]
 	path = tinn
 	url = https://github.com/Rubisoft-Partnership/tinn
+[submodule "tiny-dnn"]
+	path = tiny-dnn
+	url = https://github.com/tiny-dnn/tiny-dnn
