@@ -3,7 +3,6 @@
 #include "tiny_dnn/tiny_dnn.h"
 #include "../model-bp/src/train.cpp"
 
-
 static void usage(const char *argv0)
 {
     std::cout << "Usage: " << argv0 << " --data_path <path_to_dataset_folder>"
