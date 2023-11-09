@@ -1,10 +1,10 @@
 #include <iostream>
 
 #include "tiny_dnn/tiny_dnn.h"
-// #include "../model-bp/src/main.cpp"
 
 static void construct_net(tiny_dnn::network<tiny_dnn::sequential> &nn,
-                          tiny_dnn::core::backend_t backend_type)
+                          tiny_dnn::core::backend_t backend_type,
+                          const int layers_number)
 {
 
     using fc = tiny_dnn::layers::fc;
@@ -12,8 +12,10 @@ static void construct_net(tiny_dnn::network<tiny_dnn::sequential> &nn,
     using softmax = tiny_dnn::activation::softmax;
 
     nn << fc(32 * 32, 200, true, backend_type) // F6, 32^2-in, 200-out
-       << tanh()
-       << fc(200, 10, true, backend_type) // F6, 200-in, 10-out
+       << tanh();
+    for (int i = 0; i < layers_number - 2; i++) // add the (<layer_number> - 2) layers
+        nn << fc(200, 200, true, backend_type) << tanh();
+    nn << fc(200, 10, true, backend_type) // F6, 200-in, 10-out
        << softmax();
 }
 
@@ -29,7 +31,7 @@ static void train(const std::string &data_dir_path,
 
     tiny_dnn::core::backend_t backend_type = tiny_dnn::core::default_engine();
 
-    construct_net(nn, backend_type);
+    construct_net(nn, backend_type, layers_number);
 
     std::cout << "load models..." << std::endl;
 

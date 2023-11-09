@@ -80,10 +80,10 @@ int main(int argc, char **argv)
                   << std::endl;
         return -1;
     }
-    if (layers_number <= 0)
+    if (layers_number <= 2)
     {
         std::cerr << "Invalid number of layers. The number of layers must be "
-                     "greater than 0."
+                     "greater than 2."
                   << std::endl;
         return -1;
     }
