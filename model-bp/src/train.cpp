@@ -21,11 +21,13 @@ static void train(const std::string &data_dir_path,
                         double learning_rate,
                         const int n_train_epochs,
                         const int n_minibatch,
-                        tiny_dnn::core::backend_t backend_type)
+                        const int layers_number)
 {
   // specify loss-function and learning strategy
   tiny_dnn::network<tiny_dnn::sequential> nn;
   tiny_dnn::adagrad optimizer;
+
+  tiny_dnn::core::backend_t backend_type = tiny_dnn::core::default_engine();
 
   construct_net(nn, backend_type);
 
