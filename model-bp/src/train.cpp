@@ -3,15 +3,14 @@
 
 #include "tiny_dnn/tiny_dnn.h"
 
-static void construct_net(tiny_dnn::network<tiny_dnn::sequential> &nn)
+static void construct_net(tiny_dnn::network<tiny_dnn::sequential> &nn,
+                          const std::vector<int> &layer_units)
 {
     tiny_dnn::core::backend_t backend_type = tiny_dnn::core::default_engine();
 
     using fc = tiny_dnn::layers::fc;
     using tanh = tiny_dnn::activation::tanh;
     using softmax = tiny_dnn::activation::softmax;
-
-    std::vector<int> layer_units = {32 * 32, 500, 500, 500, 10};
 
     // construct nets
 
@@ -27,13 +26,14 @@ static void construct_net(tiny_dnn::network<tiny_dnn::sequential> &nn)
 static void train(const std::string &data_dir_path,
                   double learning_rate,
                   const int n_train_epochs,
-                  const int n_minibatch)
+                  const int n_minibatch,
+                  const std::vector<int> &layer_units)
 {
     // specify loss-function and learning strategy
     tiny_dnn::network<tiny_dnn::sequential> nn;
     tiny_dnn::adagrad optimizer;
 
-    construct_net(nn);
+    construct_net(nn, layer_units);
 
     std::cout << "load models..." << std::endl;
 

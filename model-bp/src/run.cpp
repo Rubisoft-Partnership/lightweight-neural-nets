@@ -124,7 +124,7 @@ int main(int argc, char **argv)
               << std::endl;
     try
     {
-        train(data_path, learning_rate, epochs, minibatch_size);
+        train(data_path, learning_rate, epochs, minibatch_size, layer_units);
     }
     catch (tiny_dnn::nn_error &err)
     {

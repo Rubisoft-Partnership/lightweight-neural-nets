@@ -2,10 +2,9 @@
 
 filename=${1:-target/main.out}
 data_path=${2:-../tiny-dnn/data}
-learning_rate=${3:-1}
+learning_rate=${3:-0.01}
 epochs=${4:-30}
-minibatch_size=${5:-16}
-layers_number=${6:-5}
+minibatch_size=${5:-32}
 
 if [ ! -f $filename ]; then
     make
