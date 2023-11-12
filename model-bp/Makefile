@@ -1,7 +1,7 @@
 CC = g++
-CFLAGS = -I ../../tiny-dnn
-DEPS = run.cpp
-EXECNAME = main.out
+CFLAGS = -I ../tiny-dnn
+DEPS = src/run.cpp
+EXECNAME = target/main.out
 
 all: main
 

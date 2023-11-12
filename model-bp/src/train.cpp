@@ -1,37 +1,39 @@
 #include <iostream>
+#include <vector>
 
 #include "tiny_dnn/tiny_dnn.h"
 
-static void construct_net(tiny_dnn::network<tiny_dnn::sequential> &nn,
-                          tiny_dnn::core::backend_t backend_type,
-                          const int layers_number)
+static void construct_net(tiny_dnn::network<tiny_dnn::sequential> &nn)
 {
+    tiny_dnn::core::backend_t backend_type = tiny_dnn::core::default_engine();
 
     using fc = tiny_dnn::layers::fc;
     using tanh = tiny_dnn::activation::tanh;
     using softmax = tiny_dnn::activation::softmax;
 
-    nn << fc(32 * 32, 200, true, backend_type) // F6, 32^2-in, 200-out
-       << tanh();
-    for (int i = 0; i < layers_number - 2; i++) // add the (<layer_number> - 2) layers
-        nn << fc(200, 200, true, backend_type) << tanh();
-    nn << fc(200, 10, true, backend_type) // F6, 200-in, 10-out
+    std::vector<int> layer_units = {32 * 32, 500, 500, 500, 10};
+
+    // construct nets
+
+    for (int i = 0; i < layer_units.size() - 2; i++)
+    {
+        nn << fc(layer_units[i], layer_units[i + 1], true, backend_type) << tanh();
+    }
+    nn << fc(layer_units[layer_units.size() - 2], layer_units.back(), true, backend_type) // F6, 200-in, 10-out
        << softmax();
+
 }
 
 static void train(const std::string &data_dir_path,
                   double learning_rate,
                   const int n_train_epochs,
-                  const int n_minibatch,
-                  const int layers_number)
+                  const int n_minibatch)
 {
     // specify loss-function and learning strategy
     tiny_dnn::network<tiny_dnn::sequential> nn;
     tiny_dnn::adagrad optimizer;
 
-    tiny_dnn::core::backend_t backend_type = tiny_dnn::core::default_engine();
-
-    construct_net(nn, backend_type, layers_number);
+    construct_net(nn);
 
     std::cout << "load models..." << std::endl;
 
