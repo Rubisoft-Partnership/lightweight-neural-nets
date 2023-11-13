@@ -44,11 +44,11 @@ static void train(const std::string &data_dir_path,
     tiny_dnn::parse_mnist_labels(data_dir_path + "/train-labels.idx1-ubyte",
                                  &train_labels);
     tiny_dnn::parse_mnist_images(data_dir_path + "/train-images.idx3-ubyte",
-                                 &train_images, -1.0, 1.0, 2, 2);
+                                 &train_images, -1.0, 1.0, 0, 0);
     tiny_dnn::parse_mnist_labels(data_dir_path + "/t10k-labels.idx1-ubyte",
                                  &test_labels);
     tiny_dnn::parse_mnist_images(data_dir_path + "/t10k-images.idx3-ubyte",
-                                 &test_images, -1.0, 1.0, 2, 2);
+                                 &test_images, -1.0, 1.0, 0, 0);
 
     std::cout << "start training" << std::endl;
 
@@ -86,5 +86,5 @@ static void train(const std::string &data_dir_path,
     // test and show results
     nn.test(test_images, test_labels).print_detail(std::cout);
     // save network model & trained weights
-    nn.save("bp-model");
+    nn.save("models/bp-model");
 }

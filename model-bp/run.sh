@@ -10,4 +10,4 @@ if [ ! -f $filename ]; then
     make
 fi
 
-./$filename --data_path $data_path --learning_rate $learning_rate --epochs $epochs --minibatch_size $minibatch_size --layer_units 1024 500 500 500 10
+./$filename --data_path $data_path --learning_rate $learning_rate --epochs $epochs --minibatch_size $minibatch_size --layer_units 784 500 500 500 10
