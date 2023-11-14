@@ -18,9 +18,8 @@ static void construct_net(tiny_dnn::network<tiny_dnn::sequential> &nn,
     {
         nn << fc(layer_units[i], layer_units[i + 1], true, backend_type) << tanh();
     }
-    nn << fc(layer_units[layer_units.size() - 2], layer_units.back(), true, backend_type) // F6, 200-in, 10-out
+    nn << fc(layer_units[layer_units.size() - 2], layer_units.back(), true, backend_type)
        << softmax();
-
 }
 
 static void train(const std::string &data_dir_path,

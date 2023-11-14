@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 
 #include "tiny_dnn/tiny_dnn.h"
 #include "../model-bp/src/train.cpp"
@@ -9,7 +10,7 @@ static void usage(const char *argv0)
               << " --learning_rate <1>"
               << " --epochs <30>"
               << " --minibatch_size <16>"
-              << " --layers_number <1>" << std::endl;
+              << " --layer_units <784 500 500 500 10>" << std::endl;
 }
 
 int main(int argc, char **argv)
@@ -93,10 +94,10 @@ int main(int argc, char **argv)
                   << std::endl;
         return -1;
     }
-    if (layer_units.size() <= 2)
+    if (layer_units.size() <= 1)
     {
-        std::cerr << "Invalid number of layers. The number of layers must be "
-                     "greater than 2."
+        std::cerr << "Invalid number of units. The number of layers must be "
+                     "greater than 1."
                   << std::endl;
         return -1;
     }
@@ -113,15 +114,28 @@ int main(int argc, char **argv)
               << "Learning rate: " << learning_rate << std::endl
               << "Minibatch size: " << minibatch_size << std::endl
               << "Number of epochs: " << epochs << std::endl
-              << "Number of layers: " << layer_units.size() << std::endl;
-    // prints the layer units
-    std::cout << "Layer units: ";
-    for (int i = 0; i < layer_units.size(); i++)
-    {
-        std::cout << layer_units[i] << " ";
-    }
+              << "Number of layers: " << layer_units.size() - 1 << std::endl;
+    // prints the layers and its in and out dim using iomanip
+
+#define PRINT_WIDTH 12
+
     std::cout << std::endl
+              << std::left
+              << std::setw(PRINT_WIDTH) << "Layer num"
+              << std::setw(PRINT_WIDTH) << "Input dim"
+              << std::setw(PRINT_WIDTH) << "Output dim"
               << std::endl;
+
+    for (int i = 0; i < layer_units.size() - 1; i++)
+    {
+        std::cout << std::left
+                  << std::setw(PRINT_WIDTH) << i + 1
+                  << std::setw(PRINT_WIDTH) << layer_units[i]     // Replace with actual in_dim
+                  << std::setw(PRINT_WIDTH) << layer_units[i + 1] // Replace with actual out_dim
+                  << std::endl;
+    }
+    std::cout << std::endl;
+
     try
     {
         train(data_path, learning_rate, epochs, minibatch_size, layer_units);
