@@ -1,2 +1,4 @@
 *.out
+model-bp/models/*
+.vscode/*
 *.json
