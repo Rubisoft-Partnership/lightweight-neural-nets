@@ -13,13 +13,8 @@ static void construct_net(tiny_dnn::network<tiny_dnn::sequential> &nn,
     using softmax = tiny_dnn::activation::softmax;
 
     // construct nets
-
-    for (int i = 0; i < layer_units.size() - 2; i++)
-    {
-        nn << fc(layer_units[i], layer_units[i + 1], true, backend_type) << tanh();
-    }
-    nn << fc(layer_units[layer_units.size() - 2], layer_units.back(), true, backend_type)
-       << softmax();
+    nn = tiny_dnn::make_mlp<tanh>(layer_units.begin(), layer_units.end());
+    nn << softmax();
 }
 
 static void train(const std::string &data_dir_path,
