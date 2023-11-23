@@ -1,5 +1,6 @@
 *.out
 *.json
+*.txt
 model-bp/models/*
 .vscode/*
 build
