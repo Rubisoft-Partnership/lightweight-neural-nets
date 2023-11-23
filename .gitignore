@@ -4,3 +4,4 @@
 model-bp/models/*
 .vscode/*
 build
+*.csv
