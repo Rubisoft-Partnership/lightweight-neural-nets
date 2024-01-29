@@ -1,8 +1,9 @@
-#include "Tinn.h"
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>
+
+#include "ff-lib.h"
 
 // Data object.
 typedef struct
@@ -210,7 +211,7 @@ int main()
     // Load the training set.
     const Data data = build("../../dataset/mnist/mnist_train.txt", nips - nops, nops);
     // Train, baby, train.
-    const Tinn tinn = xtbuild(nips, nhid, nops);
+    const Tinn tinn = xtbuild(nips, nhid, nops, relu, pdrelu);
     FFsamples samples = new_samples(nips);
     for (int i = 0; i < iterations; i++)
     {
@@ -221,7 +222,8 @@ int main()
             generate_samples(data, j, samples);
 
             // TODO: edit `xttrain` to take in the positive and negative samples in the form of <input, label>
-            //  error += xttrain(tinn, in_pos, tg_pos, rate);
+            error += fftrain(tinn, samples.pos, samples.neg, rate, 0.5f);
+            // normalize output ( future inputs )
         }
         printf("error %.12f :: learning rate %f\n",
                (double)error / data.rows,
