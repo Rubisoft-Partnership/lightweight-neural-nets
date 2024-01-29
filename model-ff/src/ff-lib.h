@@ -39,9 +39,12 @@ float fftrain(const Tinn t, const float *const pos, const float *const neg, floa
 Tinn xtbuild(const int nips, const int nhid, const int nops, float (*act)(float), float (*pdact)(float));
 
 // Activation function.
-float relu(const float a);
 
+float relu(const float a);
 float pdrelu(const float a);
+
+float sigmoid(const float a);
+float pdsigmoid(const float a);
 
 
 /*

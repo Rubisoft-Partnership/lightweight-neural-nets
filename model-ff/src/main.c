@@ -211,7 +211,7 @@ int main()
     // Load the training set.
     const Data data = build("../../dataset/mnist/mnist_train.txt", nips - nops, nops);
     // Train, baby, train.
-    const Tinn tinn = xtbuild(nips, nhid, nops, relu, pdrelu);
+    const Tinn tinn = xtbuild(nips, nhid, nops, sigmoid, pdsigmoid);
     FFsamples samples = new_samples(nips);
     for (int i = 0; i < iterations; i++)
     {
@@ -221,9 +221,8 @@ int main()
         {
             generate_samples(data, j, samples);
 
-            // TODO: edit `xttrain` to take in the positive and negative samples in the form of <input, label>
-            error += fftrain(tinn, samples.pos, samples.neg, rate, 0.5f);
-            // normalize output ( future inputs )
+            error += fftrain(tinn, samples.pos, samples.neg, rate, 10.0f);
+            // normalize output ( future input  s )
         }
         printf("error %.12f :: learning rate %f\n",
                (double)error / data.rows,
