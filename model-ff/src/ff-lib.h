@@ -1,4 +1,7 @@
-// TODO: Add activation function and its derivative to Tinn
+#pragma once
+
+#define MAX_LAYERS_NUM 64
+
 
 typedef struct
 {
@@ -31,12 +34,21 @@ typedef struct
 } Tinn; 
 
 
+typedef struct
+{
+    Tinn hid_layers[MAX_LAYERS_NUM];
+    int num_layers;
+    int num_hid_layers;
+}FFNet;
 
 
-float fftrain(const Tinn t, const float *const pos, const float *const neg, float rate, const float threshold);
 
-// New Tinn creation function that takes an activation function and its derivative as arguments
-Tinn xtbuild(const int nips, const int nhid, const int nops, float (*act)(float), float (*pdact)(float));
+float fftrainnet(const FFNet ffnet, const float *const pos, const float *const neg, float rate);
+FFNet ffnetbuild(const int *layer_sizes, int num_layers, float (*act)(float), float (*pdact)(float), const float treshold);
+int ffpredictnet(const FFNet ffnet, const float *in, int num_classes, int insize);
+
+
+
 
 // Activation function.
 
@@ -52,14 +64,5 @@ float pdsigmoid(const float a);
 */
 // Tinn original functions
 
-float *xtpredict(Tinn, const float *in);
-
-float xttrain(Tinn, const float *in, const float *tg, float rate);
-
-void xtsave(Tinn, const char *path);
-
-Tinn xtload(const char *path);
-
-void xtfree(Tinn);
 
 void xtprint(const float *arr, const int size);

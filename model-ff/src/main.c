@@ -15,7 +15,7 @@ typedef struct
     // Number of inputs to neural network.
     int feature_len;
     // Number of outputs to neural network.
-    int label_len;
+    int num_class;
     // Number of rows in file (number of sets for neural network).
     int rows;
 } Data;
@@ -74,17 +74,17 @@ static float **new2d(const int rows, const int cols)
 }
 
 // New data object.
-static Data ndata(const int feature_len, const int label_len, const int rows)
+static Data ndata(const int feature_len, const int num_class, const int rows)
 {
     const Data data = {
-        new2d(rows, feature_len), new2d(rows, label_len), feature_len, label_len, rows};
+        new2d(rows, feature_len), new2d(rows, num_class), feature_len, num_class, rows};
     return data;
 }
 
 // Gets one row of inputs and outputs from a string.
 static void parse(const Data data, char *line, const int row)
 {
-    const int cols = data.feature_len + data.label_len;
+    const int cols = data.feature_len + data.num_class;
     for (int col = 0; col < cols; col++)
     {
         const float val = atof(strtok(col == 0 ? line : NULL, " "));
@@ -133,34 +133,23 @@ static FFsamples new_samples(const int nips)
     return s;
 }
 
-// Generates a positive and a negative sample for the FF algorithm by appending the one-hot encoded target to the input
+// Generates a positive and a negative sample for the FF algorithm by embedding the one-hot encoded target in the input
 static void generate_samples(const Data d, const int row, FFsamples s)
 {
-    for (int col = 0; col < d.feature_len; col++)
-    {
-        s.pos[col] = d.in[row][col];
-        s.neg[col] = d.in[row][col];
-    }
-    int one_pos;
-    for (int col = d.feature_len; col < d.feature_len + d.label_len; col++)
-    {
-        if (d.tg[row][col - d.feature_len] == 1.0f)
-        {
-            one_pos = col;
-        }
-        s.pos[col] = d.tg[row][col - d.feature_len];
-        s.neg[col] = d.tg[row][col - d.feature_len];
-    }
+    memcpy(s.pos, d.in[row], (d.feature_len - d.num_class) * sizeof(float));
+    memcpy(s.neg, d.in[row], (d.feature_len - d.num_class) * sizeof(float));
+    memcpy(&s.pos[d.feature_len - d.num_class], d.tg[row], d.num_class * sizeof(float));
+    memset(&s.neg[d.feature_len - d.num_class], 0, d.num_class * sizeof(float));
     // Set the positive sample's label to 0.0f
-    s.neg[one_pos] = 0.0f;
+    int one_pos;
+    for (int i = d.feature_len - d.num_class; i < d.feature_len; i++)
+        if (s.pos[i] == 1.0f)
+            one_pos = i - (d.feature_len - d.num_class);
     // Generate a random label for the negative sample that is not the same as the positive sample's label
-    int neg_label = rand() % (d.label_len - 1);
-    if (neg_label >= one_pos)
-    {
-        neg_label++;
-    }
+    int step = 1 + rand() % (d.num_class - 1);
+    int neg_label = (one_pos + step) % d.num_class;
     // Set the negative sample's label to 1.0f
-    s.neg[d.feature_len + neg_label] = 1.0f;
+    s.neg[(d.feature_len - d.num_class) + neg_label] = 1.0f;
 }
 
 // Parses file from path getting all inputs and outputs for the neural network. Returns data object.
@@ -168,7 +157,7 @@ static void generate_samples(const Data d, const int row, FFsamples s)
 // My understanding is that the dataset is fully loaded into memory for training.
 // This is not ideal for large datasets, but it is fine for small datasets like the one int the README.
 // TODO: decide if we want to load the entire dataset into memory or not and implement it
-static Data build(const char *path, const int feature_len, const int label_len)
+static Data build(const char *path, const int feature_len, const int num_class)
 {
     FILE *file = fopen(path, "r");
     if (file == NULL)
@@ -179,7 +168,7 @@ static Data build(const char *path, const int feature_len, const int label_len)
         exit(1);
     }
     const int rows = lns(file);
-    Data data = ndata(feature_len, label_len, rows);
+    Data data = ndata(feature_len, num_class, rows);
     for (int row = 0; row < rows; row++)
     {
         char *line = readln(file);
@@ -197,21 +186,25 @@ int main()
     srand(time(0));
     // Input and output size is harded coded here as machine learning
     // repositories usually don't include the input and output size in the data itself.
-    const int nips = 784 + 10;
+    const int nips = 784;
     const int nops = 10;
+    const int layers_sizes[] = {784, 200, 10};
+    const int layers_number = 3;
     // Hyper Parameters.
     // Learning rate is annealed and thus not constant.
     // It can be fine tuned along with the number of hidden layers.
     // Feel free to modify the anneal rate.
     // The number of iterations can be changed for stronger training.
-    float rate = 1.0f;
-    const int nhid = 28;
+    float rate = 0.1f;
+    // const int nhid = 200;
     const float anneal = 0.99f;
-    const int iterations = 128;
+    const int iterations = 8;
+    const float threshold = 10.0f;
+
     // Load the training set.
-    const Data data = build("../../dataset/mnist/mnist_train.txt", nips - nops, nops);
+    const Data data = build("../../dataset/mnist/mnist_train.txt", nips, nops);
     // Train, baby, train.
-    const Tinn tinn = xtbuild(nips, nhid, nops, sigmoid, pdsigmoid);
+    const FFNet ffnet = ffnetbuild(layers_sizes, layers_number, relu, pdrelu, threshold);
     FFsamples samples = new_samples(nips);
     for (int i = 0; i < iterations; i++)
     {
@@ -221,8 +214,7 @@ int main()
         {
             generate_samples(data, j, samples);
 
-            error += fftrain(tinn, samples.pos, samples.neg, rate, 10.0f);
-            // normalize output ( future input  s )
+            error += fftrainnet(ffnet, samples.pos, samples.neg, rate);
         }
         printf("error %.12f :: learning rate %f\n",
                (double)error / data.rows,
@@ -230,10 +222,14 @@ int main()
         rate *= anneal;
     }
     // This is how you save the neural network to disk.
-    xtsave(tinn, "saved.tinn");
-    xtfree(tinn);
+
+    /// TODO: implement saving and freeing of the neural network
+    /*
+    xtsave(ffnet, "saved.tinn");
+    xtfree(ffnet);
+    */
     // This is how you load the neural network from disk.
-    const Tinn loaded = xtload("saved.tinn");
+    // const Tinn loaded = xtload("saved.tinn");
     // Now we do a prediction with the neural network we loaded from disk.
     // Ideally, we would also load a testing set to make the prediction with,
     // but for the sake of brevity here we just reuse the training set from earlier.
@@ -243,13 +239,13 @@ int main()
     // TODO: implement inference here
     const float *const in = data.in[0];
     const float *const tg = data.tg[0];
-    const float *const pd = xtpredict(loaded, in);
+    const int pd = ffpredictnet(ffnet, in, nops, nips);
     // Prints target.
-    xtprint(tg, data.label_len);
+    xtprint(tg, data.num_class);
     // Prints prediction.
-    xtprint(pd, data.label_len);
+    printf("%d\n", pd);
+    // xtprint(pd, data.num_class);
     // All done. Let's clean up.
-    xtfree(loaded);
     dfree(data);
     return 0;
 }
