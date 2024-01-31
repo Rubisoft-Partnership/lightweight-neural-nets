@@ -136,6 +136,7 @@ static void ffbprop(const Tinn t, const float *const in_pos, const float *const 
                     const float rate, const float g_pos, const float g_neg)
 {
     const float a = ffpderr(g_pos, g_neg, t.threshold);
+    printf("a: %f\n", a);
     for (int i = 0; i < t.nhid; i++)
     {
         float sum = 0.0f;
@@ -163,16 +164,31 @@ static float fferr(const float g_pos, const float g_neg, const float threshold)
     float first_term = logf(1 + expf(-abs(pos_exponent))) + pos_exponent > 0.0 ? pos_exponent : 0.0;
     float second_term = logf(1 + expf(-abs(neg_exponent))) + neg_exponent > 0.0 ? neg_exponent : 0.0;
 
+    printf("g_pos: %f, g_neg: %f, err: %f\n", g_pos, g_neg, first_term + second_term);
+
     return first_term + second_term;
 
     // equivalent to:
     // return logf(1.0f + expf(-g_pos + threshold)) + logf(1.0f + expf(g_neg - threshold));
 }
 
+static float stable_sigmoid(float x) {
+    if (x >= 0) {
+        return 1.0f / (1.0f + expf(-x) + 1e-4);
+    } else {
+        float exp_x = expf(x);
+        return exp_x / (1.0f + exp_x + 1e-4);
+    }
+}
+
 // Returns partial derivative of error function.
 static float ffpderr(const float g_pos, const float g_neg, const float threshold)
 {
-    return -expf(threshold) / (expf(g_pos) + expf(threshold)) + expf(threshold) / (expf(g_neg) + expf(threshold));
+    float sigmoid_g_pos = stable_sigmoid(threshold - g_pos);
+    float sigmoid_g_neg = stable_sigmoid(threshold - g_neg);
+
+    return -sigmoid_g_pos + sigmoid_g_neg + 1e-4;
+    // return -expf(threshold) / (expf(g_pos) + expf(threshold)) + expf(threshold) / (expf(g_neg) + expf(threshold));
 }
 
 // Returns the goodness of a layer.
