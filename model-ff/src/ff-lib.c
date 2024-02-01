@@ -2,9 +2,10 @@
 
 #include <string.h>
 #include <stdarg.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
+#include <stdarg.h>
 
 // Buffer to store hidden activations and output activations.
 #define H_BUFFER_SIZE 1024
@@ -13,11 +14,16 @@ float o_buffer[H_BUFFER_SIZE]; // outputs buffer
 
 #define MAX_CLASSES 16
 
+static LogLevel currentLogLevel;
+static FILE* globalLogFile;
+
+
+
 // Function declarations.
 static void ffbprop(const Tinn t, const float *const in_pos, const float *const in_neg,
                     const float rate, const float g_pos, const float g_neg);
 static float fferr(const float g_pos, const float g_neg, const float threshold);
-static float ffpderr(const float g_pos, const float g_neg, const float threshold);
+static double ffpderr(const float g_pos, const float g_neg, const float threshold);
 static float goodness(const float *vec, const int size);
 float fftrain(const Tinn t, const float *const pos, const float *const neg, float rate);
 Tinn xtbuild(const int nips, const int nhid, const int nops, float (*act)(float), float (*pdact)(float), const float threshold);
@@ -31,12 +37,130 @@ void fprop(const Tinn t, const float *const in);
 static void wbrand(const Tinn t);
 static float frand();
 
+
+// Log functions
+void log_message(LogLevel level, const char *format, ...);
+
+
+// Function to set the current log level
+void set_log_level(LogLevel level)
+{
+    currentLogLevel = level;
+}
+
+void open_log_file_with_timestamp(const char *logDir, const char *logPrefix) 
+{
+    // Get the current time
+    time_t now = time(NULL);
+    struct tm *tm_info = localtime(&now);
+
+    // Create the log filename
+    char logFilename[256];
+    strftime(logFilename, sizeof(logFilename), "%Y-%m-%d_%H-%M-%S", tm_info);
+
+    // Construct the full path
+    char fullPath[512];
+    snprintf(fullPath, sizeof(fullPath), "%s/%s_%s.log", logDir, logPrefix, logFilename);
+
+    // Open the log file
+    globalLogFile = fopen(fullPath, "w");
+    if (!globalLogFile) {
+        perror("Failed to open log file");
+        exit(EXIT_FAILURE);
+    }
+}
+
+void close_log_file()
+{
+    if (globalLogFile) {
+        fclose(globalLogFile);
+    }
+}
+
+void log_message(LogLevel level, const char *format, ...)
+{
+    if (level < currentLogLevel) {
+        return;
+    }
+    if (!globalLogFile) {
+        fprintf(stderr, "Log file is not open.\n");
+        return;
+    }
+
+    // Similar logging logic as before, but use vfprintf to write to globalLogFile
+    const char* levelStr = "";
+    switch(level) {
+        case LOG_DEBUG: levelStr = "DEBUG"; break;
+        case LOG_INFO:  levelStr = "INFO";  break;
+        case LOG_WARN:  levelStr = "WARN";  break;
+        case LOG_ERROR: levelStr = "ERROR"; break;
+    }
+    fprintf(globalLogFile, "[%s] ", levelStr);
+
+    va_list args;
+    va_start(args, format);
+    vfprintf(globalLogFile, format, args);
+    va_end(args);
+    fprintf(globalLogFile, "\n"); // Add new line at the end
+    fflush(globalLogFile); // Ensure the message is written immediately
+}
+
+void log_debug(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    log_message(LOG_DEBUG, format, args);
+    va_end(args);
+}
+
+void log_info(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    log_message(LOG_INFO, format, args);
+    va_end(args);
+}
+
+void log_warn(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    log_message(LOG_WARN, format, args);
+    va_end(args);
+}
+
+void log_error(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    log_message(LOG_ERROR, format, args);
+    va_end(args);
+}
+
+// End log functions
+
+
 // Builds a FFNet by creating multiple Tinn objects. layer_sizes includes the number of inputs, hidden neurons, and outputs units.
 FFNet ffnetbuild(const int *layer_sizes, int num_layers, float (*act)(float), float (*pdact)(float), const float treshold)
 {
     FFNet ffnet;
     ffnet.num_layers = num_layers;
     ffnet.num_hid_layers = num_layers - 2;
+
+    // begin logs
+    log_info("Building FFNet with %d layers, %d hidden layers", num_layers, ffnet.num_hid_layers);
+    // logs layers dimensions in a single line
+    char layers_str[256];
+    layers_str[0] = '\0';
+    for (int i = 0; i < num_layers; i++)
+    {
+        char layer_str[32];
+        snprintf(layer_str, sizeof(layer_str), "%d ", layer_sizes[i]);
+        strcat(layers_str, layer_str);
+    }
+    log_info("Layers: %s", layers_str);
+    // end logs
+
     for (int i = 1; i < num_layers - 1; i++)
     {
         ffnet.hid_layers[i - 1] = xtbuild(layer_sizes[i - 1], layer_sizes[i], layer_sizes[i + 1], act, pdact, treshold);
@@ -135,8 +259,8 @@ void normalize_vector(float *output, int size)
 static void ffbprop(const Tinn t, const float *const in_pos, const float *const in_neg,
                     const float rate, const float g_pos, const float g_neg)
 {
-    const float a = ffpderr(g_pos, g_neg, t.threshold);
-    printf("a: %f\n", a);
+    const double a = ffpderr(g_pos, g_neg, t.threshold);
+    // printf("a: %.17g\n", a);
     for (int i = 0; i < t.nhid; i++)
     {
         float sum = 0.0f;
@@ -161,33 +285,35 @@ static float fferr(const float g_pos, const float g_neg, const float threshold)
 
     float pos_exponent = -g_pos + threshold;
     float neg_exponent = g_neg - threshold;
-    float first_term = logf(1 + expf(-abs(pos_exponent))) + pos_exponent > 0.0 ? pos_exponent : 0.0;
-    float second_term = logf(1 + expf(-abs(neg_exponent))) + neg_exponent > 0.0 ? neg_exponent : 0.0;
-
-    printf("g_pos: %f, g_neg: %f, err: %f\n", g_pos, g_neg, first_term + second_term);
-
+    float first_term = logf(1 + expf(-fabs(pos_exponent))) + pos_exponent > 0.0 ? pos_exponent : 0.0;
+    float second_term = logf(1 + expf(-fabs(neg_exponent))) + neg_exponent > 0.0 ? neg_exponent : 0.0;  
+    // printf("g_pos: %f, g_neg: %f, err: %f\n", g_pos, g_neg, first_term + second_term);
     return first_term + second_term;
-
     // equivalent to:
     // return logf(1.0f + expf(-g_pos + threshold)) + logf(1.0f + expf(g_neg - threshold));
 }
 
-static float stable_sigmoid(float x) {
-    if (x >= 0) {
-        return 1.0f / (1.0f + expf(-x) + 1e-4);
-    } else {
-        float exp_x = expf(x);
-        return exp_x / (1.0f + exp_x + 1e-4);
+static double stable_sigmoid(double x)
+{
+    if (x >= 0)
+    {
+        return 1.0 / (1.0 + exp(-x) + 1e-4);
+    }
+    else
+    {
+        double exp_x = exp(x);
+        // printf("exp_x: %.17g\n", exp_x);
+        return exp_x / (1.0 + exp_x + 1e-4);
     }
 }
 
 // Returns partial derivative of error function.
-static float ffpderr(const float g_pos, const float g_neg, const float threshold)
+static double ffpderr(const float g_pos, const float g_neg, const float threshold)
 {
-    float sigmoid_g_pos = stable_sigmoid(threshold - g_pos);
-    float sigmoid_g_neg = stable_sigmoid(threshold - g_neg);
+    double sigmoid_g_pos = stable_sigmoid((double)(threshold - g_pos));
+    double sigmoid_g_neg = stable_sigmoid(threshold - g_neg);
 
-    return -sigmoid_g_pos + sigmoid_g_neg + 1e-4;
+    return -sigmoid_g_pos + sigmoid_g_neg;
     // return -expf(threshold) / (expf(g_pos) + expf(threshold)) + expf(threshold) / (expf(g_neg) + expf(threshold));
 }
 

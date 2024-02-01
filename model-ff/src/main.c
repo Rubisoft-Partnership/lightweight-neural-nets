@@ -1,4 +1,4 @@
-#include <stdio.h>
+// #include <stdio.h>
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>
@@ -188,18 +188,21 @@ int main()
     // repositories usually don't include the input and output size in the data itself.
     const int nips = 784;
     const int nops = 10;
-    const int layers_sizes[] = {784, 200, 10};
-    const int layers_number = 3;
+    const int layers_sizes[] = {784, 1500, 500, 10};
+    const int layers_number = 4;
     // Hyper Parameters.
     // Learning rate is annealed and thus not constant.
     // It can be fine tuned along with the number of hidden layers.
     // Feel free to modify the anneal rate.
     // The number of iterations can be changed for stronger training.
-    float rate = 0.1f;
+    float rate = 0.5f;
     // const int nhid = 200;
     const float anneal = 0.99f;
-    const int iterations = 8;
+    const int iterations = 12;
     const float threshold = 10.0f;
+
+    open_log_file_with_timestamp("../logs", "ffnet");
+    set_log_level(LOG_DEBUG);
 
     // Load the training set.
     const Data data = build("../../dataset/mnist/mnist_train.txt", nips, nops);
@@ -208,19 +211,25 @@ int main()
     FFsamples samples = new_samples(nips);
     for (int i = 0; i < iterations; i++)
     {
+        log_info("Iteration %d", i);
         shuffle(data);
         float error = 0.0f;
         for (int j = 0; j < data.rows; j++)
         {
+            log_debug("Sample %d", j);
             generate_samples(data, j, samples);
 
             error += fftrainnet(ffnet, samples.pos, samples.neg, rate);
+            log_debug("Error %f", error);
         }
         printf("error %.12f :: learning rate %f\n",
                (double)error / data.rows,
                (double)rate);
         rate *= anneal;
     }
+
+    log_info("Training done");
+
     // This is how you save the neural network to disk.
 
     /// TODO: implement saving and freeing of the neural network
@@ -247,5 +256,7 @@ int main()
     // xtprint(pd, data.num_class);
     // All done. Let's clean up.
     dfree(data);
+
+    close_log_file();
     return 0;
 }
