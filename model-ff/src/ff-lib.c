@@ -39,7 +39,7 @@ static float frand();
 
 
 // Log functions
-void log_message(LogLevel level, const char *format, ...);
+void log_message(LogLevel level, const char *format, va_list args);
 
 
 // Function to set the current log level
@@ -77,8 +77,8 @@ void close_log_file()
     }
 }
 
-void log_message(LogLevel level, const char *format, ...)
-{
+void log_message(LogLevel level, const char *format, va_list args)
+{ 
     if (level < currentLogLevel) {
         return;
     }
@@ -87,7 +87,6 @@ void log_message(LogLevel level, const char *format, ...)
         return;
     }
 
-    // Similar logging logic as before, but use vfprintf to write to globalLogFile
     const char* levelStr = "";
     switch(level) {
         case LOG_DEBUG: levelStr = "DEBUG"; break;
@@ -96,13 +95,9 @@ void log_message(LogLevel level, const char *format, ...)
         case LOG_ERROR: levelStr = "ERROR"; break;
     }
     fprintf(globalLogFile, "[%s] ", levelStr);
-
-    va_list args;
-    va_start(args, format);
     vfprintf(globalLogFile, format, args);
-    va_end(args);
-    fprintf(globalLogFile, "\n"); // Add new line at the end
-    fflush(globalLogFile); // Ensure the message is written immediately
+    fprintf(globalLogFile, "\n");
+    fflush(globalLogFile);
 }
 
 void log_debug(const char *format, ...)
