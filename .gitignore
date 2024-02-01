@@ -6,3 +6,4 @@ model-bp/models/*
 build
 *.csv
 *.tinn
+*.log
