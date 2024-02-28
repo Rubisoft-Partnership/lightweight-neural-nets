@@ -1,9 +1,15 @@
-// #include <stdio.h>
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>
 
 #include "ff-lib.h"
+
+#ifndef MNIST
+#define MNIST 0
+#endif
+#ifndef DIGITS
+#define DIGITS 0
+#endif
 
 // Data object.
 typedef struct
@@ -182,14 +188,16 @@ static Data build(const char *path, const int feature_len, const int num_class)
 // Learns and predicts hand written digits with 98% accuracy.
 int main()
 {
+
     // Tinn does not seed the random number generator.
     srand(time(0));
     // Input and output size is harded coded here as machine learning
     // repositories usually don't include the input and output size in the data itself.
-    const int nips = 784;
+    int nips = 784;
     const int nops = 10;
-    const int layers_sizes[] = {784, 1500, 500, 10};
-    const int layers_number = 4;
+    int layers_sizes[] = {784, 1024, 500, 10};
+
+    const int layers_number = sizeof(layers_sizes) / sizeof(layers_sizes[0]);
     // Hyper Parameters.
     // Learning rate is annealed and thus not constant.
     // It can be fine tuned along with the number of hidden layers.
@@ -203,8 +211,18 @@ int main()
     open_log_file_with_timestamp("../logs", "ffnet");
     set_log_level(LOG_DEBUG);
 
-    // Load the training set.
-    const Data data = build("../../dataset/mnist/mnist_train.txt", nips, nops);
+    Data data;
+    if (DIGITS)
+    {
+        layers_sizes[0] = 64;
+        nips = 64;
+        data = build("../../dataset/digit_dataset/digits.txt", nips, nops);
+    }
+    else if (MNIST)
+    {
+        data = build("../../dataset/mnist/mnist_train.txt", nips, nops);
+    }
+
     // Train, baby, train.
     const FFNet ffnet = ffnetbuild(layers_sizes, layers_number, relu, pdrelu, threshold);
     FFsamples samples = new_samples(nips);

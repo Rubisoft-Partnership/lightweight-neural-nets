@@ -1,7 +1,8 @@
 /**
  * @file ff-lib.c
  * @brief This file contains the implementation of the feedforward neural network library.
- */
+ *
+ * */
 
 #include "ff-lib.h"
 
@@ -19,9 +20,7 @@ float o_buffer[H_BUFFER_SIZE]; // outputs buffer
 #define MAX_CLASSES 16
 
 static LogLevel currentLogLevel;
-static FILE* globalLogFile;
-
-
+static FILE *globalLogFile;
 
 // Function declarations.
 static void ffbprop(const Tinn t, const float *const in_pos, const float *const in_neg,
@@ -41,10 +40,8 @@ void fprop(const Tinn t, const float *const in);
 static void wbrand(const Tinn t);
 static float frand();
 
-
 // Log functions
 void log_message(LogLevel level, const char *format, va_list args);
-
 
 // Function to set the current log level
 void set_log_level(LogLevel level)
@@ -52,7 +49,7 @@ void set_log_level(LogLevel level)
     currentLogLevel = level;
 }
 
-void open_log_file_with_timestamp(const char *logDir, const char *logPrefix) 
+void open_log_file_with_timestamp(const char *logDir, const char *logPrefix)
 {
     // Get the current time
     time_t now = time(NULL);
@@ -68,7 +65,8 @@ void open_log_file_with_timestamp(const char *logDir, const char *logPrefix)
 
     // Open the log file
     globalLogFile = fopen(fullPath, "w");
-    if (!globalLogFile) {
+    if (!globalLogFile)
+    {
         perror("Failed to open log file");
         exit(EXIT_FAILURE);
     }
@@ -76,27 +74,39 @@ void open_log_file_with_timestamp(const char *logDir, const char *logPrefix)
 
 void close_log_file()
 {
-    if (globalLogFile) {
+    if (globalLogFile)
+    {
         fclose(globalLogFile);
     }
 }
 
 void log_message(LogLevel level, const char *format, va_list args)
-{ 
-    if (level < currentLogLevel) {
+{
+    if (level < currentLogLevel)
+    {
         return;
     }
-    if (!globalLogFile) {
+    if (!globalLogFile)
+    {
         fprintf(stderr, "Log file is not open.\n");
         return;
     }
 
-    const char* levelStr = "";
-    switch(level) {
-        case LOG_DEBUG: levelStr = "DEBUG"; break;
-        case LOG_INFO:  levelStr = "INFO";  break;
-        case LOG_WARN:  levelStr = "WARN";  break;
-        case LOG_ERROR: levelStr = "ERROR"; break;
+    const char *levelStr = "";
+    switch (level)
+    {
+    case LOG_DEBUG:
+        levelStr = "DEBUG";
+        break;
+    case LOG_INFO:
+        levelStr = "INFO";
+        break;
+    case LOG_WARN:
+        levelStr = "WARN";
+        break;
+    case LOG_ERROR:
+        levelStr = "ERROR";
+        break;
     }
     fprintf(globalLogFile, "[%s] ", levelStr);
     vfprintf(globalLogFile, format, args);
@@ -137,7 +147,6 @@ void log_error(const char *format, ...)
 }
 
 // End log functions
-
 
 // Builds a FFNet by creating multiple Tinn objects. layer_sizes includes the number of inputs, hidden neurons, and outputs units.
 FFNet ffnetbuild(const int *layer_sizes, int num_layers, float (*act)(float), float (*pdact)(float), const float treshold)
@@ -223,14 +232,17 @@ void embed_label(float *sample, const float *in, int label, int insize, int num_
 // Trains a tinn with an input and target output with a learning rate. Returns target to output error.
 float fftrain(const Tinn t, const float *const pos, const float *const neg, float rate)
 {
+    log_debug("Forward pass");
     // Positive pass.
     fprop(t, pos);
+    log_debug("Forward pass for positive");
     memcpy(h_buffer, t.h, t.nhid * sizeof(*t.h)); // copy activation and output
     memcpy(o_buffer, t.o, t.nops * sizeof(*t.o));
     float g_pos = goodness(t.o, t.nops);
 
     // Negative pass.
     fprop(t, neg);
+    log_debug("Forward pass for negative");
     float g_neg = goodness(t.o, t.nops);
 
     // Peforms gradient descent.
@@ -286,7 +298,7 @@ static float fferr(const float g_pos, const float g_neg, const float threshold)
     float pos_exponent = -g_pos + threshold;
     float neg_exponent = g_neg - threshold;
     float first_term = logf(1 + expf(-fabs(pos_exponent))) + pos_exponent > 0.0 ? pos_exponent : 0.0;
-    float second_term = logf(1 + expf(-fabs(neg_exponent))) + neg_exponent > 0.0 ? neg_exponent : 0.0;  
+    float second_term = logf(1 + expf(-fabs(neg_exponent))) + neg_exponent > 0.0 ? neg_exponent : 0.0;
     // printf("g_pos: %f, g_neg: %f, err: %f\n", g_pos, g_neg, first_term + second_term);
     return first_term + second_term;
     // equivalent to:
