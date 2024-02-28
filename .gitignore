@@ -7,3 +7,8 @@ build
 *.csv
 *.tinn
 *.log
+
+
+# Python venv files
+
+dataset/digit_dataset/venv/*

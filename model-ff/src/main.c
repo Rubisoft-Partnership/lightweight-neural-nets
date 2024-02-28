@@ -196,7 +196,6 @@ int main()
     // Feel free to modify the anneal rate.
     // The number of iterations can be changed for stronger training.
     float rate = 0.5f;
-    // const int nhid = 200;
     const float anneal = 0.99f;
     const int iterations = 12;
     const float threshold = 10.0f;
