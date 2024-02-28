@@ -195,7 +195,7 @@ int main()
     // repositories usually don't include the input and output size in the data itself.
     int nips = 784;
     const int nops = 10;
-    int layers_sizes[] = {784, 1024, 500, 10};
+    int layers_sizes[] = {784, 500, 500, 10};
 
     const int layers_number = sizeof(layers_sizes) / sizeof(layers_sizes[0]);
     // Hyper Parameters.
@@ -205,11 +205,8 @@ int main()
     // The number of iterations can be changed for stronger training.
     float rate = 0.5f;
     const float anneal = 0.99f;
-    const int iterations = 12;
+    const int iterations = 60;
     const float threshold = 10.0f;
-
-    open_log_file_with_timestamp("../logs", "ffnet");
-    set_log_level(LOG_DEBUG);
 
     Data data;
     if (DIGITS)
@@ -217,11 +214,15 @@ int main()
         layers_sizes[0] = 64;
         nips = 64;
         data = build("../../dataset/digit_dataset/digits.txt", nips, nops);
+        open_log_file_with_timestamp("../logs", "digits");
     }
     else if (MNIST)
     {
+        open_log_file_with_timestamp("../logs", "mnist");
         data = build("../../dataset/mnist/mnist_train.txt", nips, nops);
     }
+
+    set_log_level(LOG_DEBUG);
 
     // Train, baby, train.
     const FFNet ffnet = ffnetbuild(layers_sizes, layers_number, relu, pdrelu, threshold);
@@ -262,14 +263,23 @@ int main()
     // One data set is picked at random (zero index of input and target arrays is enough
     // as they were both shuffled earlier).
 
-    // TODO: implement inference here
-    const float *const in = data.in[0];
-    const float *const tg = data.tg[0];
-    const int pd = ffpredictnet(ffnet, in, nops, nips);
-    // Prints target.
-    xtprint(tg, data.num_class);
-    // Prints prediction.
-    printf("%d\n", pd);
+    printf("Predictions:\n");
+
+    for (int i = 0; i < 10; i++)
+    {
+        float *const in = data.in[i];
+        float *const tg = data.tg[i];
+        const int pd = ffpredictnet(ffnet, in, nops, nips);
+        // Prints target.
+        for (int i = 0; i < data.num_class; i++)
+        {
+            if (tg[i] == 1.0f){
+                printf("GT: %d, prediction:%d\n", i, pd);
+                break;
+            }
+        }
+    }
+
     // xtprint(pd, data.num_class);
     // All done. Let's clean up.
     dfree(data);
