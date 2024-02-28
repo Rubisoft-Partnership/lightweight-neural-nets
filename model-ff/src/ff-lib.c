@@ -232,17 +232,14 @@ void embed_label(float *sample, const float *in, int label, int insize, int num_
 // Trains a tinn with an input and target output with a learning rate. Returns target to output error.
 float fftrain(const Tinn t, const float *const pos, const float *const neg, float rate)
 {
-    log_debug("Forward pass");
     // Positive pass.
     fprop(t, pos);
-    log_debug("Forward pass for positive");
     memcpy(h_buffer, t.h, t.nhid * sizeof(*t.h)); // copy activation and output
     memcpy(o_buffer, t.o, t.nops * sizeof(*t.o));
     float g_pos = goodness(t.o, t.nops);
 
     // Negative pass.
     fprop(t, neg);
-    log_debug("Forward pass for negative");
     float g_neg = goodness(t.o, t.nops);
 
     // Peforms gradient descent.
@@ -271,6 +268,8 @@ static void ffbprop(const Tinn t, const float *const in_pos, const float *const 
                     const float rate, const float g_pos, const float g_neg)
 {
     const double a = ffpderr(g_pos, g_neg, t.threshold);
+    log_debug("G_pos: %f, G_neg: %f", g_pos, g_neg);
+    log_debug("Loss: %.17g", fferr(g_pos, g_neg, t.threshold));
     log_debug("Partial derivative: %.17g", a);
     // printf("a: %.17g\n", a);
     for (int i = 0; i < t.nhid; i++)
