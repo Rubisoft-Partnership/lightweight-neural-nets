@@ -1,7 +1,11 @@
+/**
+ * @file ff-lib.c
+ * @brief This file contains the implementation of the feedforward neural network library.
+ */
+
 #include "ff-lib.h"
 
 #include <string.h>
-#include <stdarg.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
@@ -255,6 +259,7 @@ static void ffbprop(const Tinn t, const float *const in_pos, const float *const 
                     const float rate, const float g_pos, const float g_neg)
 {
     const double a = ffpderr(g_pos, g_neg, t.threshold);
+    log_debug("Partial derivative: %.17g", a);
     // printf("a: %.17g\n", a);
     for (int i = 0; i < t.nhid; i++)
     {
