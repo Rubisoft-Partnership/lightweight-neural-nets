@@ -7,7 +7,7 @@ build
 *.csv
 *.tinn
 *.log
-
+*.o
 
 # Python venv files
 
