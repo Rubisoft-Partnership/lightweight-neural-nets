@@ -8,15 +8,15 @@
 typedef struct
 {
     // All the weights.
-    float *w;
+    double *w;
     // Hidden to output layer weights.
-    float *x;
+    double *x;
     // Biases.
-    float *b;
+    double *b;
     // Hidden layer.
-    float *h;
+    double *h;
     // Output layer.
-    float *o;
+    double *o;
     // Number of biases - always two - Tinn only supports a single hidden layer.
     int nb;
     // Number of weights.
@@ -28,11 +28,11 @@ typedef struct
     // Number of outputs.
     int nops;
     // Hyperparameter for the FF algorithm.
-    float threshold;
+    double threshold;
     // Activation function.
-    float (*act)(const float);
+    double (*act)(const double);
     // Derivative of activation function.
-    float (*pdact)(const float);
+    double (*pdact)(const double);
 } Tinn; 
 
 
@@ -64,20 +64,20 @@ void log_error(const char *format, ...);
 
 
 
-float fftrainnet(const FFNet ffnet, const float *const pos, const float *const neg, float rate);
-FFNet ffnetbuild(const int *layer_sizes, int num_layers, float (*act)(float), float (*pdact)(float), const float treshold);
-int ffpredictnet(const FFNet ffnet, const float *in, int num_classes, int insize);
+double fftrainnet(const FFNet ffnet, const double *const pos, const double *const neg, double rate);
+FFNet ffnetbuild(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double treshold);
+int ffpredictnet(const FFNet ffnet, const double *in, int num_classes, int insize);
 
 
 
 
 // Activation function.
 
-float relu(const float a);
-float pdrelu(const float a);
+double relu(const double a);
+double pdrelu(const double a);
 
-float sigmoid(const float a);
-float pdsigmoid(const float a);
+double sigmoid(const double a);
+double pdsigmoid(const double a);
 
 
 /*
@@ -86,4 +86,4 @@ float pdsigmoid(const float a);
 // Tinn original functions
 
 
-void xtprint(const float *arr, const int size);
+void xtprint(const double *arr, const int size);

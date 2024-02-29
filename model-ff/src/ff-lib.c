@@ -14,8 +14,8 @@
 
 // Buffer to store hidden activations and output activations.
 #define H_BUFFER_SIZE 1024
-float h_buffer[H_BUFFER_SIZE]; // activations buffer
-float o_buffer[H_BUFFER_SIZE]; // outputs buffer
+double h_buffer[H_BUFFER_SIZE]; // activations buffer
+double o_buffer[H_BUFFER_SIZE]; // outputs buffer
 
 #define MAX_CLASSES 16
 
@@ -23,22 +23,22 @@ static LogLevel currentLogLevel;
 static FILE *globalLogFile;
 
 // Function declarations.
-static void ffbprop(const Tinn t, const float *const in_pos, const float *const in_neg,
-                    const float rate, const float g_pos, const float g_neg);
-static float fferr(const float g_pos, const float g_neg, const float threshold);
-static double ffpderr(const float g_pos, const float g_neg, const float threshold);
-static float goodness(const float *vec, const int size);
-float fftrain(const Tinn t, const float *const pos, const float *const neg, float rate);
-Tinn xtbuild(const int nips, const int nhid, const int nops, float (*act)(float), float (*pdact)(float), const float threshold);
-void embed_label(float *sample, const float *in, int label, int insize, int num_classes);
-void normalize_vector(float *output, int size);
+static void ffbprop(const Tinn t, const double *const in_pos, const double *const in_neg,
+                    const double rate, const double g_pos, const double g_neg);
+static double fferr(const double g_pos, const double g_neg, const double threshold);
+static double ffpderr(const double g_pos, const double g_neg, const double threshold);
+static double goodness(const double *vec, const int size);
+double fftrain(const Tinn t, const double *const pos, const double *const neg, double rate);
+Tinn xtbuild(const int nips, const int nhid, const int nops, double (*act)(double), double (*pdact)(double), const double threshold);
+void embed_label(double *sample, const double *in, int label, int insize, int num_classes);
+void normalize_vector(double *output, int size);
 
 // From Tinn.c, but modified
-void fprop(const Tinn t, const float *const in);
+void fprop(const Tinn t, const double *const in);
 
 // From Tinn.c
 static void wbrand(const Tinn t);
-static float frand();
+static double frand();
 
 // Log functions
 void log_message(LogLevel level, const char *format, va_list args);
@@ -149,7 +149,7 @@ void log_error(const char *format, ...)
 // End log functions
 
 // Builds a FFNet by creating multiple Tinn objects. layer_sizes includes the number of inputs, hidden neurons, and outputs units.
-FFNet ffnetbuild(const int *layer_sizes, int num_layers, float (*act)(float), float (*pdact)(float), const float treshold)
+FFNet ffnetbuild(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double treshold)
 {
     FFNet ffnet;
     ffnet.num_layers = num_layers;
@@ -177,10 +177,10 @@ FFNet ffnetbuild(const int *layer_sizes, int num_layers, float (*act)(float), fl
     return ffnet;
 }
 
-float fftrainnet(const FFNet ffnet, const float *const pos, const float *const neg, float rate)
+double fftrainnet(const FFNet ffnet, const double *const pos, const double *const neg, double rate)
 {
     // printf("Training FFNet...\n");
-    float error = 0.0f;
+    double error = 0.0f;
     // Feed first layer manually.
     error += fftrain(ffnet.hid_layers[0], pos, neg, rate);
     // Feed the rest of the layers.
@@ -193,10 +193,10 @@ float fftrainnet(const FFNet ffnet, const float *const pos, const float *const n
 }
 
 // Inference function for FFNet.
-int ffpredictnet(const FFNet ffnet, const float *in, int num_classes, int insize)
+int ffpredictnet(const FFNet ffnet, const double *in, int num_classes, int insize)
 {
-    float *netinput = (float *)malloc((insize) * sizeof(float));
-    float goodnesses[MAX_CLASSES];
+    double *netinput = (double *)malloc((insize) * sizeof(double));
+    double goodnesses[MAX_CLASSES];
     for (int label = 0; label < num_classes; label++)
     {
         embed_label(netinput, in, label, insize, num_classes);
@@ -222,7 +222,7 @@ int ffpredictnet(const FFNet ffnet, const float *in, int num_classes, int insize
 }
 
 // Generates inputs for inference given input and label
-void embed_label(float *sample, const float *in, int label, int insize, int num_classes)
+void embed_label(double *sample, const double *in, int label, int insize, int num_classes)
 {
     memcpy(sample, in, insize * sizeof(*in));
     memset(&sample[insize - num_classes], 0, num_classes * sizeof(*sample));
@@ -230,17 +230,17 @@ void embed_label(float *sample, const float *in, int label, int insize, int num_
 }
 
 // Trains a tinn with an input and target output with a learning rate. Returns target to output error.
-float fftrain(const Tinn t, const float *const pos, const float *const neg, float rate)
+double fftrain(const Tinn t, const double *const pos, const double *const neg, double rate)
 {
     // Positive pass.
     fprop(t, pos);
     memcpy(h_buffer, t.h, t.nhid * sizeof(*t.h)); // copy activation and output
     memcpy(o_buffer, t.o, t.nops * sizeof(*t.o));
-    float g_pos = goodness(t.o, t.nops);
+    double g_pos = goodness(t.o, t.nops);
 
     // Negative pass.
     fprop(t, neg);
-    float g_neg = goodness(t.o, t.nops);
+    double g_neg = goodness(t.o, t.nops);
 
     // Peforms gradient descent.
     ffbprop(t, pos, neg, rate, g_pos, g_neg);
@@ -253,9 +253,9 @@ float fftrain(const Tinn t, const float *const pos, const float *const neg, floa
     return fferr(g_pos, g_neg, t.threshold);
 }
 
-void normalize_vector(float *output, int size)
+void normalize_vector(double *output, int size)
 {
-    float norm = 0.0f;
+    double norm = 0.0f;
     for (int i = 0; i < size; i++)
         norm += output[i] * output[i];
     norm = sqrt(norm);
@@ -264,8 +264,8 @@ void normalize_vector(float *output, int size)
 }
 
 // Performs back propagation for the FF algorithm.
-static void ffbprop(const Tinn t, const float *const in_pos, const float *const in_neg,
-                    const float rate, const float g_pos, const float g_neg)
+static void ffbprop(const Tinn t, const double *const in_pos, const double *const in_neg,
+                    const double rate, const double g_pos, const double g_neg)
 {
     const double a = ffpderr(g_pos, g_neg, t.threshold);
     log_debug("G_pos: %f, G_neg: %f", g_pos, g_neg);
@@ -274,12 +274,12 @@ static void ffbprop(const Tinn t, const float *const in_pos, const float *const 
     // printf("a: %.17g\n", a);
     for (int i = 0; i < t.nhid; i++)
     {
-        float sum = 0.0f;
+        double sum = 0.0f;
         // Calculate total error change with respect to output.
         for (int j = 0; j < t.nops; j++)
         {
-            const float b_pos = t.pdact(o_buffer[j]);
-            const float b_neg = t.pdact(t.o[j]);
+            const double b_pos = t.pdact(o_buffer[j]);
+            const double b_neg = t.pdact(t.o[j]);
             sum += a * (b_pos + b_neg) * t.x[j * t.nhid + i];
             // Correct weights in hidden to output layer.
             t.x[j * t.nhid + i] -= rate * a * (b_pos * h_buffer[i] + b_neg * t.h[i]);
@@ -291,13 +291,13 @@ static void ffbprop(const Tinn t, const float *const in_pos, const float *const 
 }
 
 // Computes error using the FFLoss function.
-static float fferr(const float g_pos, const float g_neg, const float threshold)
+static double fferr(const double g_pos, const double g_neg, const double threshold)
 {
 
-    float pos_exponent = -g_pos + threshold;
-    float neg_exponent = g_neg - threshold;
-    float first_term = logf(1 + expf(-fabs(pos_exponent))) + pos_exponent > 0.0 ? pos_exponent : 0.0;
-    float second_term = logf(1 + expf(-fabs(neg_exponent))) + neg_exponent > 0.0 ? neg_exponent : 0.0;
+    double pos_exponent = -g_pos + threshold;
+    double neg_exponent = g_neg - threshold;
+    double first_term = logf(1 + expf(-fabs(pos_exponent))) + pos_exponent > 0.0 ? pos_exponent : 0.0;
+    double second_term = logf(1 + expf(-fabs(neg_exponent))) + neg_exponent > 0.0 ? neg_exponent : 0.0;
     // printf("g_pos: %f, g_neg: %f, err: %f\n", g_pos, g_neg, first_term + second_term);
     return first_term + second_term;
     // equivalent to:
@@ -319,7 +319,7 @@ static double stable_sigmoid(double x)
 }
 
 // Returns partial derivative of error function.
-static double ffpderr(const float g_pos, const float g_neg, const float threshold)
+static double ffpderr(const double g_pos, const double g_neg, const double threshold)
 {
     double sigmoid_g_pos = stable_sigmoid((double)(threshold - g_pos));
     double sigmoid_g_neg = stable_sigmoid(threshold - g_neg);
@@ -329,9 +329,9 @@ static double ffpderr(const float g_pos, const float g_neg, const float threshol
 }
 
 // Returns the goodness of a layer.
-float goodness(const float *vec, const int size)
+double goodness(const double *vec, const int size)
 {
-    float sum = 0.0f;
+    double sum = 0.0f;
     for (int i = 0; i < size; i++)
     {
         sum += vec[i] * vec[i];
@@ -340,36 +340,36 @@ float goodness(const float *vec, const int size)
 }
 
 // ReLU activation function.
-float relu(const float a)
+double relu(const double a)
 {
     return a > 0.0f ? a : 0.0f;
 }
 
 // ReLU derivative.
-float pdrelu(const float a)
+double pdrelu(const double a)
 {
     return a > 0.0f ? 1.0f : 0.0f;
 }
 
 // Sigmoid activation function.
-float sigmoid(const float a)
+double sigmoid(const double a)
 {
     return 1.0f / (1.0f + expf(-a));
 }
 
 // Sigmoid derivative.
-float pdsigmoid(const float a)
+double pdsigmoid(const double a)
 {
     return a * (1.0f - a);
 }
 
 // Performs forward propagation.
-void fprop(const Tinn t, const float *const in)
+void fprop(const Tinn t, const double *const in)
 {
     // Calculate hidden layer neuron values.
     for (int i = 0; i < t.nhid; i++)
     {
-        float sum = 0.0f;
+        double sum = 0.0f;
         for (int j = 0; j < t.nips; j++)
             sum += in[j] * t.w[i * t.nips + j];
         t.h[i] = t.act(sum + t.b[0]);
@@ -377,7 +377,7 @@ void fprop(const Tinn t, const float *const in)
     // Calculate output layer neuron values.
     for (int i = 0; i < t.nops; i++)
     {
-        float sum = 0.0f;
+        double sum = 0.0f;
         for (int j = 0; j < t.nhid; j++)
             sum += t.h[j] * t.x[i * t.nhid + j];
         t.o[i] = t.act(sum + t.b[1]);
@@ -385,17 +385,17 @@ void fprop(const Tinn t, const float *const in)
 }
 
 // Constructs a tinn with number of inputs, number of hidden neurons, and number of outputs
-Tinn xtbuild(const int nips, const int nhid, const int nops, float (*act)(float), float (*pdact)(float), const float threshold)
+Tinn xtbuild(const int nips, const int nhid, const int nops, double (*act)(double), double (*pdact)(double), const double threshold)
 {
     Tinn t;
     // Tinn only supports one hidden layer so there are two biases.
     t.nb = 2;
     t.nw = nhid * (nips + nops);               // total number of weights
-    t.w = (float *)calloc(t.nw, sizeof(*t.w)); // weights (both [intput to hidden] and [hidden to output])
+    t.w = (double *)calloc(t.nw, sizeof(*t.w)); // weights (both [intput to hidden] and [hidden to output])
     t.x = t.w + nhid * nips;
-    t.b = (float *)calloc(t.nb, sizeof(*t.b)); // biases
-    t.h = (float *)calloc(nhid, sizeof(*t.h)); // hidden neurons
-    t.o = (float *)calloc(nops, sizeof(*t.o)); // output neurons
+    t.b = (double *)calloc(t.nb, sizeof(*t.b)); // biases
+    t.h = (double *)calloc(nhid, sizeof(*t.h)); // hidden neurons
+    t.o = (double *)calloc(nops, sizeof(*t.o)); // output neurons
     t.nips = nips;
     t.nhid = nhid;
     t.nops = nops;
@@ -455,8 +455,8 @@ void xtfree(const Tinn t)
     free(t.o);
 }
 
-// Prints an array of floats. Useful for printing predictions.
-void xtprint(const float *arr, const int size)
+// Prints an array of doubles. Useful for printing predictions.
+void xtprint(const double *arr, const int size)
 {
     for (int i = 0; i < size; i++)
         printf("%f ", (double)arr[i]);
@@ -464,7 +464,7 @@ void xtprint(const float *arr, const int size)
 }
 
 // Returns an output prediction given an input.
-float *xtpredict(const Tinn t, const float *const in)
+double *xtpredict(const Tinn t, const double *const in)
 {
     fprop(t, in);
     return t.o;
@@ -479,8 +479,8 @@ static void wbrand(const Tinn t)
         t.b[i] = frand() - 0.5f;
 }
 
-// Returns floating point random from 0.0 - 1.0.
-static float frand()
+// Returns doubleing point random from 0.0 - 1.0.
+static double frand()
 {
-    return rand() / (float)RAND_MAX;
+    return rand() / (double)RAND_MAX;
 }

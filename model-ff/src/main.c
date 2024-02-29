@@ -15,9 +15,9 @@
 typedef struct
 {
     // 2D floating point array of input.
-    float **in;
+    double **in;
     // 2D floating point array of target.
-    float **tg;
+    double **tg;
     // Number of inputs to neural network.
     int feature_len;
     // Number of outputs to neural network.
@@ -30,9 +30,9 @@ typedef struct
 typedef struct
 {
     // floating point array of FF positive sample <input, correct_label>
-    float *pos;
+    double *pos;
     // floating point array of FF negative sample <input, incorrect_label>
-    float *neg;
+    double *neg;
 } FFsamples;
 
 // Returns the number of lines in a file.
@@ -70,12 +70,12 @@ static char *readln(FILE *const file)
     return line;
 }
 
-// New 2D array of floats.
-static float **new2d(const int rows, const int cols)
+// New 2D array of doubles.
+static double **new2d(const int rows, const int cols)
 {
-    float **row = (float **)malloc((rows) * sizeof(float *));
+    double **row = (double **)malloc((rows) * sizeof(double *));
     for (int r = 0; r < rows; r++)
-        row[r] = (float *)malloc((cols) * sizeof(float));
+        row[r] = (double *)malloc((cols) * sizeof(double));
     return row;
 }
 
@@ -93,7 +93,7 @@ static void parse(const Data data, char *line, const int row)
     const int cols = data.feature_len + data.num_class;
     for (int col = 0; col < cols; col++)
     {
-        const float val = atof(strtok(col == 0 ? line : NULL, " "));
+        const double val = atof(strtok(col == 0 ? line : NULL, " "));
         if (col < data.feature_len)
             data.in[row][col] = val;
         else
@@ -119,8 +119,8 @@ static void shuffle(const Data d)
     for (int a = 0; a < d.rows; a++)
     {
         const int b = rand() % d.rows;
-        float *ot = d.tg[a];
-        float *it = d.in[a];
+        double *ot = d.tg[a];
+        double *it = d.in[a];
         // Swap output.
         d.tg[a] = d.tg[b];
         d.tg[b] = ot;
@@ -134,18 +134,18 @@ static void shuffle(const Data d)
 static FFsamples new_samples(const int nips)
 {
     FFsamples s = {
-        (float *)malloc((nips) * sizeof(float)),
-        (float *)malloc((nips) * sizeof(float))};
+        (double *)malloc((nips) * sizeof(double)),
+        (double *)malloc((nips) * sizeof(double))};
     return s;
 }
 
 // Generates a positive and a negative sample for the FF algorithm by embedding the one-hot encoded target in the input
 static void generate_samples(const Data d, const int row, FFsamples s)
 {
-    memcpy(s.pos, d.in[row], (d.feature_len - d.num_class) * sizeof(float));
-    memcpy(s.neg, d.in[row], (d.feature_len - d.num_class) * sizeof(float));
-    memcpy(&s.pos[d.feature_len - d.num_class], d.tg[row], d.num_class * sizeof(float));
-    memset(&s.neg[d.feature_len - d.num_class], 0, d.num_class * sizeof(float));
+    memcpy(s.pos, d.in[row], (d.feature_len - d.num_class) * sizeof(double));
+    memcpy(s.neg, d.in[row], (d.feature_len - d.num_class) * sizeof(double));
+    memcpy(&s.pos[d.feature_len - d.num_class], d.tg[row], d.num_class * sizeof(double));
+    memset(&s.neg[d.feature_len - d.num_class], 0, d.num_class * sizeof(double));
     // Set the positive sample's label to 0.0f
     int one_pos;
     for (int i = d.feature_len - d.num_class; i < d.feature_len; i++)
@@ -203,10 +203,10 @@ int main()
     // It can be fine tuned along with the number of hidden layers.
     // Feel free to modify the anneal rate.
     // The number of iterations can be changed for stronger training.
-    float rate = 0.5f;
-    const float anneal = 0.99f;
+    double rate = 0.5f;
+    const double anneal = 0.99f;
     const int iterations = 60;
-    const float threshold = 10.0f;
+    const double threshold = 10.0f;
 
     Data data;
     if (DIGITS)
@@ -231,7 +231,7 @@ int main()
     {
         log_info("Iteration %d", i);
         shuffle(data);
-        float error = 0.0f;
+        double error = 0.0f;
         for (int j = 0; j < data.rows; j++)
         {
             log_debug("Sample %d", j);
@@ -267,8 +267,8 @@ int main()
 
     for (int i = 0; i < 10; i++)
     {
-        float *const in = data.in[i];
-        float *const tg = data.tg[i];
+        double *const in = data.in[i];
+        double *const tg = data.tg[i];
         const int pd = ffpredictnet(ffnet, in, nops, nips);
         // Prints target.
         for (int i = 0; i < data.num_class; i++)
