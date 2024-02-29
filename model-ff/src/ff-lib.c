@@ -293,11 +293,10 @@ static void ffbprop(const Tinn t, const double *const in_pos, const double *cons
 // Computes error using the FFLoss function.
 static double fferr(const double g_pos, const double g_neg, const double threshold)
 {
-
     double pos_exponent = -g_pos + threshold;
     double neg_exponent = g_neg - threshold;
-    double first_term = logf(1 + expf(-fabs(pos_exponent))) + pos_exponent > 0.0 ? pos_exponent : 0.0;
-    double second_term = logf(1 + expf(-fabs(neg_exponent))) + neg_exponent > 0.0 ? neg_exponent : 0.0;
+    double first_term = log(1 + exp(-fabs(pos_exponent))) + pos_exponent > 0.0 ? pos_exponent : 0.0;
+    double second_term = log(1 + exp(-fabs(neg_exponent))) + neg_exponent > 0.0 ? neg_exponent : 0.0;
     // printf("g_pos: %f, g_neg: %f, err: %f\n", g_pos, g_neg, first_term + second_term);
     return first_term + second_term;
     // equivalent to:
@@ -312,8 +311,9 @@ static double stable_sigmoid(double x)
     }
     else
     {
+        ///TODO: Fix underflow here
         double exp_x = exp(x);
-        // printf("exp_x: %.17g\n", exp_x);
+        log_debug("x: %.17g, exp_x: %.17g",x, exp_x);
         return exp_x / (1.0 + exp_x + 1e-4);
     }
 }
@@ -321,10 +321,12 @@ static double stable_sigmoid(double x)
 // Returns partial derivative of error function.
 static double ffpderr(const double g_pos, const double g_neg, const double threshold)
 {
-    double sigmoid_g_pos = stable_sigmoid((double)(threshold - g_pos));
-    double sigmoid_g_neg = stable_sigmoid(threshold - g_neg);
+    double sigmoid_g_pos = stable_sigmoid(threshold - g_pos);
+    double sigmoid_g_neg = stable_sigmoid(g_neg - threshold);
 
-    return -sigmoid_g_pos + sigmoid_g_neg;
+    log_debug("Sigmoid g_pos: %.17g, Sigmoid g_neg: %.17g", sigmoid_g_pos, sigmoid_g_neg);
+    return  sigmoid_g_neg - sigmoid_g_pos;
+    // Equivalent to:
     // return -expf(threshold) / (expf(g_pos) + expf(threshold)) + expf(threshold) / (expf(g_neg) + expf(threshold));
 }
 
@@ -354,7 +356,7 @@ double pdrelu(const double a)
 // Sigmoid activation function.
 double sigmoid(const double a)
 {
-    return 1.0f / (1.0f + expf(-a));
+    return 1.0f / (1.0f + exp(-a));
 }
 
 // Sigmoid derivative.

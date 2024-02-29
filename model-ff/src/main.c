@@ -206,7 +206,7 @@ int main()
     double rate = 0.5f;
     const double anneal = 0.99f;
     const int iterations = 60;
-    const double threshold = 10.0f;
+    const double threshold = 20.0f;
 
     Data data;
     if (DIGITS)
