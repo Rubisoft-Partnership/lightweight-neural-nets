@@ -195,7 +195,7 @@ int main()
     // repositories usually don't include the input and output size in the data itself.
     int nips = 784;
     const int nops = 10;
-    int layers_sizes[] = {784, 500, 500, 10};
+    int layers_sizes[] = {784, 100, 100, 10};
 
     const int layers_number = sizeof(layers_sizes) / sizeof(layers_sizes[0]);
     // Hyper Parameters.
@@ -206,7 +206,7 @@ int main()
     double rate = 0.5f;
     const double anneal = 0.99f;
     const int iterations = 60;
-    const double threshold = 20.0f;
+    const double threshold = 4.0f;
 
     Data data;
     if (DIGITS)

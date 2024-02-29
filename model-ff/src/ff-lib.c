@@ -32,6 +32,7 @@ double fftrain(const Tinn t, const double *const pos, const double *const neg, d
 Tinn xtbuild(const int nips, const int nhid, const int nops, double (*act)(double), double (*pdact)(double), const double threshold);
 void embed_label(double *sample, const double *in, int label, int insize, int num_classes);
 void normalize_vector(double *output, int size);
+static double stable_sigmoid(double x);
 
 // From Tinn.c, but modified
 void fprop(const Tinn t, const double *const in);
@@ -180,7 +181,7 @@ FFNet ffnetbuild(const int *layer_sizes, int num_layers, double (*act)(double), 
 double fftrainnet(const FFNet ffnet, const double *const pos, const double *const neg, double rate)
 {
     // printf("Training FFNet...\n");
-    double error = 0.0f;
+    double error = 0.0;
     // Feed first layer manually.
     error += fftrain(ffnet.hid_layers[0], pos, neg, rate);
     // Feed the rest of the layers.
@@ -226,7 +227,7 @@ void embed_label(double *sample, const double *in, int label, int insize, int nu
 {
     memcpy(sample, in, insize * sizeof(*in));
     memset(&sample[insize - num_classes], 0, num_classes * sizeof(*sample));
-    sample[insize - label] = 1.0f;
+    sample[insize - label] = 1.0;
 }
 
 // Trains a tinn with an input and target output with a learning rate. Returns target to output error.
@@ -255,7 +256,7 @@ double fftrain(const Tinn t, const double *const pos, const double *const neg, d
 
 void normalize_vector(double *output, int size)
 {
-    double norm = 0.0f;
+    double norm = 0.0;
     for (int i = 0; i < size; i++)
         norm += output[i] * output[i];
     norm = sqrt(norm);
@@ -267,26 +268,33 @@ void normalize_vector(double *output, int size)
 static void ffbprop(const Tinn t, const double *const in_pos, const double *const in_neg,
                     const double rate, const double g_pos, const double g_neg)
 {
-    const double a = ffpderr(g_pos, g_neg, t.threshold);
+    // const double a = ffpderr(g_pos, g_neg, t.threshold);
+    const double pderr_pos = -stable_sigmoid(t.threshold - g_pos);
+    const double pderr_neg = stable_sigmoid(g_neg - t.threshold);
     log_debug("G_pos: %f, G_neg: %f", g_pos, g_neg);
     log_debug("Loss: %.17g", fferr(g_pos, g_neg, t.threshold));
-    log_debug("Partial derivative: %.17g", a);
-    // printf("a: %.17g\n", a);
+    log_debug("Partial derivative pos: %.17g, neg: %.17g", pderr_pos, pderr_neg);
+
     for (int i = 0; i < t.nhid; i++)
     {
-        double sum = 0.0f;
+        double sum_pos = 0.0;
+        double sum_neg = 0.0;
         // Calculate total error change with respect to output.
         for (int j = 0; j < t.nops; j++)
         {
-            const double b_pos = t.pdact(o_buffer[j]);
-            const double b_neg = t.pdact(t.o[j]);
-            sum += a * (b_pos + b_neg) * t.x[j * t.nhid + i];
+            // Computes the positive and negative:
+            // derivative of the goodness with respect to the output of the layer
+            // multiplied by the derivative of the output of the layer with respect to the weights in the hidden layer to output layer
+            const double b_pos = 2 * o_buffer[j] * h_buffer[i];
+            const double b_neg = 2 * t.o[j] * t.h[i];
+            sum_pos += o_buffer[j] * t.x[j * t.nhid + i];
+            sum_neg += t.o[j] * t.x[j * t.nhid + i];
             // Correct weights in hidden to output layer.
-            t.x[j * t.nhid + i] -= rate * a * (b_pos * h_buffer[i] + b_neg * t.h[i]);
+            t.x[j * t.nhid + i] -= rate * (b_pos * pderr_pos + b_neg * pderr_neg);
         }
         // Correct weights in input to hidden layer.
         for (int j = 0; j < t.nips; j++)
-            t.w[i * t.nips + j] -= rate * sum * (t.pdact(t.h[i]) * in_neg[j] + t.pdact(h_buffer[i]) * in_pos[j]);
+            t.w[i * t.nips + j] -= rate * ((pderr_neg * 2 * sum_neg * in_neg[j]) + (pderr_pos * 2 * sum_pos * in_pos[j]));
     }
 }
 
@@ -295,12 +303,12 @@ static double fferr(const double g_pos, const double g_neg, const double thresho
 {
     double pos_exponent = -g_pos + threshold;
     double neg_exponent = g_neg - threshold;
-    double first_term = log(1 + exp(-fabs(pos_exponent))) + pos_exponent > 0.0 ? pos_exponent : 0.0;
-    double second_term = log(1 + exp(-fabs(neg_exponent))) + neg_exponent > 0.0 ? neg_exponent : 0.0;
+    // double first_term = log(1 + exp(-fabs(pos_exponent))) + pos_exponent > 0.0 ? pos_exponent : 0.0;
+    // double second_term = log(1 + exp(-fabs(neg_exponent))) + neg_exponent > 0.0 ? neg_exponent : 0.0;
     // printf("g_pos: %f, g_neg: %f, err: %f\n", g_pos, g_neg, first_term + second_term);
-    return first_term + second_term;
+    // return first_term + second_term;
     // equivalent to:
-    // return logf(1.0f + expf(-g_pos + threshold)) + logf(1.0f + expf(g_neg - threshold));
+    return logf(1.0 + expf(-g_pos + threshold)) + logf(1.0 + expf(g_neg - threshold));
 }
 
 static double stable_sigmoid(double x)
@@ -311,9 +319,9 @@ static double stable_sigmoid(double x)
     }
     else
     {
-        ///TODO: Fix underflow here
+        /// TODO: Fix underflow here
         double exp_x = exp(x);
-        log_debug("x: %.17g, exp_x: %.17g",x, exp_x);
+        log_debug("x: %.17g, exp_x: %.17g", x, exp_x);
         return exp_x / (1.0 + exp_x + 1e-4);
     }
 }
@@ -325,7 +333,7 @@ static double ffpderr(const double g_pos, const double g_neg, const double thres
     double sigmoid_g_neg = stable_sigmoid(g_neg - threshold);
 
     log_debug("Sigmoid g_pos: %.17g, Sigmoid g_neg: %.17g", sigmoid_g_pos, sigmoid_g_neg);
-    return  sigmoid_g_neg - sigmoid_g_pos;
+    return sigmoid_g_neg - sigmoid_g_pos;
     // Equivalent to:
     // return -expf(threshold) / (expf(g_pos) + expf(threshold)) + expf(threshold) / (expf(g_neg) + expf(threshold));
 }
@@ -333,7 +341,7 @@ static double ffpderr(const double g_pos, const double g_neg, const double thres
 // Returns the goodness of a layer.
 double goodness(const double *vec, const int size)
 {
-    double sum = 0.0f;
+    double sum = 0.0;
     for (int i = 0; i < size; i++)
     {
         sum += vec[i] * vec[i];
@@ -344,25 +352,27 @@ double goodness(const double *vec, const int size)
 // ReLU activation function.
 double relu(const double a)
 {
-    return a > 0.0f ? a : 0.0f;
+    // return a;
+    return a > 0.0 ? a : 0.0;
 }
 
 // ReLU derivative.
 double pdrelu(const double a)
 {
-    return a > 0.0f ? 1.0f : 0.0f;
+    // return 1;
+    return a > 0.0 ? 1.0 : 0.0;
 }
 
 // Sigmoid activation function.
 double sigmoid(const double a)
 {
-    return 1.0f / (1.0f + exp(-a));
+    return 1.0 / (1.0 + exp(-a));
 }
 
 // Sigmoid derivative.
 double pdsigmoid(const double a)
 {
-    return a * (1.0f - a);
+    return a * (1.0 - a);
 }
 
 // Performs forward propagation.
@@ -371,7 +381,7 @@ void fprop(const Tinn t, const double *const in)
     // Calculate hidden layer neuron values.
     for (int i = 0; i < t.nhid; i++)
     {
-        double sum = 0.0f;
+        double sum = 0.0;
         for (int j = 0; j < t.nips; j++)
             sum += in[j] * t.w[i * t.nips + j];
         t.h[i] = t.act(sum + t.b[0]);
@@ -379,7 +389,7 @@ void fprop(const Tinn t, const double *const in)
     // Calculate output layer neuron values.
     for (int i = 0; i < t.nops; i++)
     {
-        double sum = 0.0f;
+        double sum = 0.0;
         for (int j = 0; j < t.nhid; j++)
             sum += t.h[j] * t.x[i * t.nhid + j];
         t.o[i] = t.act(sum + t.b[1]);
@@ -392,7 +402,7 @@ Tinn xtbuild(const int nips, const int nhid, const int nops, double (*act)(doubl
     Tinn t;
     // Tinn only supports one hidden layer so there are two biases.
     t.nb = 2;
-    t.nw = nhid * (nips + nops);               // total number of weights
+    t.nw = nhid * (nips + nops);                // total number of weights
     t.w = (double *)calloc(t.nw, sizeof(*t.w)); // weights (both [intput to hidden] and [hidden to output])
     t.x = t.w + nhid * nips;
     t.b = (double *)calloc(t.nb, sizeof(*t.b)); // biases
