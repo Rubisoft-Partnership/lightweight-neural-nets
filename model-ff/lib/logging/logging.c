@@ -3,7 +3,7 @@
  * @brief This file contains the logging utilities.
  * */
 
-#include "logging.h"
+#include <logging/logging.h>
 
 #include <string.h>
 #include <stdlib.h>

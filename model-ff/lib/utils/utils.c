@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "utils.h"
+#include <utils/utils.h>
 
 // Return the number of lines in a file.
 int lns(FILE *const file)

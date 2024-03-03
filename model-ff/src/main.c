@@ -2,9 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "ff-lib.h"
-#include "data.h"
-#include "logging.h"
+#include <ff-lib/ff-lib.h>
+#include <data/data.h>
+#include <logging/logging.h>
 
 
 // Learns and predicts hand written digits with 98% accuracy.

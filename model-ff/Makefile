@@ -1,6 +1,6 @@
 BIN = target/main.out
 
-CFLAGS = -std=c99 -Wall -Wextra -pedantic -Ofast -flto -march=native
+CFLAGS = -std=c99 -Wall -Wextra -pedantic -Ofast -flto -march=native -Ilib
 
 # Check if the dataset variable is provided and append it to CFLAGS
 ifeq ($(dataset),)
@@ -15,7 +15,7 @@ LDFLAGS = -lm
 
 CC = gcc
 
-SRC = src/main.c src/ff-lib.c src/logging.c src/data.c src/utils.c
+SRC = src/main.c lib/ff-lib/ff-lib.c lib/logging/logging.c lib/data/data.c lib/utils/utils.c
 
 all:
 	$(CC) -o $(BIN) $(SRC) $(CFLAGS) $(DATASET_DEF) $(LDFLAGS)

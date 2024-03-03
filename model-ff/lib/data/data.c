@@ -1,8 +1,8 @@
 #include <stdlib.h>
 
-#include "data.h"
-#include "utils.h"
-#include "logging.h"
+#include <data/data.h>
+#include <utils/utils.h>
+#include <logging/logging.h>
 
 // New data object.
 Data ndata(const int feature_len, const int num_class, const int rows)

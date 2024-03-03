@@ -4,7 +4,7 @@
  *
  * */
 
-#include "ff-lib.h"
+#include <ff-lib/ff-lib.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -12,7 +12,7 @@
 #include <time.h>
 #include <stdarg.h>
 
-#include "logging.h"
+#include <logging/logging.h>
 
 // Buffer to store hidden activations and output activations.
 #define H_BUFFER_SIZE 1024
