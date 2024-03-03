@@ -2,13 +2,12 @@ BIN = target/main.out
 
 CFLAGS = -std=c99 -Wall -Wextra -pedantic -Ofast -flto -march=native -Ilib
 
-# Check if the dataset variable is provided and append it to CFLAGS
 ifeq ($(dataset),)
-  DATASET_DEF =
-else ifeq ($(dataset),MNIST)
-	DATASET_DEF = -DMNIST=1
-else ifeq ($(dataset),DIGITS)
-	DATASET_DEF = -DDIGITS=1
+	DATASET_DEF =
+else ifeq ($(dataset),mnist)
+	DATASET_DEF = -DATA_MNIST
+else ifeq ($(dataset),digits)
+	DATASET_DEF = -DATA_DIGITS
 endif
 
 LDFLAGS = -lm

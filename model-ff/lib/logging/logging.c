@@ -22,7 +22,7 @@ void set_log_level(LogLevel level)
     currentLogLevel = level;
 }
 
-void open_log_file_with_timestamp(const char *logDir, const char *logPrefix)
+void open_log_file_with_timestamp(void)
 {
     // Get the current time
     time_t now = time(NULL);
@@ -33,8 +33,8 @@ void open_log_file_with_timestamp(const char *logDir, const char *logPrefix)
     strftime(logFilename, sizeof(logFilename), "%Y-%m-%d_%H-%M-%S", tm_info);
 
     // Construct the full path
-    char fullPath[512];
-    snprintf(fullPath, sizeof(fullPath), "%s/%s_%s.log", logDir, logPrefix, logFilename);
+    char fullPath[256];
+    snprintf(fullPath, sizeof(fullPath), "%s/log_%s.log", LOGGING_LOG_PATH, logFilename);
 
     // Open the log file
     globalLogFile = fopen(fullPath, "w");

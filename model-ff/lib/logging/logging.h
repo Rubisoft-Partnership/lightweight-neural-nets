@@ -2,7 +2,9 @@
 
 #include <stdio.h>
 
-void open_log_file_with_timestamp(const char *logDir, const char *logPrefix);
+#define LOGGING_LOG_PATH "../logs"
+
+void open_log_file_with_timestamp(void);
 void close_log_file(void);
 
 typedef enum

@@ -2,7 +2,6 @@
 
 #include <data/data.h>
 #include <utils/utils.h>
-#include <logging/logging.h>
 
 // New data object.
 Data ndata(const int feature_len, const int num_class, const int rows)
@@ -83,23 +82,18 @@ void generate_samples(const Data d, const int row, FFsamples s)
     s.neg[(d.feature_len - d.num_class) + neg_label] = 1.0f;
 }
 
+// TODO: decide if we want to load the entire dataset into memory or not and implement it.
 // Parses file from path getting all inputs and outputs for the neural network. Returns data object.
-
-// My understanding is that the dataset is fully loaded into memory for training.
-// This is not ideal for large datasets, but it is fine for small datasets like the one int the README.
-// TODO: decide if we want to load the entire dataset into memory or not and implement it
-Data build(const char *path, const int feature_len, const int num_class)
+Data build(void)
 {
-    FILE *file = fopen(path, "r");
+    FILE *file = fopen(DATA_DATASET_PATH, "r");
     if (file == NULL)
     {
-        printf("Could not open %s\n", path);
-        printf("Get it:\n");
-        printf("cd ../dataset/mnist; sh get_mnist_csv.sh .; python3 csv_to_tinn.py; cd -\n");
+        printf("Could not open %s\n", DATA_DATASET_PATH);
         exit(1);
     }
     const int rows = lns(file);
-    Data data = ndata(feature_len, num_class, rows);
+    Data data = ndata(DATA_FEATURES, DATA_CLASSES, rows);
     for (int row = 0; row < rows; row++)
     {
         char *line = readln(file);
