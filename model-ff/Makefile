@@ -15,7 +15,7 @@ LDFLAGS = -lm
 
 CC = gcc
 
-SRC = src/main.c src/ff-lib.c
+SRC = src/main.c src/ff-lib.c src/logging.c src/data.c src/utils.c
 
 all:
 	$(CC) -o $(BIN) $(SRC) $(CFLAGS) $(DATASET_DEF) $(LDFLAGS)
