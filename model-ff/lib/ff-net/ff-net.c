@@ -66,7 +66,7 @@ double fftrainnet(const FFNet ffnet, const double *const pos, const double *cons
 }
 
 // Inference function for FFNet.
-int ffpredictnet(const FFNet ffnet, const double *in, int num_classes, int insize)
+int ffpredictnet(const FFNet ffnet, const double *in, const int num_classes, const int insize)
 {
     double *netinput = (double *)malloc((insize) * sizeof(double));
     double goodnesses[MAX_CLASSES];

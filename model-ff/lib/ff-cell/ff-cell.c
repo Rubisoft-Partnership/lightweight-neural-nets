@@ -35,7 +35,7 @@ static double frand(void);
 
 
 // Generates inputs for inference given input and label
-void embed_label(double *sample, const double *in, int label, int insize, int num_classes)
+void embed_label(double *sample, const double *in, const int label, const int insize, const int num_classes)
 {
     memcpy(sample, in, insize * sizeof(*in));
     memset(&sample[insize - num_classes], 0, num_classes * sizeof(*sample));
