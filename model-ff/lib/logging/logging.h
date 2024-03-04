@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#define LOGGING_LOG_PATH "../logs"
+#define LOGGING_LOG_PATH PROJECT_BASEPATH "/logs"
 
 void open_log_file_with_timestamp(void);
 void close_log_file(void);

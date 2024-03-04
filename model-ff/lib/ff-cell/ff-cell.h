@@ -2,7 +2,10 @@
 
 #include <stdio.h>
 
-#define MAX_LAYERS_NUM 64
+// Size of buffer to store hidden activations and output activations.
+#define H_BUFFER_SIZE 1024
+
+#define MAX_CLASSES 16
 
 typedef struct
 {
@@ -34,17 +37,6 @@ typedef struct
     double (*pdact)(const double);
 } Tinn;
 
-typedef struct
-{
-    Tinn hid_layers[MAX_LAYERS_NUM];
-    int num_layers;
-    int num_hid_layers;
-} FFNet;
-
-double fftrainnet(const FFNet ffnet, const double *const pos, const double *const neg, double rate);
-FFNet ffnetbuild(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double treshold);
-int ffpredictnet(const FFNet ffnet, const double *in, int num_classes, int insize);
-
 // Activation function.
 
 double relu(const double a);
@@ -52,7 +44,14 @@ double pdrelu(const double a);
 
 double sigmoid(const double a);
 double pdsigmoid(const double a);
+double fftrain(const Tinn t, const double *const pos, const double *const neg, double rate);
+Tinn xtbuild(const int nips, const int nhid, const int nops, double (*act)(double), double (*pdact)(double), const double threshold);
+void embed_label(double *sample, const double *in, int label, int insize, int num_classes);
+void normalize_vector(double *output, int size);
+double goodness(const double *vec, const int size);
 
+// From Tinn.c, but modified
+void fprop(const Tinn t, const double *const in);
 /*
 --------------------------------------------------------------------------------------------------------------------------
 */

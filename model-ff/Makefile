@@ -1,12 +1,13 @@
 BIN = target/main.out
+PROJECT_BASEPATH = $(realpath .)
 
-CFLAGS = -std=c99 -Wall -Wextra -pedantic -Ofast -flto -march=native -Ilib
+CFLAGS = -std=c99 -Wall -Wextra -pedantic -Ofast -flto -march=native -Ilib -DPROJECT_BASEPATH=\"$(PROJECT_BASEPATH)\"
 
-ifeq ($(dataset),)
+ifeq ($(DATASET),)
 	DATASET_DEF =
-else ifeq ($(dataset),mnist)
+else ifeq ($(DATASET),mnist)
 	DATASET_DEF = -DATA_MNIST
-else ifeq ($(dataset),digits)
+else ifeq ($(DATASET),digits)
 	DATASET_DEF = -DATA_DIGITS
 endif
 
@@ -14,7 +15,7 @@ LDFLAGS = -lm
 
 CC = gcc
 
-SRC = src/main.c lib/ff-lib/ff-lib.c lib/logging/logging.c lib/data/data.c lib/utils/utils.c
+SRC = src/main.c lib/ff-net/ff-net.c lib/ff-cell/ff-cell.c lib/logging/logging.c lib/data/data.c lib/utils/utils.c
 
 all:
 	$(CC) -o $(BIN) $(SRC) $(CFLAGS) $(DATASET_DEF) $(LDFLAGS)
