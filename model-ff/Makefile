@@ -1,21 +1,21 @@
 BIN = target/main.out
+PROJECT_BASEPATH = $(realpath .)
 
-CFLAGS = -std=c99 -Wall -Wextra -pedantic -Ofast -flto -march=native
+CFLAGS = -std=c99 -Wall -Wextra -pedantic -Ofast -flto -march=native -Ilib -DPROJECT_BASEPATH=\"$(PROJECT_BASEPATH)\"
 
-# Check if the dataset variable is provided and append it to CFLAGS
-ifeq ($(dataset),)
-  DATASET_DEF =
-else ifeq ($(dataset),MNIST)
-	DATASET_DEF = -DMNIST=1
-else ifeq ($(dataset),DIGITS)
-	DATASET_DEF = -DDIGITS=1
+ifeq ($(DATASET),)
+	DATASET_DEF =
+else ifeq ($(DATASET),mnist)
+	DATASET_DEF = -DDATA_MNIST
+else ifeq ($(DATASET),digits)
+	DATASET_DEF = -DDATA_DIGITS
 endif
 
 LDFLAGS = -lm
 
 CC = gcc
 
-SRC = src/main.c src/ff-lib.c
+SRC = src/main.c lib/ff-net/ff-net.c lib/ff-cell/ff-cell.c lib/logging/logging.c lib/data/data.c lib/utils/utils.c
 
 all:
 	$(CC) -o $(BIN) $(SRC) $(CFLAGS) $(DATASET_DEF) $(LDFLAGS)

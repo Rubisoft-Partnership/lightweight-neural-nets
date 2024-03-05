@@ -1,10 +1,10 @@
 /**
- * @file ff-lib.c
- * @brief This file contains the implementation of the feedforward neural network library.
+ * @file ff-cell.c
+ * @brief This file contains the implementation of a feedforward neural network block.
  *
  * */
 
-#include "ff-lib.h"
+#include <ff-cell/ff-cell.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -12,26 +12,18 @@
 #include <time.h>
 #include <stdarg.h>
 
+#include <logging/logging.h>
+
 // Buffer to store hidden activations and output activations.
-#define H_BUFFER_SIZE 1024
-double h_buffer[H_BUFFER_SIZE]; // activations buffer
-double o_buffer[H_BUFFER_SIZE]; // outputs buffer
-
-#define MAX_CLASSES 16
-
-static LogLevel currentLogLevel;
-static FILE *globalLogFile;
+extern double h_buffer[H_BUFFER_SIZE]; // activations buffer
+extern double o_buffer[H_BUFFER_SIZE]; // outputs buffer
 
 // Function declarations.
 static void ffbprop(const Tinn t, const double *const in_pos, const double *const in_neg,
                     const double rate, const double g_pos, const double g_neg);
 static double fferr(const double g_pos, const double g_neg, const double threshold);
 static double ffpderr(const double g_pos, const double g_neg, const double threshold);
-static double goodness(const double *vec, const int size);
-double fftrain(const Tinn t, const double *const pos, const double *const neg, double rate);
-Tinn xtbuild(const int nips, const int nhid, const int nops, double (*act)(double), double (*pdact)(double), const double threshold);
-void embed_label(double *sample, const double *in, int label, int insize, int num_classes);
-void normalize_vector(double *output, int size);
+double goodness(const double *vec, const int size);
 static double stable_sigmoid(double x);
 
 // From Tinn.c, but modified
@@ -39,191 +31,11 @@ void fprop(const Tinn t, const double *const in);
 
 // From Tinn.c
 static void wbrand(const Tinn t);
-static double frand();
+static double frand(void);
 
-// Log functions
-void log_message(LogLevel level, const char *format, va_list args);
-
-// Function to set the current log level
-void set_log_level(LogLevel level)
-{
-    currentLogLevel = level;
-}
-
-void open_log_file_with_timestamp(const char *logDir, const char *logPrefix)
-{
-    // Get the current time
-    time_t now = time(NULL);
-    struct tm *tm_info = localtime(&now);
-
-    // Create the log filename
-    char logFilename[256];
-    strftime(logFilename, sizeof(logFilename), "%Y-%m-%d_%H-%M-%S", tm_info);
-
-    // Construct the full path
-    char fullPath[512];
-    snprintf(fullPath, sizeof(fullPath), "%s/%s_%s.log", logDir, logPrefix, logFilename);
-
-    // Open the log file
-    globalLogFile = fopen(fullPath, "w");
-    if (!globalLogFile)
-    {
-        perror("Failed to open log file");
-        exit(EXIT_FAILURE);
-    }
-}
-
-void close_log_file()
-{
-    if (globalLogFile)
-    {
-        fclose(globalLogFile);
-    }
-}
-
-void log_message(LogLevel level, const char *format, va_list args)
-{
-    if (level < currentLogLevel)
-    {
-        return;
-    }
-    if (!globalLogFile)
-    {
-        fprintf(stderr, "Log file is not open.\n");
-        return;
-    }
-
-    const char *levelStr = "";
-    switch (level)
-    {
-    case LOG_DEBUG:
-        levelStr = "DEBUG";
-        break;
-    case LOG_INFO:
-        levelStr = "INFO";
-        break;
-    case LOG_WARN:
-        levelStr = "WARN";
-        break;
-    case LOG_ERROR:
-        levelStr = "ERROR";
-        break;
-    }
-    fprintf(globalLogFile, "[%s] ", levelStr);
-    vfprintf(globalLogFile, format, args);
-    fprintf(globalLogFile, "\n");
-    fflush(globalLogFile);
-}
-
-void log_debug(const char *format, ...)
-{
-    va_list args;
-    va_start(args, format);
-    log_message(LOG_DEBUG, format, args);
-    va_end(args);
-}
-
-void log_info(const char *format, ...)
-{
-    va_list args;
-    va_start(args, format);
-    log_message(LOG_INFO, format, args);
-    va_end(args);
-}
-
-void log_warn(const char *format, ...)
-{
-    va_list args;
-    va_start(args, format);
-    log_message(LOG_WARN, format, args);
-    va_end(args);
-}
-
-void log_error(const char *format, ...)
-{
-    va_list args;
-    va_start(args, format);
-    log_message(LOG_ERROR, format, args);
-    va_end(args);
-}
-
-// End log functions
-
-// Builds a FFNet by creating multiple Tinn objects. layer_sizes includes the number of inputs, hidden neurons, and outputs units.
-FFNet ffnetbuild(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double treshold)
-{
-    FFNet ffnet;
-    ffnet.num_layers = num_layers;
-    ffnet.num_hid_layers = num_layers - 2;
-
-    // begin logs
-    log_info("Building FFNet with %d layers, %d hidden layers", num_layers, ffnet.num_hid_layers);
-    // logs layers dimensions in a single line
-    char layers_str[256];
-    layers_str[0] = '\0';
-    for (int i = 0; i < num_layers; i++)
-    {
-        char layer_str[32];
-        snprintf(layer_str, sizeof(layer_str), "%d ", layer_sizes[i]);
-        strcat(layers_str, layer_str);
-    }
-    log_info("Layers: %s", layers_str);
-    // end logs
-
-    for (int i = 1; i < num_layers - 1; i++)
-    {
-        ffnet.hid_layers[i - 1] = xtbuild(layer_sizes[i - 1], layer_sizes[i], layer_sizes[i + 1], act, pdact, treshold);
-    }
-
-    return ffnet;
-}
-
-double fftrainnet(const FFNet ffnet, const double *const pos, const double *const neg, double rate)
-{
-    // printf("Training FFNet...\n");
-    double error = 0.0;
-    // Feed first layer manually.
-    error += fftrain(ffnet.hid_layers[0], pos, neg, rate);
-    // Feed the rest of the layers.
-    for (int i = 1; i < ffnet.num_hid_layers; i++)
-    {
-        error += fftrain(ffnet.hid_layers[i], o_buffer, ffnet.hid_layers[i - 1].o, rate);
-    }
-    // printf("error: %f\n", error);
-    return error;
-}
-
-// Inference function for FFNet.
-int ffpredictnet(const FFNet ffnet, const double *in, int num_classes, int insize)
-{
-    double *netinput = (double *)malloc((insize) * sizeof(double));
-    double goodnesses[MAX_CLASSES];
-    for (int label = 0; label < num_classes; label++)
-    {
-        embed_label(netinput, in, label, insize, num_classes);
-        fprop(ffnet.hid_layers[0], in);
-        normalize_vector(ffnet.hid_layers[0].o, ffnet.hid_layers[0].nops);
-        for (int i = 1; i < ffnet.num_hid_layers; i++)
-        {
-            fprop(ffnet.hid_layers[i], ffnet.hid_layers[i - 1].o);
-            normalize_vector(ffnet.hid_layers[i].o, ffnet.hid_layers[i].nops);
-            goodnesses[label] += goodness(ffnet.hid_layers[i].o, ffnet.hid_layers[i].nops);
-        }
-    }
-
-    free(netinput);
-
-    int max_goodness_index = 0;
-    for (int i = 1; i < num_classes; i++)
-    {
-        if (goodnesses[i] > goodnesses[max_goodness_index])
-            max_goodness_index = i;
-    }
-    return max_goodness_index;
-}
 
 // Generates inputs for inference given input and label
-void embed_label(double *sample, const double *in, int label, int insize, int num_classes)
+void embed_label(double *sample, const double *in, const int label, const int insize, const int num_classes)
 {
     memcpy(sample, in, insize * sizeof(*in));
     memset(&sample[insize - num_classes], 0, num_classes * sizeof(*sample));
@@ -437,9 +249,9 @@ Tinn xtload(const char *const path)
     const Tinn t = xtbuild(nips, nhid, nops, sigmoid, pdsigmoid, 0.5); /// TODO: relu and treshold hardcode is a quick fix, change this!
     // Load bias and weights.
     for (int i = 0; i < t.nb; i++)
-        fscanf(file, "%f\n", &t.b[i]);
+        fscanf(file, "%lf\n", &t.b[i]);
     for (int i = 0; i < t.nw; i++)
-        fscanf(file, "%f\n", &t.w[i]);
+        fscanf(file, "%lf\n", &t.w[i]);
     fclose(file);
     return t;
 }
@@ -492,7 +304,7 @@ static void wbrand(const Tinn t)
 }
 
 // Returns doubleing point random from 0.0 - 1.0.
-static double frand()
+static double frand(void)
 {
     return rand() / (double)RAND_MAX;
 }
