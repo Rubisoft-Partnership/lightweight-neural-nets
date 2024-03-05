@@ -86,6 +86,7 @@ void generate_samples(const Data d, const int row, FFsamples s)
 // Parses file from path getting all inputs and outputs for the neural network. Returns data object.
 Data build(void)
 {
+    log_debug("Building data from %s", DATA_DATASET_PATH);
     FILE *file = fopen(DATA_DATASET_PATH, "r");
     if (file == NULL)
     {

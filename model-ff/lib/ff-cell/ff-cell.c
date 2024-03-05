@@ -15,8 +15,8 @@
 #include <logging/logging.h>
 
 // Buffer to store hidden activations and output activations.
-double h_buffer[H_BUFFER_SIZE]; // activations buffer
-double o_buffer[H_BUFFER_SIZE]; // outputs buffer
+extern double h_buffer[H_BUFFER_SIZE]; // activations buffer
+extern double o_buffer[H_BUFFER_SIZE]; // outputs buffer
 
 // Function declarations.
 static void ffbprop(const Tinn t, const double *const in_pos, const double *const in_neg,

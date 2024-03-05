@@ -6,9 +6,9 @@ CFLAGS = -std=c99 -Wall -Wextra -pedantic -Ofast -flto -march=native -Ilib -DPRO
 ifeq ($(DATASET),)
 	DATASET_DEF =
 else ifeq ($(DATASET),mnist)
-	DATASET_DEF = -DATA_MNIST
+	DATASET_DEF = -DDATA_MNIST
 else ifeq ($(DATASET),digits)
-	DATASET_DEF = -DATA_DIGITS
+	DATASET_DEF = -DDATA_DIGITS
 endif
 
 LDFLAGS = -lm

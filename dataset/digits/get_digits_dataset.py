@@ -35,8 +35,3 @@ with open("digits.txt", "w") as f:
         # Write to the file space separated features and one-hot encoding
         f.write(" ".join(map(str, digit)) + " " + " ".join(map(str, one_hot)) + "\n")
 
-# Display the last digit
-# plt.figure(1, figsize=(3, 3))
-# last_digit_matrix = digits[-1].reshape(8, 8)
-# plt.imshow(last_digit_matrix, cmap=plt.cm.gray_r, interpolation="nearest")
-# plt.show()
