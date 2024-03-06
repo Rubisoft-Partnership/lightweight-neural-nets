@@ -11,6 +11,8 @@ Model-ff uses Forward-Forward algorithm to train a neural network.
 
 $\theta \in \R: \text{threshold}$
 
+$\alpha \in \R: \text{learning rate}$
+
 $f \in\N: \text{features}, l\in\N: \text{classes}$
 
 $\mathcal{L} = \{l_1, ..., l_l\}: \text{set of labels}$
@@ -23,46 +25,91 @@ $y\in\R^l: \text{label}$
 
 $\eta:\R^f\times\R^l\rightarrow\R^f: \text{embed function}$
 
-$W_0\in\R^{f\times u_0}: \text{weight matrix from input to hidden layer}$
+$W^{\tiny{(0)}}\in\R^{f\times u_0}: \text{weight matrix from input to hidden layer}$
 
-$W_1\in\R^{u_0\times u_1}: \text{weight matrix from hidden to output layer}$
+$W^{\tiny{(1)}}\in\R^{u_0\times u_1}: \text{weight matrix from hidden to output layer}$
 
-$a_0:\R^{u_0}\rightarrow\R^{u_0}: \text{hidden activation function}$
+$a^{\tiny{(0)}}:\R^{u_0}\rightarrow\R^{u_0}: \text{hidden activation function (ReLu)}$
 
-$a_1:\R^{u_1}\rightarrow\R^{u_1}: \text{output activation function}$
+$a^{\tiny{(1)}}:\R^{u_1}\rightarrow\R^{u_1}: \text{output activation function (ReLu)}$
 
-### Forward-Forward
+$G(z):\R^{u_1}\rightarrow\R=\sum_{i=1}^{i\le u_1}(z^{\tiny{(1)}}_{i})^2$
+
+$L(z, \bar{z}):\R^{u_1 \times u_1}\rightarrow\R=\zeta(\theta - G(z^{\tiny{(1)}})) + \zeta(G(\bar{z}^{\tiny{(1)}})-\theta)$
+
+
+### Forward pass
 
 Input to hidden layer:
 
-$x_{pos} :=\eta(x,y)$
+$x :=\eta(x',y)$
 
-$x_{neg} :=\eta(x,\bar{y}), \bar{y}\in\mathcal{L}|\bar{y}\neq y$
+$\bar x :=\eta(x,\bar{y}), \bar{y}\in\mathcal{L}|\bar{y}\neq y$
 
-$h_0^{pos} := W_0x_{pos}$
+$h^{\tiny{(0)}} := W^{\tiny{(0)}}x'$
 
-$h_0^{neg} := W_0x_{neg}$
+$\bar{h}^{\tiny{(0)}} := W^{\tiny{(0)}}\bar x$
 
-$z_0^{pos} := a_0(h_0^{pos})$
+$z^{\tiny{(0)}} := a^{\tiny{(0)}}(h^{\tiny{(0)}})$
 
-$z_0^{neg} := a_0(h_0^{neg})$
+$\bar{z}^{\tiny{(0)}} := a^{\tiny{(0)}}(\bar{h}^{\tiny{(0)}})$
 
 Hidden to output layer:
 
-$h_1^{pos} := W_1z_0^{pos}$
+$h^{\tiny{(1)}} := W^{\tiny{(1)}}z^{\tiny{(0)}}$
 
-$h_1^{neg} := W_1z_0^{neg}$
+$\bar{h}^{\tiny{(1)}} := W^{\tiny{(1)}}\bar{z}^{\tiny{(0)}}$
 
-$z_1^{pos} := a_1(h_1^{pos})$
+$z^{\tiny{(1)}} := a^{\tiny{(1)}}(h^{\tiny{(1)}})$
 
-$z_1^{neg} := a_1(h_1^{neg})$
+$\bar{z}^{\tiny{(1)}} := a^{\tiny{(1)}}(\bar{h}^{\tiny{(1)}})$
 
+### Backward pass
 
-$G_{pos} = \sum_{i=0}^{i\le u_1}z_{1,i}^{pos}$
+Updating hidden layers weights:
 
-$G_{neg} = \sum_{i=0}^{i\le u_1}z_{1,i}^{neg}$
+$
+w^{\tiny{(1)}}_{i, j} =
+w^{\tiny{(1)}}_{i, j} -\alpha\frac{\delta L}{\delta w^{\tiny{(1)}}_{i, j}} =
+w^{\tiny{(1)}}_{i, j} -
+\alpha(\frac{\delta L_{pos}}{\delta w^{\tiny{(1)}}_{i, j}} + 
+\frac{\delta L_{neg}}{\delta w^{\tiny{(1)}}_{i, j}})
+$
 
-$L_{FF}=\zeta(\theta - G_{pos}) + \zeta(G_{neg}-\theta)$
+$
+\frac{\delta L_{pos}}{\delta w^{\tiny{(1)}}_{i, j}} = 
+\frac{\delta L_{pos}}{\delta G(z^{\tiny{(1)}})}
+\frac{\delta G(z^{\tiny{(1)}})}{\delta z^{\tiny{(1)}}_{j}} 
+\frac{\delta z^{\tiny{(1)}}_{i}}{\delta w^{\tiny{(1)}}_{i,j}}
+$
 
+$
+\frac{\delta L_{pos}}{\delta G(z^{\tiny{(1)}})} =
+-\sigma(\theta - G(z^{\tiny{(1)}}))
+$
 
-Weights are updated using the following formula for every Tinn using ReLu:
+$
+\frac{\delta G(z^{\tiny{(1)}})}{\delta z^{\tiny{(1)}}_{j}} =
+2z^{\tiny{(1)}}_{j}
+$
+
+Using ReLu activation function:
+
+$
+\frac{\delta z^{\tiny{(1)}}_{j}}{\delta w^{\tiny{(1)}}_{i,j}} =
+\frac{\delta a^{\tiny{(1)}}(\sum_iw^{\tiny{(1)}}_{i,j} z^{\tiny{(0)}}_i)}{\delta w^{\tiny{(1)}}_{i,j}} =
+\begin{cases}
+    z^{\tiny{(0)}}_i & \text{if} \space h^{\tiny{(1)}}_j \ge 0 \\
+    0 & \text{if} \space h^{\tiny{(1)}}_j \lt 0 \\
+\end{cases}
+$
+
+$
+\frac{\delta L_{pos}}{\delta w^{\tiny{(1)}}_{i, j}} =
+\begin{cases}
+    -\sigma(\theta - G(z^{\tiny{(1)}}))2z^{\tiny{(1)}}_{j}z^{\tiny{(0)}}_i & \text{if} \space z^{\tiny{(1)}}_j \ge 0 \\
+    0 & \text{if} \space z^{\tiny{(1)}}_j \lt 0  \\
+\end{cases} \equiv
+-\sigma(\theta - G(z^{\tiny{(1)}}))2z^{\tiny{(1)}}_{j}z^{\tiny{(0)}}_i
+$
+
