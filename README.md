@@ -33,7 +33,7 @@ $a^{\tiny{(0)}}:\R^{u_0}\rightarrow\R^{u_0}: \text{hidden activation function (R
 
 $a^{\tiny{(1)}}:\R^{u_1}\rightarrow\R^{u_1}: \text{output activation function (ReLu)}$
 
-$G(z):\R^{u_1}\rightarrow\R=\sum_{i=1}^{i\le u_1}(z^{\tiny{(1)}}_{i})^2$
+$G(z):\R^{u_1}\rightarrow\R=\sum\limits_{i=1}^{i\le u_1}(z^{\tiny{(1)}}_{i})^2$
 
 $L(z, \bar{z}):\R^{u_1 \times u_1}\rightarrow\R=\zeta\bigl(\theta - G(z^{\tiny{(1)}})\bigr) + \zeta\bigl(G(\bar{z}^{\tiny{(1)}})-\theta)$
 
@@ -93,11 +93,11 @@ $
 2z^{\tiny{(1)}}_{j}
 $
 
-Using ReLu activation function:
+Using ReLu activation function for both hidden and output layers:
 
 $
 \frac{\delta z^{\tiny{(1)}}_{j}}{\delta w^{\tiny{(1)}}_{i,j}} =
-\frac{\delta a^{\tiny{(1)}}\bigl(\sum_iw^{\tiny{(1)}}_{i,j} z^{\tiny{(0)}}_i\bigr)}{\delta w^{\tiny{(1)}}_{i,j}} =
+\frac{\delta a^{\tiny{(1)}}\bigl(\sum\limits_iw^{\tiny{(1)}}_{i,j} z^{\tiny{(0)}}_i\bigr)}{\delta w^{\tiny{(1)}}_{i,j}} =
 \begin{cases}
     z^{\tiny{(0)}}_i & \text{if} \space h^{\tiny{(1)}}_j \ge 0 \\
     0 & \text{if} \space h^{\tiny{(1)}}_j \lt 0 \\
@@ -112,6 +112,10 @@ $
 \end{cases} =
 -\sigma\bigl(\theta - G(z^{\tiny{(1)}})\bigr)2z^{\tiny{(1)}}_{j}z^{\tiny{(0)}}_i
 $
+
+Note that $z^{\tiny{(1)}}_j$ is never smaller than zero as it's the result of ReLu activation.
+
+Similarly for the negative pass we have:
 
 $
 \frac{\delta L_{neg}}{\delta w^{\tiny{(1)}}_{i, j}} = 
@@ -147,6 +151,48 @@ $
 $
 \frac{\delta L_{pos}}{\delta w^{\tiny{(0)}}_{i, j}} =
 \frac{\delta L_{pos}}{\delta G(z^{\tiny{(1)}})}
-\frac{\delta G(z^{\tiny{(1)}})}{\delta z^{\tiny{(1)}}_{j??}}
-\frac{\delta z^{\tiny{(1)}}_{j??}}{\delta h^{\tiny{(1)}}}
+\frac{\delta G(z^{\tiny{(1)}})}{\delta z^{\tiny{(0)}}_{j}}
+\frac{\delta z^{\tiny{(0)}}_{j}}{\delta w^{\tiny{(0)}}_{i,j}}
+$
+
+We have already computed $\frac{\delta L_{pos}}{\delta G(z^{\tiny{(1)}})}$.
+
+$
+\frac{\delta G(z^{\tiny{(1)}})}{\delta z^{\tiny{(0)}}_{j}} =
+\frac{\delta}{\delta z^{\tiny{(0)}}_{j}} \sum\limits_{k=1}^{k\le u_1}(z^{\tiny{(1)}}_{k})^2=
+\sum\limits_{k=1}^{k\le u_1}\frac{\delta}{\delta z^{\tiny{(0)}}_{j}}\Bigl(a^{\tiny{(1)}}\bigl(\sum\limits_{m=1}^{m\le u_0}w_{m,k}^{\tiny{(1)}}z^{\tiny{(0)}}_m\bigr)\Bigr)^2 =
+\sum\limits_{k=1}^{k\le u_1}2a^{\tiny{(1)}}\bigl(\sum\limits_{m=1}^{m\le u_0}w_{m,k}^{\tiny{(1)}}z^{\tiny{(0)}}_m\bigr)\frac{\delta}{\delta z^{\tiny{(0)}}_{j}}\Bigl(a^{\tiny{(1)}}\bigl(\sum\limits_{m=1}^{m\le u_0}w_{m,k}^{\tiny{(1)}}z^{\tiny{(0)}}_m\bigr)\Bigr) =
+\sum\limits_{k=1}^{k\le u_1}2z^{\tiny{(1)}}_k\frac{\delta}{\delta z^{\tiny{(0)}}_{j}}\Bigl(a^{\tiny{(1)}}\bigl(\sum\limits_{m=1}^{m\le u_0}w_{m,k}^{\tiny{(1)}}z^{\tiny{(0)}}_m\bigr)\Bigr) =
+\begin {cases}
+    \sum\limits_{k=1}^{k\le u_1}2z^{\tiny{(1)}}_k{w_{j,k}^{\tiny{(1)}}} & \text{if}\space h_k^{\tiny{(1)}} \ge 0 \\
+    0 & \text{if}\space h_k^{\tiny{(1)}} \lt 0
+\end{cases} =
+\sum\limits_{k=1}^{k\le u_1}2z^{\tiny{(1)}}_k{w_{j,k}^{\tiny{(1)}}} = 2W_j^{\tiny{(1)}}z^{\tiny{(1)}}
+$
+
+$
+\frac{\delta z^{\tiny{(0)}}_{j}}{\delta w^{\tiny{(0)}}_{i,j}} =
+\frac{\delta a^{\tiny{(0)}}\bigl(\sum\limits_{k=0}^{k \le u_0} w^{\tiny{(0)}}_{k,j} x_k\bigr)}{\delta w^{\tiny{(0)}}_{i,j}} =
+\begin{cases}
+    x_i & \text{if} \space h^{\tiny{(0)}}_j \ge 0 \\
+    0 & \text{if} \space h^{\tiny{(0)}}_j \lt 0 \\
+\end{cases}
+$
+
+$
+\frac{\delta L_{pos}}{\delta w^{\tiny{(0)}}_{i, j}} =
+\begin{cases}
+    -\sigma\bigl(\theta - G(z^{\tiny{(1)}})\bigr)2\Bigl(\sum\limits_{k=1}^{k\le u_1}z^{\tiny{(1)}}_k{w_{j,k}^{\tiny{(1)}}}\Bigr) x_i & \text{if} \space h^{\tiny{(0)}}_j \ge 0 \\
+    0 & \text{if} \space h^{\tiny{(0)}}_j \lt 0  \\
+\end{cases}
+$
+
+Updating the negative pass weights is similar to the positive pass weights.
+
+$
+\frac{\delta L_{neg}}{\delta w^{\tiny{(0)}}_{i, j}} =
+\begin{cases}
+    \sigma\bigl(G(\bar{z}^{\tiny{(1)}}) - \theta\bigr)2\Bigl(\sum\limits_{k=1}^{k\le u_1}\bar z^{\tiny{(1)}}_k{w_{j,k}^{\tiny{(1)}}}\Bigr) \bar x_i & \text{if} \space \bar{h}^{\tiny{(0)}}_j \ge 0 \\
+    0 & \text{if} \space \bar{h}^{\tiny{(0)}}_j \lt 0  \\
+\end{cases}
 $
