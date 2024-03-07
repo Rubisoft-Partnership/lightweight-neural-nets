@@ -35,7 +35,7 @@ $a^{\tiny{(1)}}:\R^{u_1}\rightarrow\R^{u_1}: \text{output activation function (R
 
 $G(z):\R^{u_1}\rightarrow\R=\sum_{i=1}^{i\le u_1}(z^{\tiny{(1)}}_{i})^2$
 
-$L(z, \bar{z}):\R^{u_1 \times u_1}\rightarrow\R=\zeta(\theta - G(z^{\tiny{(1)}})) + \zeta(G(\bar{z}^{\tiny{(1)}})-\theta)$
+$L(z, \bar{z}):\R^{u_1 \times u_1}\rightarrow\R=\zeta\bigl(\theta - G(z^{\tiny{(1)}})\bigr) + \zeta\bigl(G(\bar{z}^{\tiny{(1)}})-\theta)$
 
 
 ### Forward pass
@@ -72,8 +72,8 @@ $
 w^{\tiny{(1)}}_{i, j} =
 w^{\tiny{(1)}}_{i, j} -\alpha\frac{\delta L}{\delta w^{\tiny{(1)}}_{i, j}} =
 w^{\tiny{(1)}}_{i, j} -
-\alpha(\frac{\delta L_{pos}}{\delta w^{\tiny{(1)}}_{i, j}} + 
-\frac{\delta L_{neg}}{\delta w^{\tiny{(1)}}_{i, j}})
+\alpha\Bigl(\frac{\delta L_{pos}}{\delta w^{\tiny{(1)}}_{i, j}} + 
+\frac{\delta L_{neg}}{\delta w^{\tiny{(1)}}_{i, j}}\Bigr)
 $
 
 $
@@ -85,7 +85,7 @@ $
 
 $
 \frac{\delta L_{pos}}{\delta G(z^{\tiny{(1)}})} =
--\sigma(\theta - G(z^{\tiny{(1)}}))
+-\sigma\bigl(\theta - G(z^{\tiny{(1)}})\bigr)
 $
 
 $
@@ -97,7 +97,7 @@ Using ReLu activation function:
 
 $
 \frac{\delta z^{\tiny{(1)}}_{j}}{\delta w^{\tiny{(1)}}_{i,j}} =
-\frac{\delta a^{\tiny{(1)}}(\sum_iw^{\tiny{(1)}}_{i,j} z^{\tiny{(0)}}_i)}{\delta w^{\tiny{(1)}}_{i,j}} =
+\frac{\delta a^{\tiny{(1)}}\bigl(\sum_iw^{\tiny{(1)}}_{i,j} z^{\tiny{(0)}}_i\bigr)}{\delta w^{\tiny{(1)}}_{i,j}} =
 \begin{cases}
     z^{\tiny{(0)}}_i & \text{if} \space h^{\tiny{(1)}}_j \ge 0 \\
     0 & \text{if} \space h^{\tiny{(1)}}_j \lt 0 \\
@@ -107,9 +107,46 @@ $
 $
 \frac{\delta L_{pos}}{\delta w^{\tiny{(1)}}_{i, j}} =
 \begin{cases}
-    -\sigma(\theta - G(z^{\tiny{(1)}}))2z^{\tiny{(1)}}_{j}z^{\tiny{(0)}}_i & \text{if} \space z^{\tiny{(1)}}_j \ge 0 \\
+    -\sigma\bigl(\theta - G(z^{\tiny{(1)}})\bigr)2z^{\tiny{(1)}}_{j}z^{\tiny{(0)}}_i & \text{if} \space z^{\tiny{(1)}}_j \ge 0 \\
     0 & \text{if} \space z^{\tiny{(1)}}_j \lt 0  \\
-\end{cases} \equiv
--\sigma(\theta - G(z^{\tiny{(1)}}))2z^{\tiny{(1)}}_{j}z^{\tiny{(0)}}_i
+\end{cases} =
+-\sigma\bigl(\theta - G(z^{\tiny{(1)}})\bigr)2z^{\tiny{(1)}}_{j}z^{\tiny{(0)}}_i
 $
 
+$
+\frac{\delta L_{neg}}{\delta w^{\tiny{(1)}}_{i, j}} = 
+\frac{\delta L_{neg}}{\delta G(\bar{z}^{\tiny{(1)}})}
+\frac{\delta G(\bar{z}^{\tiny{(1)}})}{\delta \bar{z}^{\tiny{(1)}}_{j}}
+\frac{\delta \bar{z}^{\tiny{(1)}}_{i}}{\delta w^{\tiny{(1)}}_{i,j}}
+$
+
+$
+\frac{\delta L_{neg}}{\delta G(\bar{z}^{\tiny{(1)}})} =
+\sigma\bigl(G(\bar{z}^{\tiny{(1)}}) - \theta\bigr)
+$
+
+$
+\frac{\delta L_{neg}}{\delta w^{\tiny{(1)}}_{i, j}} =
+\begin{cases}
+    \sigma\bigl(G(\bar{z}^{\tiny{(1)}}) - \theta\bigr)2\bar{z}^{\tiny{(1)}}_{j}\bar{z}^{\tiny{(0)}}_i & \text{if} \space \bar{z}^{\tiny{(1)}}_j \ge 0 \\
+    0 & \text{if} \space \bar{z}^{\tiny{(1)}}_j \lt 0  \\
+\end{cases} =
+\sigma\bigl(G(\bar{z}^{\tiny{(1)}}) - \theta\bigr)2z^{\tiny{(1)}}_{j}\bar{z}^{\tiny{(0)}}_i
+$
+
+
+Updating input layers weights:
+
+$
+w^{\tiny{(0)}}_{i, j} =
+w^{\tiny{(0)}}_{i, j} -\alpha\frac{\delta L}{\delta w^{\tiny{(0)}}_{i, j}} =
+w^{\tiny{(0)}}_{i, j} - 
+\alpha \Bigl(\frac{\delta L_{pos}}{\delta w^{\tiny{(0)}}_{i, j}} + \frac{\delta L_{neg}}{\delta w^{\tiny{(0)}}_{i, j}}\Bigr)
+$
+
+$
+\frac{\delta L_{pos}}{\delta w^{\tiny{(0)}}_{i, j}} =
+\frac{\delta L_{pos}}{\delta G(z^{\tiny{(1)}})}
+\frac{\delta G(z^{\tiny{(1)}})}{\delta z^{\tiny{(1)}}_{j??}}
+\frac{\delta z^{\tiny{(1)}}_{j??}}{\delta h^{\tiny{(1)}}}
+$
