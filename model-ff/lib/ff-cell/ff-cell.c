@@ -33,7 +33,6 @@ void fprop(const Tinn t, const double *const in);
 static void wbrand(const Tinn t);
 static double frand(void);
 
-
 // Generates inputs for inference given input and label
 void embed_label(double *sample, const double *in, const int label, const int insize, const int num_classes)
 {
@@ -80,7 +79,6 @@ void normalize_vector(double *output, int size)
 static void ffbprop(const Tinn t, const double *const in_pos, const double *const in_neg,
                     const double rate, const double g_pos, const double g_neg)
 {
-    // const double a = ffpderr(g_pos, g_neg, t.threshold);
     const double pderr_pos = -stable_sigmoid(t.threshold - g_pos);
     const double pderr_neg = stable_sigmoid(g_neg - t.threshold);
     log_debug("G_pos: %f, G_neg: %f", g_pos, g_neg);
@@ -106,7 +104,11 @@ static void ffbprop(const Tinn t, const double *const in_pos, const double *cons
         }
         // Correct weights in input to hidden layer.
         for (int j = 0; j < t.nips; j++)
-            t.w[i * t.nips + j] -= rate * ((pderr_neg * 2 * sum_neg * in_neg[j]) + (pderr_pos * 2 * sum_pos * in_pos[j]));
+        {
+            const double pos_adjust = h_buffer[i] > 0.0 ? pderr_pos * 2 * sum_pos * in_pos[j] : 0.0;
+            const double neg_adjust = h_buffer[i] > 0.0 ? pderr_neg * 2 * sum_neg * in_neg[j] : 0.0;
+            t.w[i * t.nips + j] -= rate * (pos_adjust + neg_adjust);
+        }
     }
 }
 
@@ -120,7 +122,7 @@ static double fferr(const double g_pos, const double g_neg, const double thresho
     // printf("g_pos: %f, g_neg: %f, err: %f\n", g_pos, g_neg, first_term + second_term);
     // return first_term + second_term;
     // equivalent to:
-    return logf(1.0 + expf(-g_pos + threshold)) + logf(1.0 + expf(g_neg - threshold));
+    return log(1.0 + exp(-g_pos + threshold)) + log(1.0 + exp(g_neg - threshold));
 }
 
 static double stable_sigmoid(double x)
