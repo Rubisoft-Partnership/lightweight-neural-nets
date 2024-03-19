@@ -117,9 +117,11 @@ static double fferr(const double g_pos, const double g_neg, const double thresho
 {
     double pos_exponent = -g_pos + threshold;
     double neg_exponent = g_neg - threshold;
+
+    // numerical stability fix:
     // double first_term = log(1 + exp(-fabs(pos_exponent))) + pos_exponent > 0.0 ? pos_exponent : 0.0;
     // double second_term = log(1 + exp(-fabs(neg_exponent))) + neg_exponent > 0.0 ? neg_exponent : 0.0;
-    // printf("g_pos: %f, g_neg: %f, err: %f\n", g_pos, g_neg, first_term + second_term);
+    // log_debug("g_pos: %f, g_neg: %f, err: %f", g_pos, g_neg, first_term + second_term);
     // return first_term + second_term;
     // equivalent to:
     return log(1.0 + exp(-g_pos + threshold)) + log(1.0 + exp(g_neg - threshold));
