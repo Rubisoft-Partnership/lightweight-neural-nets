@@ -37,7 +37,7 @@ void embed_label(double *sample, const double *in, const int label, const int in
 {
     memcpy(sample, in, insize * sizeof(*in));
     memset(&sample[insize - num_classes], 0, num_classes * sizeof(*sample));
-    sample[insize - label] = 1.0;
+    sample[insize - num_classes + label] = 1.0;
 }
 
 // Trains a tinn with an input and target output with a learning rate. Returns target to output error.
