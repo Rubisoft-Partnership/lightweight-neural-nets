@@ -13,10 +13,10 @@ const int layers_sizes[] = {DATA_FEATURES, 100};
 
 const int layers_number = sizeof(layers_sizes) / sizeof(layers_sizes[0]);
 // Hyper Parameters.
-double rate = 0.03f;
-const double anneal = 0.9999f;
-const int iterations = 10;
-const double threshold = 4.0f;
+double rate = 0.03;
+const double anneal = 0.9999;
+const int iterations = 5;
+const double threshold = 4.0;
 
 Data data;
 FFNet ffnet;
@@ -44,7 +44,6 @@ static void train_loop(void)
         double error = 0.0f;
         for (int j = 0; j < data.rows; j++)
         {
-            log_debug("Sample %d", j);
             generate_samples(data, j, samples);
             error = fftrainnet(ffnet, samples.pos, samples.neg, rate);
             log_debug("Error %f", error);
@@ -60,19 +59,20 @@ void evaluate(void)
 {
     log_info("Testing FFNet...");
     for (int i = 0; i < 100; i++)
-    {
+    {   
         double *const in = data.in[i];
         double *const tg = data.tg[i];
-        const int pd = ffpredictnet(ffnet, in, nops, nips);
-        // Prints target.
-        for (int i = 0; i < data.num_class; i++)
+        int gt = -1;
+        for (int j = 0; j < data.num_class; j++)
         {
-            if (tg[i] == 1.0f)
+            if (tg[j] == 1.0f)
             {
-                printf("GT: %d, prediction:%d\n", i, pd);
+                gt = j;
                 break;
             }
         }
+        const int pd = ffpredictnet(ffnet, in, nops, nips);
+        printf("Prediction: %d, ground truth: %d\n", pd, gt);
     }
 }
 
