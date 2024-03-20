@@ -32,6 +32,8 @@ with open("digits.txt", "w") as f:
         one_hot[target] = 1
         # Map digit to 0-1 range
         digit /= 16
+        # Add padding for label embedding
+        padding = " 0 0 0 0 0 0 0 0 0 0"
         # Write to the file space separated features and one-hot encoding
-        f.write(" ".join(map(str, digit)) + " " + " ".join(map(str, one_hot)) + "\n")
-
+        f.write(" ".join(map(str, digit)) + padding + " " + " ".join(map(str, one_hot)) + "\n")
+print("Done")

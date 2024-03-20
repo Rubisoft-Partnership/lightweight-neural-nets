@@ -17,7 +17,7 @@
 #define DATA_MNIST_PATH "mnist/mnist_train.txt"
 
 #define DATA_DIGITS_CLASSES 10
-#define DATA_DIGITS_FEATURES 64
+#define DATA_DIGITS_FEATURES 74
 #define DATA_DIGITS_PATH "digits/digits.txt"
 
 #ifdef DATA_MNIST
