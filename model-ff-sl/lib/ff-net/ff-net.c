@@ -59,8 +59,8 @@ int ffpredictnet(const FFNet ffnet, const double *in, const int num_classes, con
     double *netinput = (double *)malloc((insize) * sizeof(double));
     double goodnesses[MAX_CLASSES];
     // For debugging.
-    // for (int i = 0; i < num_classes; i++)
-    //     goodnesses[i] = -1.0;
+    for (int i = 0; i < num_classes; i++)
+        goodnesses[i] = 0.0;
 
     for (int label = 0; label < num_classes; label++)
     {
