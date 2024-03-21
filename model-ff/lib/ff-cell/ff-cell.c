@@ -115,8 +115,8 @@ static void ffbprop(const Tinn t, const double *const in_pos, const double *cons
 // Computes error using the FFLoss function.
 static double fferr(const double g_pos, const double g_neg, const double threshold)
 {
-    double pos_exponent = -g_pos + threshold;
-    double neg_exponent = g_neg - threshold;
+    // double pos_exponent = -g_pos + threshold;
+    // double neg_exponent = g_neg - threshold;
 
     // numerical stability fix:
     // double first_term = log(1 + exp(-fabs(pos_exponent))) + pos_exponent > 0.0 ? pos_exponent : 0.0;

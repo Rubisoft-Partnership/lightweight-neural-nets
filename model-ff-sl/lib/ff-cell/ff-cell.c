@@ -21,7 +21,6 @@ extern double o_buffer[H_BUFFER_SIZE]; // outputs buffer
 static void ffbprop(const Tinn t, const double *const in_pos, const double *const in_neg,
                     const double rate, const double g_pos, const double g_neg);
 static double fferr(const double g_pos, const double g_neg, const double threshold);
-static double ffpderr(const double g_pos, const double g_neg, const double threshold);
 double goodness(const double *vec, const int size);
 static double stable_sigmoid(double x);
 
@@ -136,9 +135,6 @@ static void ffbprop(const Tinn t, const double *const in_pos, const double *cons
 // Computes error using the FFLoss function.
 static double fferr(const double g_pos, const double g_neg, const double threshold)
 {
-    double pos_exponent = -g_pos + threshold;
-    double neg_exponent = g_neg - threshold;
-
     // numerical stability fix:
     // double first_term = log(1 + exp(-fabs(pos_exponent))) + pos_exponent > 0.0 ? pos_exponent : 0.0;
     // double second_term = log(1 + exp(-fabs(neg_exponent))) + neg_exponent > 0.0 ? neg_exponent : 0.0;
