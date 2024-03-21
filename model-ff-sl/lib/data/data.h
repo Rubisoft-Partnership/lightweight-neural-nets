@@ -61,5 +61,6 @@ void parse(const Data data, char *line, const int row);
 void dfree(const Data d);
 void shuffle(const Data d);
 FFsamples new_samples(const int nips);
+void free_samples(FFsamples s);
 void generate_samples(const Data d, const int row, FFsamples s);
 Data build(void);

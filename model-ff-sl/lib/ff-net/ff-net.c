@@ -42,6 +42,13 @@ FFNet ffnetbuild(const int *layer_sizes, int num_layers, double (*act)(double), 
     return ffnet;
 }
 
+// Frees the memory of a FFNet.
+void ffnetfree(FFNet ffnet)
+{
+    for (int i = 0; i < ffnet.num_cells; i++)
+        xtfree(ffnet.layers[i]);
+}
+
 double fftrainnet(const FFNet ffnet, const double *const pos, const double *const neg, double rate)
 {
     double error = 0.0;

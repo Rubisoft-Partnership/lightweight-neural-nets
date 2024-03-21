@@ -64,6 +64,13 @@ FFsamples new_samples(const int nips)
     return s;
 }
 
+// Frees the memory of a FFsamples object
+void free_samples(FFsamples s)
+{
+    free(s.pos);
+    free(s.neg);
+}
+
 // Generates a positive and a negative sample for the FF algorithm by embedding the one-hot encoded target in the input
 void generate_samples(const Data d, const int row, FFsamples s)
 {

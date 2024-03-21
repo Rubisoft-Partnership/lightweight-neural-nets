@@ -53,13 +53,14 @@ static void train_loop(void)
                (double)rate);
         rate *= anneal;
     }
+    free_samples(samples);
 }
 
 void evaluate(void)
 {
     log_info("Testing FFNet...");
     for (int i = 0; i < 100; i++)
-    {   
+    {
         double *const in = data.in[i];
         double *const tg = data.tg[i];
         int gt = -1;
@@ -88,5 +89,7 @@ int main(void)
 
     dfree(data);
     close_log_file();
+    ffnetfree(ffnet);
+
     return 0;
 }
