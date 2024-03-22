@@ -42,6 +42,7 @@ void embed_label(double *sample, const double *in, const int label, const int in
 // Trains a tinn with an input and target output with a learning rate. Returns target to output error.
 double fftrain(const Tinn t, const double *const pos, const double *const neg, double rate)
 {
+    increase_indent();
     // Positive pass.
     fprop(t, pos);
     // Copy positive activation output.
@@ -68,6 +69,7 @@ double fftrain(const Tinn t, const double *const pos, const double *const neg, d
     }
     double mean_weights = sum_weights / t.nw;
     double std_weights = sqrt((sum_weights_squared / t.nw) - (mean_weights * mean_weights));
+    decrease_indent();
     log_info("Mean weight value: %f\n", mean_weights);
     log_info("Standard deviation of weight value: %f\n", std_weights);
 
@@ -222,7 +224,9 @@ Tinn xtbuild(const int nips, const int nops, double (*act)(double), double (*pda
     t.pdact = pdact;
     t.threshold = threshold;
     wbrand(t);
+    increase_indent();
     log_debug("Tinn built with %d inputs, %d outputs, and %d weights", nips, nops, t.nw);
+    decrease_indent();
     return t;
 }
 

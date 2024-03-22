@@ -12,6 +12,7 @@
 
 static LogLevel currentLogLevel;
 static FILE *globalLogFile;
+static int indentLevel = 0;
 
 // Log functions
 void log_message(LogLevel level, const char *format, va_list args);
@@ -81,6 +82,10 @@ void log_message(LogLevel level, const char *format, va_list args)
         levelStr = "ERROR";
         break;
     }
+    for (int i = 0; i < indentLevel; i++)
+    {
+        fprintf(globalLogFile, "\t");
+    }
     fprintf(globalLogFile, "[%s] ", levelStr);
     vfprintf(globalLogFile, format, args);
     fprintf(globalLogFile, "\n");
@@ -117,4 +122,14 @@ void log_error(const char *format, ...)
     va_start(args, format);
     log_message(LOG_ERROR, format, args);
     va_end(args);
+}
+
+void increase_indent(void)
+{
+    indentLevel++;
+}
+
+void decrease_indent(void)
+{
+    indentLevel--;
 }

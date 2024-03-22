@@ -21,3 +21,5 @@ void log_debug(const char *format, ...);
 void log_info(const char *format, ...);
 void log_warn(const char *format, ...);
 void log_error(const char *format, ...);
+void increase_indent(void);
+void decrease_indent(void);
