@@ -17,7 +17,7 @@ CC = gcc
 
 METRICS_BASEPATH = $(PROJECT_BASEPATH)/../metrics/lib
 
-SRC = src/main.c lib/ff-net/ff-net.c lib/ff-cell/ff-cell.c lib/logging/logging.c lib/data/data.c lib/utils/utils.c $(METRICS_BASEPATH)/confusion-matrix/confusion-matrix.c
+SRC = src/main.c lib/ff-net/ff-net.c lib/ff-cell/ff-cell.c lib/logging/logging.c lib/data/data.c lib/utils/utils.c lib/adam/adam.c $(METRICS_BASEPATH)/confusion-matrix/confusion-matrix.c
 
 INCLUDE = -I$(METRICS_BASEPATH)
 

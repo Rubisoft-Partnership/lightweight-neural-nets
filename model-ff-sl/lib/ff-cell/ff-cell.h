@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <adam/adam.h>
 
 // Size of buffer to store hidden activations and output activations.
 #define H_BUFFER_SIZE 1024
@@ -29,6 +30,8 @@ typedef struct
     double (*act)(const double);
     // Derivative of activation function.
     double (*pdact)(const double);
+    // Adam optimizer.
+    Adam adam;
 } Tinn;
 
 // Activation function.

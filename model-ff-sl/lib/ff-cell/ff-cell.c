@@ -63,7 +63,8 @@ double fftrain(const Tinn t, const double *const pos, const double *const neg, d
     // Calculate the average and standard deviation of weight values
     double sum_weights = 0.0;
     double sum_weights_squared = 0.0;
-    for (int i = 0; i < t.nw; i++) {
+    for (int i = 0; i < t.nw; i++)
+    {
         sum_weights += t.w[i];
         sum_weights_squared += t.w[i] * t.w[i];
     }
@@ -104,7 +105,7 @@ static void ffbprop(const Tinn t, const double *const in_pos, const double *cons
     for (int i = 0; i < t.nips; i++)
     {
         for (int j = 0; j < t.nops; j++)
-        {   
+        {
             // log_debug("Weight from unit [%d] to unit [%d]: %.17g", i, j, t.w[j * t.nips + i]);
             const double gradient_pos = pdloss_pos * 2.0 * o_buffer[j] * in_pos[i];
             const double gradient_neg = pdloss_neg * 2.0 * t.o[j] * in_neg[i];
@@ -114,7 +115,8 @@ static void ffbprop(const Tinn t, const double *const in_pos, const double *cons
             // log_debug("Weight update: %.17g", weight_update);
             // log_debug("Weight after correction: %.17g", t.w[j * t.nips + i]);
 
-            if (weight_update != 0.0) {
+            if (weight_update != 0.0)
+            {
                 updated_weights++;
                 sum_weight_update += weight_update;
                 sum_weight_update_squared += weight_update * weight_update;
@@ -125,7 +127,8 @@ static void ffbprop(const Tinn t, const double *const in_pos, const double *cons
     // Log statistics about weight updates.
     double mean_weight_update = 0.0;
     double std_weight_update = 0.0;
-    if (updated_weights != 0) {
+    if (updated_weights != 0)
+    {
         mean_weight_update = sum_weight_update / updated_weights;
         std_weight_update = sqrt((sum_weight_update_squared / updated_weights) - (mean_weight_update * mean_weight_update));
     }
@@ -196,7 +199,7 @@ double pdsigmoid(const double a)
 
 // Performs forward propagation.
 void fprop(const Tinn t, const double *const in)
-{   
+{
     double debug_sum = 0.0;
     log_debug("Computing forward propagation for Tinn with %d inputs and %d outputs", t.nips, t.nops);
     // Calculate hidden layer neuron values.
@@ -215,6 +218,11 @@ void fprop(const Tinn t, const double *const in)
 Tinn xtbuild(const int nips, const int nops, double (*act)(double), double (*pdact)(double), const double threshold)
 {
     Tinn t;
+
+    // Adam optimizer
+    t.adam = adam_create(0.9, 0.999, nips * nops);  
+    ///TODO: Fix hardcoding of Adam hyperparameters
+
     t.nw = nips * nops;                         // total number of weights
     t.w = (double *)calloc(t.nw, sizeof(*t.w)); // weights (both [intput to hidden] and [hidden to output])
     t.o = (double *)calloc(nops, sizeof(*t.o)); // output neurons
