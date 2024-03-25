@@ -4,6 +4,7 @@
 #include <ff-net/ff-net.h>
 #include <data/data.h>
 #include <logging/logging.h>
+#include <utils/utils.h>
 
 #include <confusion-matrix/confusion-matrix.h>
 
@@ -24,7 +25,7 @@ FFNet ffnet;
 
 static void setup(void)
 {
-    srand(0); // set random seed to 0
+    set_seed(time(NULL));
     set_log_level(LOG_DEBUG);
     open_log_file_with_timestamp();
 

@@ -13,6 +13,7 @@
 #include <stdarg.h>
 
 #include <logging/logging.h>
+#include <utils/utils.h>
 
 // Buffer to store activations and output activations for the positive pass.
 extern double o_buffer[H_BUFFER_SIZE]; // outputs buffer
@@ -128,7 +129,7 @@ static void ffbprop(const Tinn t, const double *const in_pos, const double *cons
             double weight_update = rate * m_hat / (sqrt(v_hat) + 1e-8);
 
             // Update the weight
-            // weight_update = rate * gradient;
+            weight_update = rate * gradient;
             t.w[wheight_index] -= weight_update;
             // log_debug("Weight update: %.17g", weight_update);
             // log_debug("Weight after correction: %.17g", t.w[j * t.nips + i]);
@@ -286,12 +287,9 @@ static void wbrand(Tinn t)
     t.b = frand() - 0.5;
 }
 
-static int seed=0;
 
 // Returns doubleing point random from 0.0 - 1.0.
 static double frand(void)
 {
-    srand(seed);
-    seed = rand();
-    return rand() / (double)RAND_MAX;
+    return get_random() / (double)RAND_MAX;
 }

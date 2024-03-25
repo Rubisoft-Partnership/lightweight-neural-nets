@@ -45,3 +45,20 @@ double **new2d(const int rows, const int cols)
         row[r] = (double *)malloc((cols) * sizeof(double));
     return row;
 }
+
+static int seed = 0;
+
+
+void set_seed(const int s)
+{
+    seed = s;
+}
+
+// Generate a random number
+int get_random(void)
+{
+    srand(seed);
+    seed = rand();
+    return rand();
+}
+

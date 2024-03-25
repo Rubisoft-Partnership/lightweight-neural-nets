@@ -38,15 +38,12 @@ void dfree(const Data d)
     free(d.tg);
 }
 
-static seed = 0;
 // Randomly shuffles a data object.
 void shuffle(const Data d)
 {
     for (int a = 0; a < d.rows; a++)
     {
-        srand(seed);
-        seed = rand();
-        const int b = rand() % d.rows;
+        const int b = get_random() % d.rows;
         double *ot = d.tg[a];
         double *it = d.in[a];
         // Swap output.
@@ -74,7 +71,6 @@ void free_samples(FFsamples s)
     free(s.neg);
 }
 
-
 // Generates a positive and a negative sample for the FF algorithm by embedding the one-hot encoded target in the input
 void generate_samples(const Data d, const int row, FFsamples s)
 {
@@ -88,9 +84,7 @@ void generate_samples(const Data d, const int row, FFsamples s)
         if (s.pos[i] == 1.0f)
             one_pos = i - (d.feature_len - d.num_class);
     // Generate a random label for the negative sample that is not the same as the positive sample's label
-    srand(seed);
-    seed = rand();
-    int step = 1 + rand() % (d.num_class - 1);
+    int step = 1 + get_random() % (d.num_class - 1);
     int neg_label = (one_pos + step) % d.num_class;
     // Set the negative sample's label to 1.0f
     s.neg[(d.feature_len - d.num_class) + neg_label] = 1.0f;
