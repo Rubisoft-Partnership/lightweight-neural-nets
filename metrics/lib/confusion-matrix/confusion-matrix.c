@@ -7,65 +7,132 @@
 static int confusionMatrix[NUM_CLASSES][NUM_CLASSES];
 
 // Initialize the confusion matrix
-void initConfusionMatrix() {
-    for (int i = 0; i < NUM_CLASSES; ++i) {
-        for (int j = 0; j < NUM_CLASSES; ++j) {
+void initConfusionMatrix()
+{
+    for (int i = 0; i < NUM_CLASSES; ++i)
+    {
+        for (int j = 0; j < NUM_CLASSES; ++j)
+        {
             confusionMatrix[i][j] = 0;
         }
     }
 }
 
 // Add prediction data to the confusion matrix
-void addPrediction(int true_label, int predicted_label) {
-    if (true_label >= 0 && true_label < NUM_CLASSES && predicted_label >= 0 && predicted_label < NUM_CLASSES) {
+void addPrediction(int true_label, int predicted_label)
+{
+    if (true_label >= 0 && true_label < NUM_CLASSES && predicted_label >= 0 && predicted_label < NUM_CLASSES)
+    {
         confusionMatrix[true_label][predicted_label]++;
-    } else {
+    }
+    else
+    {
         printf("Error: Label indices out of bounds.\n");
     }
 }
 
 // Pretty print the normalized confusion matrix
-void printNormalizedConfusionMatrix() {
+void printNormalizedConfusionMatrix()
+{
+    int width = 7; // Width of each cell in the table
     printf("Normalized Confusion Matrix:\n");
-    printf("  ");
-    for (int i = 0; i < NUM_CLASSES; ++i) {
-        printf("%5d", i);
+
+    // Print top header
+    printf("  *  ");
+    for (int i = 0; i < NUM_CLASSES; ++i)
+    {
+        printf("|  %-*d", width - 3, i);
     }
-    printf("\n\n");
-    
-    for (int i = 0; i < NUM_CLASSES; ++i) {
-        // Calculate the sum for normalization
+    printf("|\n");
+
+    // Print header separator
+    printf("-----");
+    for (int i = 0; i < NUM_CLASSES; ++i)
+    {
+        for (int j = 0; j < width; ++j)
+            printf("-");
+    }
+    printf("|\n");
+
+    for (int i = 0; i < NUM_CLASSES; ++i)
+    {
+        // Calculate sum for normalization
         int sum = 0;
-        for (int j = 0; j < NUM_CLASSES; ++j) {
+        for (int j = 0; j < NUM_CLASSES; ++j)
+        {
             sum += confusionMatrix[i][j];
         }
 
-        printf("%d   ", i);
-        for (int j = 0; j < NUM_CLASSES; ++j) {
-            if (sum > 0) {
-                printf("%.2f ", (float)confusionMatrix[i][j] / sum);
-            } else {
-                printf("0.00 "); // Handle the case where sum is 0 to avoid division by zero
+        // Print row label
+        printf("  %d  | ", i);
+
+        // Print row data
+        for (int j = 0; j < NUM_CLASSES; ++j)
+        {
+            if (sum > 0)
+            {
+                printf("%-*.*f| ", width - 2, 2, (float)confusionMatrix[i][j] / sum);
+            }
+            else
+            {
+                printf("%-*s| ", width - 2, "0.00");
             }
         }
         printf("\n");
     }
+
+    // Print bottom separator
+    printf("-----");
+    for (int i = 0; i < NUM_CLASSES; ++i)
+    {
+        for (int j = 0; j < width; ++j)
+            printf("-");
+    }
+    printf("|\n");
 }
 
-// Pretty print the confusion matrix
-void printConfusionMatrix() {
+void printConfusionMatrix()
+{
+    int width = 7; // Adjust the cell width as needed
+
     printf("Confusion Matrix:\n");
-    printf("  ");
-    for (int i = 0; i < NUM_CLASSES; ++i) {
-        printf("%5d", i);
+
+    // Print top header
+    printf("  *  ");
+    for (int i = 0; i < NUM_CLASSES; ++i)
+    {
+        printf("|  %-*d", width - 3, i);
     }
-    printf("\n\n");
-    
-    for (int i = 0; i < NUM_CLASSES; ++i) {
-        printf("%d   ", i);
-        for (int j = 0; j < NUM_CLASSES; ++j) {
-            printf("%5d", confusionMatrix[i][j]);
+    printf("|\n");
+
+    // Print header separator
+    printf("-----");
+    for (int i = 0; i < NUM_CLASSES; ++i)
+    {
+        for (int j = 0; j < width; ++j)
+            printf("-");
+    }
+    printf("|\n");
+
+    for (int i = 0; i < NUM_CLASSES; ++i)
+    {
+        // Print row label
+        printf("  %d  | ", i);
+
+        // Print row data
+        for (int j = 0; j < NUM_CLASSES; ++j)
+        {
+            printf("%*d | ", width - 3, confusionMatrix[i][j]);
         }
         printf("\n");
     }
+
+    // Print bottom separator
+    printf("-----");
+    for (int i = 0; i < NUM_CLASSES; ++i)
+    {
+        for (int j = 0; j < width; ++j)
+            printf("-");
+    }
+    printf("|\n");
 }
