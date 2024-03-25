@@ -286,8 +286,12 @@ static void wbrand(Tinn t)
     t.b = frand() - 0.5;
 }
 
+static int seed=0;
+
 // Returns doubleing point random from 0.0 - 1.0.
 static double frand(void)
 {
+    srand(seed);
+    seed = rand();
     return rand() / (double)RAND_MAX;
 }
