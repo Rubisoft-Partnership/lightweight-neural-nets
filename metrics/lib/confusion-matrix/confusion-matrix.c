@@ -25,7 +25,7 @@ void addPrediction(int true_label, int predicted_label) {
 }
 
 // Pretty print the normalized confusion matrix
-void printConfusionMatrix() {
+void printNormalizedConfusionMatrix() {
     printf("Normalized Confusion Matrix:\n");
     printf("  ");
     for (int i = 0; i < NUM_CLASSES; ++i) {
@@ -47,6 +47,24 @@ void printConfusionMatrix() {
             } else {
                 printf("0.00 "); // Handle the case where sum is 0 to avoid division by zero
             }
+        }
+        printf("\n");
+    }
+}
+
+// Pretty print the confusion matrix
+void printConfusionMatrix() {
+    printf("Confusion Matrix:\n");
+    printf("  ");
+    for (int i = 0; i < NUM_CLASSES; ++i) {
+        printf("%5d", i);
+    }
+    printf("\n\n");
+    
+    for (int i = 0; i < NUM_CLASSES; ++i) {
+        printf("%d   ", i);
+        for (int j = 0; j < NUM_CLASSES; ++j) {
+            printf("%5d", confusionMatrix[i][j]);
         }
         printf("\n");
     }
