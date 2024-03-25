@@ -15,8 +15,7 @@ const int layers_sizes[] = {DATA_FEATURES, 500};
 
 const int layers_number = sizeof(layers_sizes) / sizeof(layers_sizes[0]);
 // Hyper Parameters.
-double rate = 0.005;
-const double anneal = 0.9999;
+double rate = 0.001;
 const int epochs = 5;
 const double threshold = 4.0;
 
@@ -60,11 +59,10 @@ static void train_loop(void)
              (double)rate);
          double epoch_time = (double)(clock() - epoch_start_time) / CLOCKS_PER_SEC;
          printf("\tEpoch time: %.2f seconds\n", epoch_time);
-        rate *= anneal;
         decrease_indent();
     }
     double total_time = (double)(clock() - start_time) / CLOCKS_PER_SEC;
-    printf("Total training time: %.2f seconds\n", total_time);
+    printf("Total training time: %.2f seconds\n\n", total_time);
     free_samples(samples);
 }
 
@@ -89,6 +87,7 @@ void evaluate(void)
         printf("Prediction: %d, ground truth: %d\n", pd, gt);
         addPrediction(gt, pd);
     }
+    printf("\n");
     printConfusionMatrix();
 }
 
