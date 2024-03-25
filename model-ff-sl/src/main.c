@@ -9,13 +9,13 @@
 // repositories usually don't include the input and output size in the data itself.
 const int nips = DATA_FEATURES;
 const int nops = DATA_CLASSES;
-const int layers_sizes[] = {DATA_FEATURES, 100};
+const int layers_sizes[] = {DATA_FEATURES, 1024, 1000, 500};
 
 const int layers_number = sizeof(layers_sizes) / sizeof(layers_sizes[0]);
 // Hyper Parameters.
-double rate = 0.03;
+double rate = 0.005;
 const double anneal = 0.9999;
-const int iterations = 5;
+const int epochs = 5;
 const double threshold = 4.0;
 
 Data data;
@@ -30,29 +30,38 @@ static void setup(void)
     data = build();
     ffnet = ffnetbuild(layers_sizes, layers_number, relu, pdrelu, threshold);
     log_debug("FFNet built with the following layers:");
+    increase_indent();
     for (int i = 0; i < ffnet.num_cells; i++)
         log_debug("Layer %d: %d inputs, %d outputs", i, ffnet.layers[i].nips, ffnet.layers[i].nops);
+    decrease_indent();
 }
 
 static void train_loop(void)
 {
+    clock_t start_time = clock();
     FFsamples samples = new_samples(nips);
-    for (int i = 0; i < iterations; i++)
+    for (int i = 0; i < epochs; i++)
     {
-        log_info("Iteration %d", i);
+        clock_t epoch_start_time = clock();
+        log_info("Epoch %d", i);
+        increase_indent();
         shuffle(data);
         double error = 0.0f;
         for (int j = 0; j < data.rows; j++)
         {
             generate_samples(data, j, samples);
             error = fftrainnet(ffnet, samples.pos, samples.neg, rate);
-            log_debug("Error %f", error);
         }
-        printf("error %.12f :: learning rate %f\n",
-               (double)error, // / i,
-               (double)rate);
+         printf("Loss %.12f :: learning rate %f\n",
+             (double)error, // / i,
+             (double)rate);
+         double epoch_time = (double)(clock() - epoch_start_time) / CLOCKS_PER_SEC;
+         printf("Epoch time: %.2f seconds\n", epoch_time);
         rate *= anneal;
+        decrease_indent();
     }
+    double total_time = (double)(clock() - start_time) / CLOCKS_PER_SEC;
+    printf("Total training time: %.2f seconds\n", total_time);
     free_samples(samples);
 }
 
