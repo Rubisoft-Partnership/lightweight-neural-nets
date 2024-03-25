@@ -12,7 +12,7 @@
 // repositories usually don't include the input and output size in the data itself.
 const int nips = DATA_FEATURES;
 const int nops = DATA_CLASSES;
-const int layers_sizes[] = {DATA_FEATURES, 500};
+const int layers_sizes[] = {DATA_FEATURES, 1024, 1000, 500};
 
 const int layers_number = sizeof(layers_sizes) / sizeof(layers_sizes[0]);
 // Hyper Parameters.
@@ -25,7 +25,8 @@ FFNet ffnet;
 
 static void setup(void)
 {
-    set_seed(time(NULL));
+    // Comment to repeat the same results
+    // set_seed(time(NULL));
     set_log_level(LOG_DEBUG);
     open_log_file_with_timestamp();
 

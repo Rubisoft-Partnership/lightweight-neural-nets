@@ -129,7 +129,7 @@ static void ffbprop(const Tinn t, const double *const in_pos, const double *cons
             double weight_update = rate * m_hat / (sqrt(v_hat) + 1e-8);
 
             // Update the weight
-            weight_update = rate * gradient;
+            // weight_update = rate * gradient;
             t.w[wheight_index] -= weight_update;
             // log_debug("Weight update: %.17g", weight_update);
             // log_debug("Weight after correction: %.17g", t.w[j * t.nips + i]);
