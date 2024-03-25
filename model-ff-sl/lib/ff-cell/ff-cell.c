@@ -92,6 +92,7 @@ void normalize_vector(double *output, int size)
 static void ffbprop(const Tinn t, const double *const in_pos, const double *const in_neg,
                     const double rate, const double g_pos, const double g_neg)
 {
+    // Calculate the partial derivative of the loss with respect to the goodness of the positive and negative pass
     const double pdloss_pos = -stable_sigmoid(t.threshold - g_pos);
     const double pdloss_neg = stable_sigmoid(g_neg - t.threshold);
     log_debug("G_pos: %f, G_neg: %f", g_pos, g_neg);
@@ -106,12 +107,29 @@ static void ffbprop(const Tinn t, const double *const in_pos, const double *cons
     {
         for (int j = 0; j < t.nops; j++)
         {
+            int wheight_index = j * t.nips + i;
             // log_debug("Weight from unit [%d] to unit [%d]: %.17g", i, j, t.w[j * t.nips + i]);
+
+            // Calculate the gradient of the loss with respect to the weight for the positive and negative pass
             const double gradient_pos = pdloss_pos * 2.0 * o_buffer[j] * in_pos[i];
             const double gradient_neg = pdloss_neg * 2.0 * t.o[j] * in_neg[i];
+            const double gradient = gradient_pos + gradient_neg;
             // log_debug("Positive correction gradient_pos: %.10g, negative correction gradient_neg: %.10g", gradient_pos, gradient_neg);
-            double weight_update = rate * (gradient_pos + gradient_neg);
-            t.w[j * t.nips + i] -= weight_update;
+
+            // Update the Adam optimizer
+            t.adam.m[wheight_index] = t.adam.beta1 * t.adam.m[wheight_index] + (1 - t.adam.beta1) * gradient;
+            t.adam.v[wheight_index] = t.adam.beta2 * t.adam.v[wheight_index] + (1 - t.adam.beta2) * gradient * gradient;
+
+            // Bias correction
+            const double m_hat = t.adam.m[wheight_index] / (1 - pow(t.adam.beta1, t.adam.t));
+            const double v_hat = t.adam.v[wheight_index] / (1 - pow(t.adam.beta2, t.adam.t));
+
+            // Weight update using Adam optimizer
+            double weight_update = rate * m_hat / (sqrt(v_hat) + 1e-8);
+
+            // Update the weight
+            // weight_update = rate * gradient;
+            t.w[wheight_index] -= weight_update;
             // log_debug("Weight update: %.17g", weight_update);
             // log_debug("Weight after correction: %.17g", t.w[j * t.nips + i]);
 
@@ -220,8 +238,8 @@ Tinn xtbuild(const int nips, const int nops, double (*act)(double), double (*pda
     Tinn t;
 
     // Adam optimizer
-    t.adam = adam_create(0.9, 0.999, nips * nops);  
-    ///TODO: Fix hardcoding of Adam hyperparameters
+    t.adam = adam_create(0.9, 0.999, nips * nops);
+    /// TODO: Fix hardcoding of Adam hyperparameters
 
     t.nw = nips * nops;                         // total number of weights
     t.w = (double *)calloc(t.nw, sizeof(*t.w)); // weights (both [intput to hidden] and [hidden to output])

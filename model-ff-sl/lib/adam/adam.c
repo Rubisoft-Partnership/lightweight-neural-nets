@@ -6,6 +6,9 @@ Adam adam_create(const double beta1, const double beta2, const int size)
     Adam adam;
     adam.beta1 = beta1;
     adam.beta2 = beta2;
+
+    // Initialize time step to 1
+    adam.t = 1;
     
     // Allocate memory for m and v
     adam.m = malloc(size * sizeof(double));
@@ -16,4 +19,10 @@ Adam adam_create(const double beta1, const double beta2, const int size)
     memset(adam.v, 0, size * sizeof(double));
 
     return adam;
+}
+
+void adam_free(Adam adam)
+{
+    free(adam.m);
+    free(adam.v);
 }

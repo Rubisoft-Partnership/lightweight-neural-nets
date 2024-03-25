@@ -11,10 +11,18 @@ typedef struct
     double beta2;
 
     // m and v zero-initializalized vectors
+    // First moment estimate
     double *m;
+    // Second moment estimate
     double *v;
+
+    // Time step
+    int t;
 } Adam;
 
 // Adam constructor
 Adam adam_create(double beta1, double beta2, int size);
+
+// Adam destructor
+void adam_free(Adam adam);
 

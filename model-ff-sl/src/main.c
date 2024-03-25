@@ -45,7 +45,7 @@ static void train_loop(void)
     for (int i = 0; i < epochs; i++)
     {
         clock_t epoch_start_time = clock();
-        printf("Epoch %d", i);
+        printf("Epoch %d\n", i);
         log_info("Epoch %d", i);
         increase_indent();
         shuffle(data);
