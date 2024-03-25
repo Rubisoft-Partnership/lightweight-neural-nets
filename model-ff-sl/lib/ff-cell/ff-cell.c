@@ -91,11 +91,11 @@ void normalize_vector(double *output, int size)
 static void ffbprop(const Tinn t, const double *const in_pos, const double *const in_neg,
                     const double rate, const double g_pos, const double g_neg)
 {
-    const double pderr_pos = -stable_sigmoid(t.threshold - g_pos);
-    const double pderr_neg = stable_sigmoid(g_neg - t.threshold);
+    const double pdloss_pos = -stable_sigmoid(t.threshold - g_pos);
+    const double pdloss_neg = stable_sigmoid(g_neg - t.threshold);
     log_debug("G_pos: %f, G_neg: %f", g_pos, g_neg);
     log_debug("Loss: %.17g", fferr(g_pos, g_neg, t.threshold));
-    log_debug("Partial derivative pos: %.17g, neg: %.17g", pderr_pos, pderr_neg);
+    log_debug("Partial derivative of the loss with resect to the goodness pos: %.17g, neg: %.17g", pdloss_pos, pdloss_neg);
 
     int updated_weights = 0;
     double sum_weight_update = 0.0;
@@ -106,10 +106,10 @@ static void ffbprop(const Tinn t, const double *const in_pos, const double *cons
         for (int j = 0; j < t.nops; j++)
         {   
             // log_debug("Weight from unit [%d] to unit [%d]: %.17g", i, j, t.w[j * t.nips + i]);
-            const double b_pos = pderr_pos * 2.0 * o_buffer[j] * in_pos[i];
-            const double b_neg = pderr_neg * 2.0 * t.o[j] * in_neg[i];
-            // log_debug("Positive correction b_pos: %.10g, negative correction b_neg: %.10g", b_pos, b_neg);
-            double weight_update = rate * (b_pos + b_neg);
+            const double gradient_pos = pdloss_pos * 2.0 * o_buffer[j] * in_pos[i];
+            const double gradient_neg = pdloss_neg * 2.0 * t.o[j] * in_neg[i];
+            // log_debug("Positive correction gradient_pos: %.10g, negative correction gradient_neg: %.10g", gradient_pos, gradient_neg);
+            double weight_update = rate * (gradient_pos + gradient_neg);
             t.w[j * t.nips + i] -= weight_update;
             // log_debug("Weight update: %.17g", weight_update);
             // log_debug("Weight after correction: %.17g", t.w[j * t.nips + i]);
