@@ -15,10 +15,14 @@ LDFLAGS = -lm
 
 CC = gcc
 
-SRC = src/main.c lib/ff-net/ff-net.c lib/ff-cell/ff-cell.c lib/logging/logging.c lib/data/data.c lib/utils/utils.c src/confusion-matrix/confusion-matrix.c
+METRICS_BASEPATH = $(PROJECT_BASEPATH)/../metrics/lib
+
+SRC = src/main.c lib/ff-net/ff-net.c lib/ff-cell/ff-cell.c lib/logging/logging.c lib/data/data.c lib/utils/utils.c $(METRICS_BASEPATH)/confusion-matrix/confusion-matrix.c
+
+INCLUDE = -I$(METRICS_BASEPATH)
 
 all:
-	$(CC) -o $(BIN) $(SRC) $(CFLAGS) $(DATASET_DEF) $(LDFLAGS)
+	$(CC) -o $(BIN) $(SRC) $(CFLAGS) $(DATASET_DEF) $(LDFLAGS) $(INCLUDE)
 
 run:
 	./$(BIN)

@@ -5,7 +5,7 @@
 #include <data/data.h>
 #include <logging/logging.h>
 
-#include "confusion-matrix/confusion-matrix.h"
+#include <confusion-matrix/confusion-matrix.h>
 
 // Input and output size is harded coded here as machine learning
 // repositories usually don't include the input and output size in the data itself.
