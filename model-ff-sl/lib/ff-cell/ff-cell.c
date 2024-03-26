@@ -261,6 +261,7 @@ void xtfree(const Tinn t)
 {
     free(t.w);
     free(t.o);
+    adam_free(t.adam);
 }
 
 // Prints an array of doubles. Useful for printing predictions.
