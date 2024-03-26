@@ -1,7 +1,7 @@
 BIN = target/main.out
 PROJECT_BASEPATH = $(realpath .)
 
-CFLAGS = -std=c99 -Wall -Wextra -pedantic -Ofast -flto -march=native -Ilib -DPROJECT_BASEPATH=\"$(PROJECT_BASEPATH)\"
+CFLAGS = -std=c99 -Wall -Wextra -pedantic -Ofast -flto -march=native -Ilib -DPROJECT_BASEPATH=\"$(PROJECT_BASEPATH)\" -g
 
 ifeq ($(DATASET),)
 	DATASET_DEF =

@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -I ../tiny-dnn
+CFLAGS = -I ../tiny-dnn -Wall
 DEPS = src/run.cpp
 EXECNAME = target/main.out
 

@@ -5,3 +5,10 @@ model-bp/models/*
 .vscode/*
 build
 *.csv
+*.tinn
+*.log
+*.o
+
+# Python venv files
+
+dataset/digit_dataset/venv/*
