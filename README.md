@@ -9,29 +9,29 @@ Model-ff uses Forward-Forward algorithm to train a neural network.
 
 ### Definitions
 
-$\theta \in \R: \text{threshold}$
+$\theta \in \mathbb{R}: \text{threshold}$
 
-$\alpha \in \R: \text{learning rate}$
+$\alpha \in \mathbb{R}: \text{learning rate}$
 
-$f \in\N: \text{features}, l\in\N: \text{classes}$
+$f \in\mathbb{N}: \text{features}, l\in\mathbb{N}: \text{classes}$
 
 $\mathcal{L} = \{l_1, ..., l_l\}: \text{set of labels}$
 
-$o\in\N: \text{output layer size}$
+$o\in\mathbb{N}: \text{output layer size}$
 
-$x\in\R^f: \text{sample}$
+$x\in\mathbb{R}^f: \text{sample}$
 
-$y\in\R^l: \text{label}$
+$y\in\mathbb{R}^l: \text{label}$
 
-$\eta:\R^f\times\R^l\rightarrow\R^f: \text{embed function}$
+$\eta:\mathbb{R}^f\times\mathbb{R}^l\rightarrow\mathbb{R}^f: \text{embed function}$
 
-$W\in\R^{f\times u_0}: \text{weight matrix from input to output layer}$
+$W\in\mathbb{R}^{f\times o}: \text{weight matrix from input to output layer}$
 
-$a:\R^{f}\rightarrow\R^{o}: \text{activation function (ReLu)}$
+$a:\mathbb{R}^{f}\rightarrow\mathbb{R}^{o}: \text{activation function (ReLu)}$
 
-$G(z):\R^{o}\rightarrow\R=\sum\limits_{i=1}^{i\le o}(z)^2$
+$G(z):\mathbb{R}^{o}\rightarrow\mathbb{R}=\sum\limits_{i=1}^{i\le o}(z_i)^2$
 
-$L(z, \bar{z}):\R^{o \times o}\rightarrow\R=\zeta\bigl(\theta - G(z)\bigr) + \zeta\bigl(G(\bar{z})-\theta)$
+$L(z, \bar{z}):\mathbb{R}^{o \times o}\rightarrow\mathbb{R}=\zeta\bigl(\theta - G(z)\bigr) + \zeta\bigl(G(\bar{z})-\theta)$
 
 ### Forward pass
 
