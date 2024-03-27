@@ -12,7 +12,7 @@
 // repositories usually don't include the input and output size in the data itself.
 const int nips = DATA_FEATURES;
 const int nops = DATA_CLASSES;
-const int layers_sizes[] = {DATA_FEATURES, 1024, 1000, 500};
+const int layers_sizes[] = {DATA_FEATURES, 500};
 
 const int layers_number = sizeof(layers_sizes) / sizeof(layers_sizes[0]);
 // Hyper Parameters.
@@ -64,7 +64,7 @@ static void train_loop(void)
         decrease_indent();
     }
     double total_time = (double)(clock() - start_time) / CLOCKS_PER_SEC;
-    printf("Total training time: %.2f seconds\n\n", total_time);
+    printf("\nTotal training time: %.2f seconds\n\n", total_time);
     free_samples(samples);
 }
 
@@ -99,7 +99,7 @@ int main(void)
     train_loop();
     log_info("Training done");
 
-    printf("Predictions:\n");
+    printf("Testing...\n");
     evaluate();
 
     dfree(data);
