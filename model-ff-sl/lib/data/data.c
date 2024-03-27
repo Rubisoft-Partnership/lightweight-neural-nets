@@ -43,7 +43,7 @@ void shuffle(const Data d)
 {
     for (int a = 0; a < d.rows; a++)
     {
-        const int b = rand() % d.rows;
+        const int b = get_random() % d.rows;
         double *ot = d.tg[a];
         double *it = d.in[a];
         // Swap output.
@@ -84,7 +84,7 @@ void generate_samples(const Data d, const int row, FFsamples s)
         if (s.pos[i] == 1.0f)
             one_pos = i - (d.feature_len - d.num_class);
     // Generate a random label for the negative sample that is not the same as the positive sample's label
-    int step = 1 + rand() % (d.num_class - 1);
+    int step = 1 + get_random() % (d.num_class - 1);
     int neg_label = (one_pos + step) % d.num_class;
     // Set the negative sample's label to 1.0f
     s.neg[(d.feature_len - d.num_class) + neg_label] = 1.0f;

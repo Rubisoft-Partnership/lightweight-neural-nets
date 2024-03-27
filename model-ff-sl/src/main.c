@@ -4,6 +4,7 @@
 #include <ff-net/ff-net.h>
 #include <data/data.h>
 #include <logging/logging.h>
+#include <utils/utils.h>
 
 #include <confusion-matrix/confusion-matrix.h>
 
@@ -11,12 +12,11 @@
 // repositories usually don't include the input and output size in the data itself.
 const int nips = DATA_FEATURES;
 const int nops = DATA_CLASSES;
-const int layers_sizes[] = {DATA_FEATURES, 500};
+const int layers_sizes[] = {DATA_FEATURES, 1024, 1000, 500};
 
 const int layers_number = sizeof(layers_sizes) / sizeof(layers_sizes[0]);
 // Hyper Parameters.
-double rate = 0.005;
-const double anneal = 0.9999;
+double rate = 0.001;
 const int epochs = 5;
 const double threshold = 4.0;
 
@@ -25,7 +25,8 @@ FFNet ffnet;
 
 static void setup(void)
 {
-    srand(0); // set random seed to 0
+    // Comment to repeat the same results
+    // set_seed(time(NULL));
     set_log_level(LOG_DEBUG);
     open_log_file_with_timestamp();
 
@@ -45,7 +46,7 @@ static void train_loop(void)
     for (int i = 0; i < epochs; i++)
     {
         clock_t epoch_start_time = clock();
-        printf("Epoch %d", i);
+        printf("Epoch %d\n", i);
         log_info("Epoch %d", i);
         increase_indent();
         shuffle(data);
@@ -60,11 +61,10 @@ static void train_loop(void)
              (double)rate);
          double epoch_time = (double)(clock() - epoch_start_time) / CLOCKS_PER_SEC;
          printf("\tEpoch time: %.2f seconds\n", epoch_time);
-        rate *= anneal;
         decrease_indent();
     }
     double total_time = (double)(clock() - start_time) / CLOCKS_PER_SEC;
-    printf("Total training time: %.2f seconds\n", total_time);
+    printf("Total training time: %.2f seconds\n\n", total_time);
     free_samples(samples);
 }
 
@@ -88,6 +88,7 @@ void evaluate(void)
         const int pd = ffpredictnet(ffnet, in, nops, nips);
         addPrediction(gt, pd);
     }
+    printf("\n");
     printNormalizedConfusionMatrix();
 }
 
