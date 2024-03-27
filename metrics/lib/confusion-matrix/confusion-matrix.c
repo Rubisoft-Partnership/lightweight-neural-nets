@@ -35,7 +35,15 @@ void addPrediction(int true_label, int predicted_label)
 void printNormalizedConfusionMatrix()
 {
     int width = 7; // Width of each cell in the table
-    printf("Normalized Confusion Matrix:\n");
+    int sample_num = 0;
+    for (int i = 0; i < NUM_CLASSES; i++)
+    {
+        for (int j = 0; j < NUM_CLASSES; j++)
+        {
+            sample_num += confusionMatrix[i][j];
+        }
+    }
+    printf("Normalized confusion Matrix with %d samples:\n", sample_num);
 
     // Print top header
     printf("  *  ");

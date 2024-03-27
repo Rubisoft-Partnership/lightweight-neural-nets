@@ -89,7 +89,7 @@ void evaluate(void)
         printf("Prediction: %d, ground truth: %d\n", pd, gt);
         addPrediction(gt, pd);
     }
-    printConfusionMatrix();
+    printNormalizedConfusionMatrix();
 }
 
 int main(void)
