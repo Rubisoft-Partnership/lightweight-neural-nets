@@ -86,7 +86,6 @@ void evaluate(void)
             }
         }
         const int pd = ffpredictnet(ffnet, in, nops, nips);
-        printf("Prediction: %d, ground truth: %d\n", pd, gt);
         addPrediction(gt, pd);
     }
     printNormalizedConfusionMatrix();
