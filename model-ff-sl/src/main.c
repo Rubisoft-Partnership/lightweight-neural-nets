@@ -5,11 +5,13 @@
 #include <data/data.h>
 #include <logging/logging.h>
 
+#include <confusion-matrix/confusion-matrix.h>
+
 // Input and output size is harded coded here as machine learning
 // repositories usually don't include the input and output size in the data itself.
 const int nips = DATA_FEATURES;
 const int nops = DATA_CLASSES;
-const int layers_sizes[] = {DATA_FEATURES, 1024, 1000, 500};
+const int layers_sizes[] = {DATA_FEATURES, 500};
 
 const int layers_number = sizeof(layers_sizes) / sizeof(layers_sizes[0]);
 // Hyper Parameters.
@@ -43,6 +45,7 @@ static void train_loop(void)
     for (int i = 0; i < epochs; i++)
     {
         clock_t epoch_start_time = clock();
+        printf("Epoch %d", i);
         log_info("Epoch %d", i);
         increase_indent();
         shuffle(data);
@@ -52,11 +55,11 @@ static void train_loop(void)
             generate_samples(data, j, samples);
             error = fftrainnet(ffnet, samples.pos, samples.neg, rate);
         }
-         printf("Loss %.12f :: learning rate %f\n",
+         printf("\tLoss %.12f :: learning rate %f\n",
              (double)error, // / i,
              (double)rate);
          double epoch_time = (double)(clock() - epoch_start_time) / CLOCKS_PER_SEC;
-         printf("Epoch time: %.2f seconds\n", epoch_time);
+         printf("\tEpoch time: %.2f seconds\n", epoch_time);
         rate *= anneal;
         decrease_indent();
     }
@@ -68,6 +71,7 @@ static void train_loop(void)
 void evaluate(void)
 {
     log_info("Testing FFNet...");
+    initConfusionMatrix();
     for (int i = 0; i < 100; i++)
     {
         double *const in = data.in[i];
@@ -82,8 +86,9 @@ void evaluate(void)
             }
         }
         const int pd = ffpredictnet(ffnet, in, nops, nips);
-        printf("Prediction: %d, ground truth: %d\n", pd, gt);
+        addPrediction(gt, pd);
     }
+    printNormalizedConfusionMatrix();
 }
 
 int main(void)
