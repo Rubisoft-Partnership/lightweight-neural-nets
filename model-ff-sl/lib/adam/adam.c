@@ -26,3 +26,20 @@ void adam_free(Adam adam)
     free(adam.m);
     free(adam.v);
 }
+
+double weight_update(Adam adam, const double gradient, const int index)
+{
+    // Increment time step
+    adam.t++;
+
+    // Update the Adam optimizer
+    adam.m[index] = adam.beta1 * adam.m[index] + (1 - adam.beta1) * gradient;
+    adam.v[index] = adam.beta2 * adam.v[index] + (1 - adam.beta2) * gradient * gradient;
+
+    // Bias correction
+    const double m_hat = adam.m[index] / (1 - pow(adam.beta1, adam.t));
+    const double v_hat = adam.v[index] / (1 - pow(adam.beta2, adam.t));
+
+    // Weight update using Adam optimizer
+    return m_hat / (sqrt(v_hat) + 1e-8);
+}

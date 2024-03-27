@@ -117,16 +117,8 @@ static void ffbprop(const Tinn t, const double *const in_pos, const double *cons
             const double gradient = gradient_pos + gradient_neg;
             // log_debug("Positive correction gradient_pos: %.10g, negative correction gradient_neg: %.10g", gradient_pos, gradient_neg);
 
-            // Update the Adam optimizer
-            t.adam.m[wheight_index] = t.adam.beta1 * t.adam.m[wheight_index] + (1 - t.adam.beta1) * gradient;
-            t.adam.v[wheight_index] = t.adam.beta2 * t.adam.v[wheight_index] + (1 - t.adam.beta2) * gradient * gradient;
-
-            // Bias correction
-            const double m_hat = t.adam.m[wheight_index] / (1 - pow(t.adam.beta1, t.adam.t));
-            const double v_hat = t.adam.v[wheight_index] / (1 - pow(t.adam.beta2, t.adam.t));
-
             // Weight update using Adam optimizer
-            double weight_update = rate * m_hat / (sqrt(v_hat) + 1e-8);
+            const double weight_update = rate * adam_weight_update(t.adam, gradient, wheight_index);
 
             // Update the weight
             t.w[wheight_index] -= weight_update;
