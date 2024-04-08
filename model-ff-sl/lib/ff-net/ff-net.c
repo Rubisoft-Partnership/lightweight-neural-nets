@@ -21,9 +21,10 @@ double o_buffer[H_BUFFER_SIZE]; // outputs buffer for positive pass
 
 
 // Builds a FFNet by creating multiple Tinn objects. layer_sizes includes the number of inputs, hidden neurons, and outputs units.
-FFNet ffnetbuild(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double treshold)
+FFNet ffnetbuild(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double treshold, Loss loss_suite)
 {
     FFNet ffnet;
+    ffnet.loss_suite = loss_suite;
     ffnet.num_cells = num_layers - 1;
 
     log_info("Building FFNet with %d layers, %d ff cells", num_layers, ffnet.num_cells);
@@ -52,9 +53,9 @@ void ffnetfree(FFNet ffnet)
 double fftrainnet(const FFNet ffnet, const double *const pos, const double *const neg, double rate)
 {
     double error = 0.0;
-    error += fftrain(ffnet.layers[0], pos, neg, rate);
+    error += fftrain(ffnet.layers[0], pos, neg, rate, ffnet.loss_suite);
     for (int i = 1; i < ffnet.num_cells; i++)
-        error += fftrain(ffnet.layers[i], o_buffer, ffnet.layers[i - 1].o, rate);
+        error += fftrain(ffnet.layers[i], o_buffer, ffnet.layers[i - 1].o, rate, ffnet.loss_suite);
     // printf("error: %f\n", error);
     return error;
 }

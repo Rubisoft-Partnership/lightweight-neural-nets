@@ -14,19 +14,16 @@
 
 #include <logging/logging.h>
 #include <utils/utils.h>
+#include <losses/losses.h>
 
 // Buffer to store activations and output activations for the positive pass.
 extern double o_buffer[H_BUFFER_SIZE]; // outputs buffer
 
-// Function declarations.
-static void ffbprop(const Tinn t, const double *const in_pos, const double *const in_neg,
-                    const double rate, const double g_pos, const double g_neg);
-static double fferr(const double g_pos, const double g_neg, const double threshold);
-double goodness(const double *vec, const int size);
-static double stable_sigmoid(double x);
-
-// From Tinn.c, but modified
+// Forward pass for a FF cell.
 void fprop(const Tinn t, const double *const in);
+// Backward pass for a FF cell.
+static void ffbprop(const Tinn t, const double *const in_pos, const double *const in_neg,
+                    const double rate, const double g_pos, const double g_neg, const Loss loss_suite);
 
 // From Tinn.c
 static void wbrand(Tinn t);
@@ -41,7 +38,7 @@ void embed_label(double *sample, const double *in, const int label, const int in
 }
 
 // Trains a tinn with an input and target output with a learning rate. Returns target to output error.
-double fftrain(const Tinn t, const double *const pos, const double *const neg, double rate)
+double fftrain(const Tinn t, const double *const pos, const double *const neg, double rate, const Loss loss_suite)
 {
     increase_indent();
     // Positive pass.
@@ -55,7 +52,7 @@ double fftrain(const Tinn t, const double *const pos, const double *const neg, d
     double g_neg = goodness(t.o, t.nops);
 
     // Peforms gradient descent.
-    ffbprop(t, pos, neg, rate, g_pos, g_neg);
+    ffbprop(t, pos, neg, rate, g_pos, g_neg, loss_suite);
 
     // Normalize the output of the layer
     normalize_vector(t.o, t.nops);
@@ -76,7 +73,7 @@ double fftrain(const Tinn t, const double *const pos, const double *const neg, d
     log_info("Standard deviation of weight value: %f\n", std_weights);
 
     // printf("g_pos: %f, g_neg: %f, err: %f\n", g_pos, g_neg, fferr(g_pos, g_neg, t.threshold));
-    return fferr(g_pos, g_neg, t.threshold);
+    return loss_suite.loss(g_pos, g_neg, t.threshold);
 }
 
 void normalize_vector(double *output, int size)
@@ -91,13 +88,13 @@ void normalize_vector(double *output, int size)
 
 // Performs back propagation for the FF algorithm.
 static void ffbprop(const Tinn t, const double *const in_pos, const double *const in_neg,
-                    const double rate, const double g_pos, const double g_neg)
+                    const double rate, const double g_pos, const double g_neg, const Loss loss_suite)
 {
     // Calculate the partial derivative of the loss with respect to the goodness of the positive and negative pass
-    const double pdloss_pos = -stable_sigmoid(t.threshold - g_pos);
-    const double pdloss_neg = stable_sigmoid(g_neg - t.threshold);
+    const double pdloss_pos = loss_suite.pdloss_pos(g_pos, t.threshold);
+    const double pdloss_neg = loss_suite.pdloss_neg(g_neg, t.threshold);
     log_debug("G_pos: %f, G_neg: %f", g_pos, g_neg);
-    log_debug("Loss: %.17g", fferr(g_pos, g_neg, t.threshold));
+    log_debug("Loss: %.17g", loss_suite.loss(g_pos, g_neg, t.threshold));
     log_debug("Partial derivative of the loss with resect to the goodness pos: %.17g, neg: %.17g", pdloss_pos, pdloss_neg);
 
     int updated_weights = 0;
@@ -145,31 +142,6 @@ static void ffbprop(const Tinn t, const double *const in_pos, const double *cons
     log_debug("Updated weights: %d\n", updated_weights);
     log_debug("Mean weight update: %f\n", mean_weight_update);
     log_debug("Standard deviation of weight update: %f\n", std_weight_update);
-}
-
-// Computes error using the FFLoss function.
-static double fferr(const double g_pos, const double g_neg, const double threshold)
-{
-    // numerical stability fix:
-    // double first_term = log(1 + exp(-fabs(pos_exponent))) + pos_exponent > 0.0 ? pos_exponent : 0.0;
-    // double second_term = log(1 + exp(-fabs(neg_exponent))) + neg_exponent > 0.0 ? neg_exponent : 0.0;
-    // log_debug("g_pos: %f, g_neg: %f, err: %f", g_pos, g_neg, first_term + second_term);
-    // return first_term + second_term;
-    // equivalent to:
-    return log(1.0 + exp(-g_pos + threshold)) + log(1.0 + exp(g_neg - threshold));
-}
-
-static double stable_sigmoid(double x)
-{
-    if (x >= 0)
-        return 1.0 / (1.0 + exp(-x) + 1e-4);
-    else
-    {
-        /// TODO: Fix underflow here
-        double exp_x = exp(x);
-        // log_debug("sigmoid input x: %.17g, exp_x: %.17g", x, exp_x);
-        return exp_x / (1.0 + exp_x + 1e-4);
-    }
 }
 
 // Returns the goodness of a layer.
@@ -278,7 +250,6 @@ static void wbrand(Tinn t)
         t.w[i] = frand() - 0.5;
     t.b = frand() - 0.5;
 }
-
 
 // Returns doubleing point random from 0.0 - 1.0.
 static double frand(void)

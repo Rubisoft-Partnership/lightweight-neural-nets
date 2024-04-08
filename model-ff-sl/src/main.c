@@ -5,6 +5,7 @@
 #include <data/data.h>
 #include <logging/logging.h>
 #include <utils/utils.h>
+#include <losses/losses.h>
 
 #include <confusion-matrix/confusion-matrix.h>
 
@@ -31,7 +32,11 @@ static void setup(void)
     open_log_file_with_timestamp();
 
     data = build();
-    ffnet = ffnetbuild(layers_sizes, layers_number, relu, pdrelu, threshold);
+    Loss loss_suite;
+    loss_suite.loss = ff_loss;
+    loss_suite.pdloss_pos = ff_pdloss_pos;
+    loss_suite.pdloss_neg = ff_pdloss_neg;
+    ffnet = ffnetbuild(layers_sizes, layers_number, relu, pdrelu, threshold, loss_suite);
     log_debug("FFNet built with the following layers:");
     increase_indent();
     for (int i = 0; i < ffnet.num_cells; i++)
