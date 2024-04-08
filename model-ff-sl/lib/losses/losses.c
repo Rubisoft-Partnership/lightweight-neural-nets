@@ -9,12 +9,12 @@ double ff_loss(const double g_pos, const double g_neg, const double threshold)
     return log(1.0 + exp(-g_pos + threshold)) + log(1.0 + exp(g_neg - threshold));
 }
 
-double ff_pdloss_pos(const double g_pos, const double threshold)
+double ff_pdloss_pos(const double g_pos, const double g_neg, const double threshold)
 {
     return -stable_sigmoid(threshold - g_pos);
 }
 
-double ff_pdloss_neg(const double g_neg, const double threshold)
+double ff_pdloss_neg(const double g_pos, const double g_neg, const double threshold)
 {
     return stable_sigmoid(g_neg - threshold);
 }
@@ -35,14 +35,12 @@ double symba_loss(const double g_pos, const double g_neg, const double threshold
     return log(1.0 + exp(threshold * (g_pos - g_neg)));
 }
 
-double symba_pdloss_pos(const double g_pos, const double threshold)
+double symba_pdloss_pos(const double g_pos, const double g_neg, const double threshold)
 {
-    ///TODO: Implement
-    return 0.0;
+    return -threshold * g_neg * stable_sigmoid(threshold * (g_neg - g_pos));
 }
 
-double symba_pdloss_neg(const double g_neg, const double threshold)
+double symba_pdloss_neg(const double g_pos, const double g_neg, const double threshold)
 {
-    ///TODO: Implement
-    return 0.0;
+    return threshold * g_pos * stable_sigmoid(threshold * (g_neg - g_pos));
 }

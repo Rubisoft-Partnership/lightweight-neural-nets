@@ -91,8 +91,8 @@ static void ffbprop(const Tinn t, const double *const in_pos, const double *cons
                     const double rate, const double g_pos, const double g_neg, const Loss loss_suite)
 {
     // Calculate the partial derivative of the loss with respect to the goodness of the positive and negative pass
-    const double pdloss_pos = loss_suite.pdloss_pos(g_pos, t.threshold);
-    const double pdloss_neg = loss_suite.pdloss_neg(g_neg, t.threshold);
+    const double pdloss_pos = loss_suite.pdloss_pos(g_pos, g_neg, t.threshold);
+    const double pdloss_neg = loss_suite.pdloss_neg(g_pos, g_neg, t.threshold);
     log_debug("G_pos: %f, G_neg: %f", g_pos, g_neg);
     log_debug("Loss: %.17g", loss_suite.loss(g_pos, g_neg, t.threshold));
     log_debug("Partial derivative of the loss with resect to the goodness pos: %.17g, neg: %.17g", pdloss_pos, pdloss_neg);
