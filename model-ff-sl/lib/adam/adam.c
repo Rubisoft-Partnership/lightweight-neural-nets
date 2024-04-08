@@ -1,5 +1,7 @@
 #include <adam/adam.h>
 
+#include <math.h>
+
 
 Adam adam_create(const double beta1, const double beta2, const int size)
 {
@@ -27,7 +29,7 @@ void adam_free(Adam adam)
     free(adam.v);
 }
 
-double weight_update(Adam adam, const double gradient, const int index)
+double adam_weight_update(Adam adam, const double gradient, const int index)
 {
     // Increment time step
     adam.t++;

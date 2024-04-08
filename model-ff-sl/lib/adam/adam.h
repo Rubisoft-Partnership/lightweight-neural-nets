@@ -7,8 +7,8 @@
 typedef struct
 {
     // Adam hyperparameters
-    const double beta1;
-    const double beta2;
+    double beta1;
+    double beta2;
 
     // m and v zero-initializalized vectors
     // First moment estimate
@@ -27,5 +27,5 @@ Adam adam_create(double beta1, double beta2, int size);
 void adam_free(Adam adam);
 
 // Adam weight update
-double weight_update(Adam adam, double gradient, int index);
+double  adam_weight_update(Adam adam, double gradient, int index);
 
