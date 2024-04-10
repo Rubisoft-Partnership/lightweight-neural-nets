@@ -32,10 +32,7 @@ static void setup(void)
     open_log_file_with_timestamp();
 
     data = build();
-    Loss loss_suite;
-    loss_suite.loss = ff_loss;
-    loss_suite.pdloss_pos = ff_pdloss_pos;
-    loss_suite.pdloss_neg = ff_pdloss_neg;
+    Loss loss_suite = LOSS_FF;
     ffnet = ffnetbuild(layers_sizes, layers_number, relu, pdrelu, threshold, loss_suite);
     log_debug("FFNet built with the following layers:");
     increase_indent();
