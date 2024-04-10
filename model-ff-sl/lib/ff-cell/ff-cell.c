@@ -22,7 +22,7 @@ extern double o_buffer[H_BUFFER_SIZE]; // outputs buffer
 // Forward pass for a FF cell.
 void fprop(const Tinn t, const double *const in);
 // Backward pass for a FF cell.
-static void ffbprop(const Tinn t, const double *const in_pos, const double *const in_neg,
+static void bprop(const Tinn t, const double *const in_pos, const double *const in_neg,
                     const double rate, const double g_pos, const double g_neg, const Loss loss_suite);
 
 // From Tinn.c
@@ -52,7 +52,7 @@ double fftrain(const Tinn t, const double *const pos, const double *const neg, d
     double g_neg = goodness(t.o, t.nops);
 
     // Peforms gradient descent.
-    ffbprop(t, pos, neg, rate, g_pos, g_neg, loss_suite);
+    bprop(t, pos, neg, rate, g_pos, g_neg, loss_suite);
 
     // Normalize the output of the layer
     normalize_vector(t.o, t.nops);
@@ -87,7 +87,7 @@ void normalize_vector(double *output, int size)
 }
 
 // Performs back propagation for the FF algorithm.
-static void ffbprop(const Tinn t, const double *const in_pos, const double *const in_neg,
+static void bprop(const Tinn t, const double *const in_pos, const double *const in_neg,
                     const double rate, const double g_pos, const double g_neg, const Loss loss_suite)
 {
     // Calculate the partial derivative of the loss with respect to the goodness of the positive and negative pass
