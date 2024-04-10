@@ -3,10 +3,11 @@
 #include <math.h>
 
 static double stable_sigmoid(double x);
+static double softplus(double x, double betha);
 
 double ff_loss(const double g_pos, const double g_neg, const double threshold)
 {
-    return log(1.0 + exp(-g_pos + threshold)) + log(1.0 + exp(g_neg - threshold));
+    return softplus(-g_pos + threshold, 1.0) + softplus(g_neg - threshold, 1.0);
 }
 
 double ff_pdloss_pos(const double g_pos, const double g_neg, const double threshold)
@@ -30,17 +31,22 @@ static double stable_sigmoid(double x)
     }
 }
 
+static double softplus(double x, double betha)
+{
+    return log(1.0 + exp(x * betha)) / betha;
+}
+
 double symba_loss(const double g_pos, const double g_neg, const double threshold)
 {
-    return log(1.0 + exp(threshold * (g_pos - g_neg)));
+    return softplus(threshold * (g_pos - g_neg), 0.1);
 }
 
 double symba_pdloss_pos(const double g_pos, const double g_neg, const double threshold)
 {
-    return -threshold * g_neg * stable_sigmoid(threshold * (g_neg - g_pos));
+    return threshold * stable_sigmoid(-threshold * (g_pos - g_neg));
 }
 
 double symba_pdloss_neg(const double g_pos, const double g_neg, const double threshold)
 {
-    return threshold * g_pos * stable_sigmoid(threshold * (g_neg - g_pos));
+    return -threshold * stable_sigmoid(-threshold * (g_pos - g_neg));
 }
