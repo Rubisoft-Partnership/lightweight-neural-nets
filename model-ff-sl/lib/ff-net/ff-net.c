@@ -39,7 +39,7 @@ FFNet ffnetbuild(const int *layer_sizes, int num_layers, double (*act)(double), 
     log_info("Layers: %s", layers_str);
 
     for (int i = 0; i < ffnet.num_cells; i++)
-        ffnet.layers[i] = xtbuild(layer_sizes[i], layer_sizes[i + 1], act, pdact, treshold);
+        ffnet.layers[i] = new_ff_cell(layer_sizes[i], layer_sizes[i + 1], act, pdact, treshold);
     return ffnet;
 }
 

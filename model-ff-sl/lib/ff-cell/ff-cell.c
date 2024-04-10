@@ -185,7 +185,7 @@ void fprop(const Tinn t, const double *const in)
 }
 
 // Constructs a tinn with number of inputs, number of hidden neurons, and number of outputs
-Tinn xtbuild(const int nips, const int nops, double (*act)(double), double (*pdact)(double), const double threshold)
+Tinn new_ff_cell(const int nips, const int nops, double (*act)(double), double (*pdact)(double), const double threshold)
 {
     Tinn t;
 

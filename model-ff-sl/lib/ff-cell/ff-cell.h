@@ -43,7 +43,7 @@ double pdrelu(const double a);
 double sigmoid(const double a);
 double pdsigmoid(const double a);
 double fftrain(const Tinn t, const double *const pos, const double *const neg, double rate, const Loss loss_suite);
-Tinn xtbuild(const int nips, const int nops, double (*act)(double), double (*pdact)(double), const double threshold);
+Tinn new_ff_cell(const int nips, const int nops, double (*act)(double), double (*pdact)(double), const double threshold);
 void xtfree(Tinn t);
 void embed_label(double *sample, const double *in, const int label, const int insize, const int num_classes);
 void normalize_vector(double *output, int size);
