@@ -167,18 +167,6 @@ double pdrelu(const double a)
     return a > 0.0 ? 1.0 : 0.0;
 }
 
-// Sigmoid activation function.
-double sigmoid(const double a)
-{
-    return 1.0 / (1.0 + exp(-a));
-}
-
-// Sigmoid derivative.
-double pdsigmoid(const double a)
-{
-    return a * (1.0 - a);
-}
-
 // Performs forward propagation.
 void fprop(const Tinn t, const double *const in)
 {
