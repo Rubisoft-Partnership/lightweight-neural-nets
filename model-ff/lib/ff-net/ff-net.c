@@ -55,11 +55,11 @@ double fftrainnet(const FFNet ffnet, const double *const pos, const double *cons
     // printf("Training FFNet...\n");
     double error = 0.0;
     // Feed first layer manually.
-    error += fftrain(ffnet.hid_layers[0], pos, neg, rate);
+    error += train_ff_cell(ffnet.hid_layers[0], pos, neg, rate);
     // Feed the rest of the layers.
     for (int i = 1; i < ffnet.num_hid_layers; i++)
     {
-        error += fftrain(ffnet.hid_layers[i], o_buffer, ffnet.hid_layers[i - 1].o, rate);
+        error += train_ff_cell(ffnet.hid_layers[i], o_buffer, ffnet.hid_layers[i - 1].o, rate);
     }
     // printf("error: %f\n", error);
     return error;

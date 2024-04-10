@@ -38,7 +38,7 @@ void embed_label(double *sample, const double *in, const int label, const int in
 }
 
 // Trains a tinn with an input and target output with a learning rate. Returns target to output error.
-double fftrain(const Tinn t, const double *const pos, const double *const neg, double rate, const Loss loss_suite)
+double train_ff_cell(const Tinn t, const double *const pos, const double *const neg, double rate, const Loss loss_suite)
 {
     increase_indent();
     // Positive pass.

@@ -53,9 +53,9 @@ void ffnetfree(FFNet ffnet)
 double fftrainnet(const FFNet ffnet, const double *const pos, const double *const neg, double rate)
 {
     double error = 0.0;
-    error += fftrain(ffnet.layers[0], pos, neg, rate, ffnet.loss_suite);
+    error += train_ff_cell(ffnet.layers[0], pos, neg, rate, ffnet.loss_suite);
     for (int i = 1; i < ffnet.num_cells; i++)
-        error += fftrain(ffnet.layers[i], o_buffer, ffnet.layers[i - 1].o, rate, ffnet.loss_suite);
+        error += train_ff_cell(ffnet.layers[i], o_buffer, ffnet.layers[i - 1].o, rate, ffnet.loss_suite);
     // printf("error: %f\n", error);
     return error;
 }
