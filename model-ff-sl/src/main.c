@@ -104,7 +104,7 @@ int main(void)
     printf("Testing...\n");
     evaluate();
 
-    dfree(data);
+    free_data(data);
     close_log_file();
     free_ff_net(ffnet);
 

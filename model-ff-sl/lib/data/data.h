@@ -56,9 +56,9 @@ typedef struct
     double *neg;
 } FFsamples;
 
-Data ndata(const int feature_len, const int num_class, const int rows);
+Data new_data(const int feature_len, const int num_class, const int rows);
 void parse(const Data data, char *line, const int row);
-void dfree(const Data d);
+void free_data(const Data d);
 void shuffle(const Data d);
 FFsamples new_samples(const int nips);
 void free_samples(FFsamples s);

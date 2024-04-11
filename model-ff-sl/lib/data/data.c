@@ -5,11 +5,23 @@
 #include <logging/logging.h>
 
 // New data object.
-Data ndata(const int feature_len, const int num_class, const int rows)
+Data new_data(const int feature_len, const int num_class, const int rows)
 {
     const Data data = {
         new2d(rows, feature_len), new2d(rows, num_class), feature_len, num_class, rows};
     return data;
+}
+
+// Frees a data object from the heap.
+void free_data(const Data d)
+{
+    for (int row = 0; row < d.rows; row++)
+    {
+        free(d.in[row]);
+        free(d.tg[row]);
+    }
+    free(d.in);
+    free(d.tg);
 }
 
 // Gets one row of inputs and outputs from a string.
@@ -26,17 +38,7 @@ void parse(const Data data, char *line, const int row)
     }
 }
 
-// Frees a data object from the heap.
-void dfree(const Data d)
-{
-    for (int row = 0; row < d.rows; row++)
-    {
-        free(d.in[row]);
-        free(d.tg[row]);
-    }
-    free(d.in);
-    free(d.tg);
-}
+
 
 // Randomly shuffles a data object.
 void shuffle(const Data d)
@@ -102,7 +104,7 @@ Data build(void)
         exit(1);
     }
     const int rows = lns(file);
-    Data data = ndata(DATA_FEATURES, DATA_CLASSES, rows);
+    Data data = new_data(DATA_FEATURES, DATA_CLASSES, rows);
     for (int row = 0; row < rows; row++)
     {
         char *line = readln(file);
