@@ -25,7 +25,7 @@ void free_data(const Data d)
 }
 
 // Gets one row of inputs and outputs from a string.
-void parse(const Data data, char *line, const int row)
+void parse_data(const Data data, char *line, const int row)
 {
     const int cols = data.feature_len + data.num_class;
     for (int col = 0; col < cols; col++)
@@ -108,7 +108,7 @@ Data build(void)
     for (int row = 0; row < rows; row++)
     {
         char *line = readln(file);
-        parse(data, line, row);
+        parse_data(data, line, row);
         free(line);
     }
     fclose(file);

@@ -57,7 +57,7 @@ typedef struct
 } FFsamples;
 
 Data new_data(const int feature_len, const int num_class, const int rows);
-void parse(const Data data, char *line, const int row);
+void parse_data(const Data data, char *line, const int row);
 void free_data(const Data d);
 void shuffle(const Data d);
 FFsamples new_samples(const int nips);
