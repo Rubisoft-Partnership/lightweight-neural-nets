@@ -1,3 +1,11 @@
+/**
+ * @file data.h
+ * @brief Header file for data handling in the lightweight neural network model.
+ * 
+ * This file contains the declarations for data handling functions and structures used in the model.
+ * It provides functions for loading, preprocessing, and manipulating data for training and testing the neural network.
+ */
+
 #pragma once
 
 #include <time.h>
@@ -56,19 +64,66 @@ typedef struct
     double *neg;
 } FFsamples;
 
-// Creates a new data object.
+/**
+ * @brief Creates a new data object.
+ * 
+ * @param feature_len Number of inputs to the neural network.
+ * @param num_class Number of outputs to the neural network.
+ * @param rows Number of rows in the file (number of sets for neural network).
+ * @return Data The newly created data object.
+ */
 Data new_data(const int feature_len, const int num_class, const int rows);
-// Frees the memory of a data object.
-void free_data(const Data d);
-// Builds a data object from a file.
+
+/**
+ * @brief Frees the memory of a data object.
+ * 
+ * @param data The data object to free.
+ */
+void free_data(const Data data);
+
+/**
+ * @brief Builds a data object from a file.
+ * 
+ * @return Data The built data object.
+ */
 Data data_build(void);
-// Parses a line from a file into a data object.
+
+/**
+ * @brief Parses a line from a file into a data object.
+ * 
+ * @param data The data object to parse into.
+ * @param line The line to parse.
+ * @param row The row index of the data object.
+ */
 void parse_data(const Data data, char *line, const int row);
-// Shuffles the data object.
-void shuffle_data(const Data d);
-// Creates a new FFsamples object.
+
+/**
+ * @brief Shuffles the data object.
+ * 
+ * @param data The data object to shuffle.
+ */
+void shuffle_data(const Data data);
+
+/**
+ * @brief Creates a new FFsamples object.
+ * 
+ * @param input_size The size of the input.
+ * @return FFsamples The newly created FFsamples object.
+ */
 FFsamples new_ff_samples(const int input_size);
-// Frees the memory of a FFsamples object.
-void free_ff_samples(FFsamples s);
-// Generates a positive and a negative sample for the FF algorithm by embedding the one-hot encoded target in the input.
-void generate_samples(const Data d, const int row, FFsamples s);
+
+/**
+ * @brief Frees the memory of a FFsamples object.
+ * 
+ * @param samples The FFsamples object to free.
+ */
+void free_ff_samples(FFsamples samples);
+
+/**
+ * @brief Generates a positive and a negative sample for the FF algorithm by embedding the one-hot encoded target in the input.
+ * 
+ * @param data The data object.
+ * @param row The row index of the data object.
+ * @param samples The FFsamples object to store the generated samples.
+ */
+void generate_samples(const Data data, const int row, FFsamples samples);
