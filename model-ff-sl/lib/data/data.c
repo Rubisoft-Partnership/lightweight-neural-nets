@@ -13,15 +13,15 @@ Data new_data(const int feature_len, const int num_class, const int rows)
 }
 
 // Frees a data object from the heap.
-void free_data(const Data d)
+void free_data(const Data data)
 {
-    for (int row = 0; row < d.rows; row++)
+    for (int row = 0; row < data.rows; row++)
     {
-        free(d.in[row]);
-        free(d.tg[row]);
+        free(data.input[row]);
+        free(data.target[row]);
     }
-    free(d.in);
-    free(d.tg);
+    free(data.input);
+    free(data.target);
 }
 
 // Gets one row of inputs and outputs from a string.
@@ -32,33 +32,31 @@ void parse_data(const Data data, char *line, const int row)
     {
         const double val = atof(strtok(col == 0 ? line : NULL, " "));
         if (col < data.feature_len)
-            data.in[row][col] = val;
+            data.input[row][col] = val;
         else
-            data.tg[row][col - data.feature_len] = val;
+            data.target[row][col - data.feature_len] = val;
     }
 }
 
-
-
 // Randomly shuffles a data object.
-void shuffle(const Data d)
+void shuffle_data(const Data d)
 {
     for (int a = 0; a < d.rows; a++)
     {
         const int b = get_random() % d.rows;
-        double *ot = d.tg[a];
-        double *it = d.in[a];
+        double *ot = d.target[a];
+        double *it = d.input[a];
         // Swap output.
-        d.tg[a] = d.tg[b];
-        d.tg[b] = ot;
+        d.target[a] = d.target[b];
+        d.target[b] = ot;
         // Swap input.
-        d.in[a] = d.in[b];
-        d.in[b] = it;
+        d.input[a] = d.input[b];
+        d.input[b] = it;
     }
 }
 
 // Instantiates a new FFsamples object
-FFsamples new_samples(const int nips)
+FFsamples new_ff_samples(const int nips)
 {
     FFsamples s = {
         (double *)malloc((nips) * sizeof(double)),
@@ -67,7 +65,7 @@ FFsamples new_samples(const int nips)
 }
 
 // Frees the memory of a FFsamples object
-void free_samples(FFsamples s)
+void free_ff_samples(FFsamples s)
 {
     free(s.pos);
     free(s.neg);
@@ -76,12 +74,12 @@ void free_samples(FFsamples s)
 // Generates a positive and a negative sample for the FF algorithm by embedding the one-hot encoded target in the input
 void generate_samples(const Data d, const int row, FFsamples s)
 {
-    memcpy(s.pos, d.in[row], (d.feature_len - d.num_class) * sizeof(double));
-    memcpy(s.neg, d.in[row], (d.feature_len - d.num_class) * sizeof(double));
-    memcpy(&s.pos[d.feature_len - d.num_class], d.tg[row], d.num_class * sizeof(double));
+    memcpy(s.pos, d.input[row], (d.feature_len - d.num_class) * sizeof(double));
+    memcpy(s.neg, d.input[row], (d.feature_len - d.num_class) * sizeof(double));
+    memcpy(&s.pos[d.feature_len - d.num_class], d.target[row], d.num_class * sizeof(double));
     memset(&s.neg[d.feature_len - d.num_class], 0, d.num_class * sizeof(double));
     // Set the positive sample's label to 0.0f
-    int one_pos;
+    int one_pos = -1;
     for (int i = d.feature_len - d.num_class; i < d.feature_len; i++)
         if (s.pos[i] == 1.0f)
             one_pos = i - (d.feature_len - d.num_class);
@@ -92,9 +90,9 @@ void generate_samples(const Data d, const int row, FFsamples s)
     s.neg[(d.feature_len - d.num_class) + neg_label] = 1.0f;
 }
 
-// TODO: decide if we want to load the entire dataset into memory or not and implement it.
+///TODO: decide if we want to load the entire dataset into memory or not and implement it.
 // Parses file from path getting all inputs and outputs for the neural network. Returns data object.
-Data build(void)
+Data data_build(void)
 {
     log_debug("Building data from %s", DATA_DATASET_PATH);
     FILE *file = fopen(DATA_DATASET_PATH, "r");

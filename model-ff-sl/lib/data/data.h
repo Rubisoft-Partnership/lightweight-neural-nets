@@ -36,9 +36,9 @@
 typedef struct
 {
     // 2D floating point array of input.
-    double **in;
+    double **input;
     // 2D floating point array of target.
-    double **tg;
+    double **target;
     // Number of inputs to neural network.
     int feature_len;
     // Number of outputs to neural network.
@@ -56,11 +56,19 @@ typedef struct
     double *neg;
 } FFsamples;
 
+// Creates a new data object.
 Data new_data(const int feature_len, const int num_class, const int rows);
-void parse_data(const Data data, char *line, const int row);
+// Frees the memory of a data object.
 void free_data(const Data d);
-void shuffle(const Data d);
-FFsamples new_samples(const int nips);
-void free_samples(FFsamples s);
+// Builds a data object from a file.
+Data data_build(void);
+// Parses a line from a file into a data object.
+void parse_data(const Data data, char *line, const int row);
+// Shuffles the data object.
+void shuffle_data(const Data d);
+// Creates a new FFsamples object.
+FFsamples new_ff_samples(const int nips);
+// Frees the memory of a FFsamples object.
+void free_ff_samples(FFsamples s);
+// Generates a positive and a negative sample for the FF algorithm by embedding the one-hot encoded target in the input.
 void generate_samples(const Data d, const int row, FFsamples s);
-Data build(void);

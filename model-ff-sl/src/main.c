@@ -31,7 +31,7 @@ static void setup(void)
     set_log_level(LOG_DEBUG);
     open_log_file_with_timestamp();
 
-    data = build();
+    data = data_build();
     Loss loss_suite = LOSS_FF;
     ffnet = new_ff_net(layers_sizes, layers_number, relu, pdrelu, threshold, loss_suite);
     log_debug("FFNet built with the following layers:");
@@ -44,14 +44,14 @@ static void setup(void)
 static void train_loop(void)
 {
     clock_t start_time = clock();
-    FFsamples samples = new_samples(nips);
+    FFsamples samples = new_ff_samples(nips);
     for (int i = 0; i < epochs; i++)
     {
         clock_t epoch_start_time = clock();
         printf("Epoch %d\n", i);
         log_info("Epoch %d", i);
         increase_indent();
-        shuffle(data);
+        shuffle_data(data);
         double error = 0.0f;
         for (int j = 0; j < data.rows; j++)
         {
@@ -67,7 +67,7 @@ static void train_loop(void)
     }
     double total_time = (double)(clock() - start_time) / CLOCKS_PER_SEC;
     printf("\nTotal training time: %.2f seconds\n\n", total_time);
-    free_samples(samples);
+    free_ff_samples(samples);
 }
 
 void evaluate(void)
@@ -76,8 +76,8 @@ void evaluate(void)
     initConfusionMatrix();
     for (int i = 0; i < 100; i++)
     {
-        double *const in = data.in[i];
-        double *const tg = data.tg[i];
+        double *const in = data.input[i];
+        double *const tg = data.target[i];
         int gt = -1;
         for (int j = 0; j < data.num_class; j++)
         {
