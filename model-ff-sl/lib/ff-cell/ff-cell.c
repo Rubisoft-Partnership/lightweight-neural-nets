@@ -56,25 +56,29 @@ Tinn new_ff_cell(const int nips, const int nops, double (*act)(double), double (
 // Trains a FF cell performing forward and backward pass with given a loss function.
 double train_ff_cell(const Tinn t, const double *const pos, const double *const neg, double rate, const Loss loss_suite)
 {
+    // Increase the indent level for logging
     increase_indent();
-    // Positive pass.
+
+    // Positive forward pass.
     fprop(t, pos);
     // Copy positive activation output.
     memcpy(o_buffer, t.o, t.nops * sizeof(*t.o));
+    // Calculate the goodness of the positive pass.
     double g_pos = goodness(t.o, t.nops);
 
-    // Negative pass.
+    // Negative forward pass.
     fprop(t, neg);
+    // Calculate the goodness of the negative pass.
     double g_neg = goodness(t.o, t.nops);
 
-    // Peforms gradient descent.
+    // Peforms weight update.
     bprop(t, pos, neg, rate, g_pos, g_neg, loss_suite);
 
     // Normalize the output of the layer
     normalize_vector(t.o, t.nops);
     normalize_vector(o_buffer, t.nops);
 
-    // Calculate the average and standard deviation of weight values
+    // Calculate the average and standard deviation of weight values for debugging.
     double sum_weights = 0.0;
     double sum_weights_squared = 0.0;
     for (int i = 0; i < t.nw; i++)
@@ -88,7 +92,7 @@ double train_ff_cell(const Tinn t, const double *const pos, const double *const 
     log_info("Mean weight value: %f\n", mean_weights);
     log_info("Standard deviation of weight value: %f\n", std_weights);
 
-    // printf("g_pos: %f, g_neg: %f, err: %f\n", g_pos, g_neg, fferr(g_pos, g_neg, t.threshold));
+    // Return the loss of the layer
     return loss_suite.loss(g_pos, g_neg, t.threshold);
 }
 
@@ -97,12 +101,14 @@ void fprop(const Tinn t, const double *const in)
 {
     double debug_sum = 0.0;
     log_debug("Computing forward propagation for Tinn with %d inputs and %d outputs", t.nips, t.nops);
-    // Calculate hidden layer neuron values.
+    // Calculate the activation output for each output unit
     for (int i = 0; i < t.nops; i++)
     {
         double sum = 0.0;
+        // Calculate the weighted sum of the inputs
         for (int j = 0; j < t.nips; j++)
             sum += in[j] * t.w[i * t.nips + j];
+        // Store the output of the activation function
         t.o[i] = t.act(sum + t.b);
         debug_sum += t.o[i]; // for debugging
     }
@@ -113,23 +119,24 @@ void fprop(const Tinn t, const double *const in)
 static void bprop(const Tinn t, const double *const in_pos, const double *const in_neg,
                   const double rate, const double g_pos, const double g_neg, const Loss loss_suite)
 {
-    // Calculate the partial derivative of the loss with respect to the goodness of the positive and negative pass
+    // Calculate the partial derivative of the loss with respect to the goodness of the positive and negative pass.
     const double pdloss_pos = loss_suite.pdloss_pos(g_pos, g_neg, t.threshold);
     const double pdloss_neg = loss_suite.pdloss_neg(g_pos, g_neg, t.threshold);
     log_debug("G_pos: %f, G_neg: %f", g_pos, g_neg);
     log_debug("Loss: %.17g", loss_suite.loss(g_pos, g_neg, t.threshold));
     log_debug("Partial derivative of the loss with resect to the goodness pos: %.17g, neg: %.17g", pdloss_pos, pdloss_neg);
 
+    // Debugging variables statistics about weight updates.
     int updated_weights = 0;
     double sum_weight_update = 0.0;
     double sum_weight_update_squared = 0.0;
 
+    // Update the weights for each connection between input and output units
     for (int i = 0; i < t.nips; i++)
     {
         for (int j = 0; j < t.nops; j++)
         {
             int wheight_index = j * t.nips + i;
-            // log_debug("Weight from unit [%d] to unit [%d]: %.17g", i, j, t.w[j * t.nips + i]);
 
             // Calculate the gradient of the loss with respect to the weight for the positive and negative pass
             const double gradient_pos = pdloss_pos * 2.0 * o_buffer[j] * in_pos[i];
@@ -145,6 +152,7 @@ static void bprop(const Tinn t, const double *const in_pos, const double *const 
             // log_debug("Weight update: %.17g", weight_update);
             // log_debug("Weight after correction: %.17g", t.w[j * t.nips + i]);
 
+            // Update statistics about weight updates.
             if (weight_update != 0.0)
             {
                 updated_weights++;
