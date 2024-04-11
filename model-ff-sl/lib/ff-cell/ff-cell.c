@@ -6,15 +6,13 @@
 
 #include <ff-cell/ff-cell.h>
 
-#include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#include <time.h>
-#include <stdarg.h>
 
 #include <logging/logging.h>
 #include <utils/utils.h>
 #include <losses/losses.h>
+#include <ff-utils/ff-utils.h>
 
 // Buffer to store activations and output activations for the positive pass.
 extern double o_buffer[H_BUFFER_SIZE]; // outputs buffer
@@ -175,26 +173,6 @@ static void bprop(const Tinn t, const double *const in_pos, const double *const 
     log_debug("Standard deviation of weight update: %f\n", std_weight_update);
 }
 
-// Normalizes a vector.
-void normalize_vector(double *vec, int size)
-{
-    double norm = 0.0;
-    for (int i = 0; i < size; i++)
-        norm += vec[i] * vec[i];
-    norm = sqrt(norm);
-    for (int i = 0; i < size; i++)
-        vec[i] /= norm;
-}
-
-// Returns the goodness of a layer.
-double goodness(const double *vec, const int size)
-{
-    double sum = 0.0;
-    for (int i = 0; i < size; i++)
-        sum += vec[i] * vec[i];
-    return sum;
-}
-
 // ReLU activation function.
 double relu(const double a)
 {
@@ -205,14 +183,6 @@ double relu(const double a)
 double pdrelu(const double a)
 {
     return a > 0.0 ? 1.0 : 0.0;
-}
-
-// Generates inputs for inference given input and label
-void embed_label(double *sample, const double *in, const int label, const int in_size, const int num_classes)
-{
-    memcpy(sample, in, in_size * sizeof(*in));
-    memset(&sample[in_size - num_classes], 0, num_classes * sizeof(*sample));
-    sample[in_size - num_classes + label] = 1.0;
 }
 
 // Frees object from heap.
