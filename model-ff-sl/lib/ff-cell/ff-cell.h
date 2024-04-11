@@ -35,25 +35,22 @@ typedef struct
     Adam adam;
 } Tinn;
 
-// Activation function.
-
+// Activation functions.
 double relu(const double a);
 double pdrelu(const double a);
 
-double sigmoid(const double a);
-double pdsigmoid(const double a);
-double train_ff_cell(const Tinn t, const double *const pos, const double *const neg, double rate, const Loss loss_suite);
+// Generates a FF cell.
 Tinn new_ff_cell(const int nips, const int nops, double (*act)(double), double (*pdact)(double), const double threshold);
-void xtfree(Tinn t);
-void embed_label(double *sample, const double *in, const int label, const int insize, const int num_classes);
-void normalize_vector(double *output, int size);
-double goodness(const double *vec, const int size);
+// Frees the memory of a FF cell.
+void free_ff_cell(Tinn t);
+// Trains a FF cell performing forward and backward pass with given a loss function.
+double train_ff_cell(const Tinn t, const double *const pos, const double *const neg, double rate, const Loss loss_suite);
+// Forward pass for a FF cell.
 void fprop(const Tinn t, const double *const in);
+// Generates a sample with the label embedded.
+void embed_label(double *sample, const double *in, const int label, const int insize, const int num_classes);
+// Normalizes a vector.
+void normalize_vector(double *output, int size);
+// Calculates the goodness of a vector.
+double goodness(const double *vec, const int size);
 
-
-/*
---------------------------------------------------------------------------------------------------------------------------
-*/
-// Tinn original functions
-
-void xtprint(const double *arr, const int size);

@@ -275,7 +275,7 @@ void xtsave(const Tinn t, const char *const path)
 }
 
 // Frees object from heap.
-void xtfree(const Tinn t)
+void free_ff_cell(const Tinn t)
 {
     free(t.w);
     free(t.b);

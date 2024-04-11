@@ -1,6 +1,6 @@
 /**
  * @file ff-cell.c
- * @brief This file contains the implementation of a feedforward neural network block.
+ * @brief This file contains the implementation of a FF cell for the FF algorithm.
  *
  * */
 
@@ -23,21 +23,37 @@ extern double o_buffer[H_BUFFER_SIZE]; // outputs buffer
 void fprop(const Tinn t, const double *const in);
 // Backward pass for a FF cell.
 static void bprop(const Tinn t, const double *const in_pos, const double *const in_neg,
-                    const double rate, const double g_pos, const double g_neg, const Loss loss_suite);
+                  const double rate, const double g_pos, const double g_neg, const Loss loss_suite);
 
-// From Tinn.c
+// Random number generation for weights.
 static void wbrand(Tinn t);
 static double frand(void);
 
-// Generates inputs for inference given input and label
-void embed_label(double *sample, const double *in, const int label, const int insize, const int num_classes)
+// Constructs a FF cell with number of inputs, number of outputs, activation function, and threshold.
+Tinn new_ff_cell(const int nips, const int nops, double (*act)(double), double (*pdact)(double), const double threshold)
 {
-    memcpy(sample, in, insize * sizeof(*in));
-    memset(&sample[insize - num_classes], 0, num_classes * sizeof(*sample));
-    sample[insize - num_classes + label] = 1.0;
+    Tinn t;
+
+    // Adam optimizer
+    t.adam = adam_create(0.9, 0.999, nips * nops);
+    /// TODO: Fix hardcoding of Adam hyperparameters
+
+    t.nw = nips * nops;                         // total number of weights
+    t.w = (double *)calloc(t.nw, sizeof(*t.w)); // weights (both [intput to hidden] and [hidden to output])
+    t.o = (double *)calloc(nops, sizeof(*t.o)); // output neurons
+    t.nips = nips;
+    t.nops = nops;
+    t.act = act;
+    t.pdact = pdact;
+    t.threshold = threshold;
+    wbrand(t);
+    increase_indent();
+    log_debug("Tinn built with %d inputs, %d outputs, and %d weights", nips, nops, t.nw);
+    decrease_indent();
+    return t;
 }
 
-// Trains a tinn with an input and target output with a learning rate. Returns target to output error.
+// Trains a FF cell performing forward and backward pass with given a loss function.
 double train_ff_cell(const Tinn t, const double *const pos, const double *const neg, double rate, const Loss loss_suite)
 {
     increase_indent();
@@ -76,19 +92,26 @@ double train_ff_cell(const Tinn t, const double *const pos, const double *const 
     return loss_suite.loss(g_pos, g_neg, t.threshold);
 }
 
-void normalize_vector(double *output, int size)
+// Performs forward propagation.
+void fprop(const Tinn t, const double *const in)
 {
-    double norm = 0.0;
-    for (int i = 0; i < size; i++)
-        norm += output[i] * output[i];
-    norm = sqrt(norm);
-    for (int i = 0; i < size; i++)
-        output[i] /= norm;
+    double debug_sum = 0.0;
+    log_debug("Computing forward propagation for Tinn with %d inputs and %d outputs", t.nips, t.nops);
+    // Calculate hidden layer neuron values.
+    for (int i = 0; i < t.nops; i++)
+    {
+        double sum = 0.0;
+        for (int j = 0; j < t.nips; j++)
+            sum += in[j] * t.w[i * t.nips + j];
+        t.o[i] = t.act(sum + t.b);
+        debug_sum += t.o[i]; // for debugging
+    }
+    log_debug("Overall activation output: %f", debug_sum);
 }
 
-// Performs back propagation for the FF algorithm.
+// Performs backward pass for the FF algorithm.
 static void bprop(const Tinn t, const double *const in_pos, const double *const in_neg,
-                    const double rate, const double g_pos, const double g_neg, const Loss loss_suite)
+                  const double rate, const double g_pos, const double g_neg, const Loss loss_suite)
 {
     // Calculate the partial derivative of the loss with respect to the goodness of the positive and negative pass
     const double pdloss_pos = loss_suite.pdloss_pos(g_pos, g_neg, t.threshold);
@@ -144,6 +167,17 @@ static void bprop(const Tinn t, const double *const in_pos, const double *const 
     log_debug("Standard deviation of weight update: %f\n", std_weight_update);
 }
 
+// Normalizes a vector.
+void normalize_vector(double *vec, int size)
+{
+    double norm = 0.0;
+    for (int i = 0; i < size; i++)
+        norm += vec[i] * vec[i];
+    norm = sqrt(norm);
+    for (int i = 0; i < size; i++)
+        vec[i] /= norm;
+}
+
 // Returns the goodness of a layer.
 double goodness(const double *vec, const int size)
 {
@@ -156,79 +190,29 @@ double goodness(const double *vec, const int size)
 // ReLU activation function.
 double relu(const double a)
 {
-    // return a;
     return a > 0.0 ? a : 0.0;
 }
 
 // ReLU derivative.
 double pdrelu(const double a)
 {
-    // return 1;
     return a > 0.0 ? 1.0 : 0.0;
 }
 
-// Performs forward propagation.
-void fprop(const Tinn t, const double *const in)
+// Generates inputs for inference given input and label
+void embed_label(double *sample, const double *in, const int label, const int in_size, const int num_classes)
 {
-    double debug_sum = 0.0;
-    log_debug("Computing forward propagation for Tinn with %d inputs and %d outputs", t.nips, t.nops);
-    // Calculate hidden layer neuron values.
-    for (int i = 0; i < t.nops; i++)
-    {
-        double sum = 0.0;
-        for (int j = 0; j < t.nips; j++)
-            sum += in[j] * t.w[i * t.nips + j];
-        t.o[i] = t.act(sum + t.b);
-        debug_sum += t.o[i]; // for debugging
-    }
-    log_debug("Overall activation output: %f", debug_sum);
-}
-
-// Constructs a tinn with number of inputs, number of hidden neurons, and number of outputs
-Tinn new_ff_cell(const int nips, const int nops, double (*act)(double), double (*pdact)(double), const double threshold)
-{
-    Tinn t;
-
-    // Adam optimizer
-    t.adam = adam_create(0.9, 0.999, nips * nops);
-    /// TODO: Fix hardcoding of Adam hyperparameters
-
-    t.nw = nips * nops;                         // total number of weights
-    t.w = (double *)calloc(t.nw, sizeof(*t.w)); // weights (both [intput to hidden] and [hidden to output])
-    t.o = (double *)calloc(nops, sizeof(*t.o)); // output neurons
-    t.nips = nips;
-    t.nops = nops;
-    t.act = act;
-    t.pdact = pdact;
-    t.threshold = threshold;
-    wbrand(t);
-    increase_indent();
-    log_debug("Tinn built with %d inputs, %d outputs, and %d weights", nips, nops, t.nw);
-    decrease_indent();
-    return t;
+    memcpy(sample, in, in_size * sizeof(*in));
+    memset(&sample[in_size - num_classes], 0, num_classes * sizeof(*sample));
+    sample[in_size - num_classes + label] = 1.0;
 }
 
 // Frees object from heap.
-void xtfree(const Tinn t)
+void free_ff_cell(const Tinn t)
 {
     free(t.w);
     free(t.o);
     adam_free(t.adam);
-}
-
-// Prints an array of doubles. Useful for printing predictions.
-void xtprint(const double *arr, const int size)
-{
-    for (int i = 0; i < size; i++)
-        printf("%f ", (double)arr[i]);
-    printf("\n");
-}
-
-// Returns an output prediction given an input.
-double *xtpredict(const Tinn t, const double *const in)
-{
-    fprop(t, in);
-    return t.o;
 }
 
 // Randomizes tinn weights and biases.
@@ -239,7 +223,7 @@ static void wbrand(Tinn t)
     t.b = frand() - 0.5;
 }
 
-// Returns doubleing point random from 0.0 - 1.0.
+// Returns random doulbe in [0.0 - 1.0]
 static double frand(void)
 {
     return get_random() / (double)RAND_MAX;

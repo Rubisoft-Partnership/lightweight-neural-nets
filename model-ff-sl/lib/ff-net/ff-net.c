@@ -47,7 +47,7 @@ FFNet ffnetbuild(const int *layer_sizes, int num_layers, double (*act)(double), 
 void ffnetfree(FFNet ffnet)
 {
     for (int i = 0; i < ffnet.num_cells; i++)
-        xtfree(ffnet.layers[i]);
+        free_ff_cell(ffnet.layers[i]);
 }
 
 double fftrainnet(const FFNet ffnet, const double *const pos, const double *const neg, double rate)

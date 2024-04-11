@@ -46,7 +46,7 @@ double sigmoid(const double a);
 double pdsigmoid(const double a);
 double fftrain(const Tinn t, const double *const pos, const double *const neg, double rate);
 Tinn xtbuild(const int nips, const int nhid, const int nops, double (*act)(double), double (*pdact)(double), const double threshold);
-void xtfree(Tinn t);
+void free_ff_cell(Tinn t);
 void embed_label(double *sample, const double *in, const int label, const int insize, const int num_classes);
 void normalize_vector(double *output, int size);
 double goodness(const double *vec, const int size);
