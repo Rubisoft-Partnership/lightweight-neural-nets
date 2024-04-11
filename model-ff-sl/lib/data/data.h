@@ -67,7 +67,7 @@ void parse_data(const Data data, char *line, const int row);
 // Shuffles the data object.
 void shuffle_data(const Data d);
 // Creates a new FFsamples object.
-FFsamples new_ff_samples(const int nips);
+FFsamples new_ff_samples(const int input_size);
 // Frees the memory of a FFsamples object.
 void free_ff_samples(FFsamples s);
 // Generates a positive and a negative sample for the FF algorithm by embedding the one-hot encoded target in the input.

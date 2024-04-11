@@ -2,7 +2,10 @@
  * @file ff-cell.c
  * @brief This file contains the implementation of a FF cell for the FF algorithm.
  *
- * */
+ * The FF cell is a building block of the FF algorithm, which is used for training neural networks.
+ * This file contains the implementation of the FF cell, including functions for forward propagation,
+ * backward propagation, weight initialization, and activation functions.
+ */
 
 #include <ff-cell/ff-cell.h>
 
@@ -18,43 +21,51 @@
 extern double o_buffer[H_BUFFER_SIZE]; // outputs buffer
 
 // Forward pass for a FF cell.
-void fprop(const Tinn t, const double *const in);
+void fprop(const FFCell t, const double *const in);
 // Backward pass for a FF cell.
-static void bprop(const Tinn t, const double *const in_pos, const double *const in_neg,
+static void bprop(const FFCell t, const double *const in_pos, const double *const in_neg,
                   const double rate, const double g_pos, const double g_neg, const Loss loss_suite);
 
 // Random number generation for weights.
-static void wbrand(Tinn t);
+static void wbrand(FFCell t);
 static double frand(void);
 
 // Constructs a FF cell with number of inputs, number of outputs, activation function, and threshold.
-Tinn new_ff_cell(const int nips, const int nops, double (*act)(double), double (*pdact)(double), const double threshold)
+FFCell new_ff_cell(const int input_size, const int output_size, double (*act)(double), double (*pdact)(double), const double threshold)
 {
-    Tinn t;
+    FFCell t;
 
     // Adam optimizer
-    t.adam = adam_create(0.9, 0.999, nips * nops);
+    t.adam = adam_create(0.9, 0.999, input_size * output_size);
     /// TODO: Fix hardcoding of Adam hyperparameters
 
-    t.nw = nips * nops;                         // total number of weights
-    t.w = (double *)calloc(t.nw, sizeof(*t.w)); // weights
-    t.o = (double *)calloc(nops, sizeof(*t.o)); // output neurons
-    t.nips = nips;
-    t.nops = nops;
+    t.nw = input_size * output_size;                             // total number of weights
+    t.weights = (double *)calloc(t.nw, sizeof(*t.weights));      // weights
+    t.output = (double *)calloc(output_size, sizeof(*t.output)); // output neurons
+    t.input_size = input_size;
+    t.output_size = output_size;
     t.act = act;
     t.pdact = pdact;
     t.threshold = threshold;
-    // Randomize weights and biases.
+    // Randomize weights and bias.
     wbrand(t);
     // Log the construction of the FF cell.
     increase_indent();
-    log_debug("Tinn built with %d inputs, %d outputs, and %d weights", nips, nops, t.nw);
+    log_debug("FFCell built with %d inputs, %d outputs, and %d weights", input_size, output_size, t.nw);
     decrease_indent();
     return t;
 }
 
+// Frees object from heap.
+void free_ff_cell(const FFCell t)
+{
+    free(t.weights);
+    free(t.output);
+    adam_free(t.adam);
+}
+
 // Trains a FF cell performing forward and backward pass with given a loss function.
-double train_ff_cell(const Tinn t, const double *const pos, const double *const neg, double rate, const Loss loss_suite)
+double train_ff_cell(const FFCell t, const double *const pos, const double *const neg, double rate, const Loss loss_suite)
 {
     // Increase the indent level for logging
     increase_indent();
@@ -62,29 +73,29 @@ double train_ff_cell(const Tinn t, const double *const pos, const double *const 
     // Positive forward pass.
     fprop(t, pos);
     // Copy positive activation output.
-    memcpy(o_buffer, t.o, t.nops * sizeof(*t.o));
+    memcpy(o_buffer, t.output, t.output_size * sizeof(*t.output));
     // Calculate the goodness of the positive pass.
-    double g_pos = goodness(t.o, t.nops);
+    double g_pos = goodness(t.output, t.output_size);
 
     // Negative forward pass.
     fprop(t, neg);
     // Calculate the goodness of the negative pass.
-    double g_neg = goodness(t.o, t.nops);
+    double g_neg = goodness(t.output, t.output_size);
 
     // Peforms weight update.
     bprop(t, pos, neg, rate, g_pos, g_neg, loss_suite);
 
     // Normalize the output of the layer
-    normalize_vector(t.o, t.nops);
-    normalize_vector(o_buffer, t.nops);
+    normalize_vector(t.output, t.output_size);
+    normalize_vector(o_buffer, t.output_size);
 
     // Calculate the average and standard deviation of weight values for debugging.
     double sum_weights = 0.0;
     double sum_weights_squared = 0.0;
     for (int i = 0; i < t.nw; i++)
     {
-        sum_weights += t.w[i];
-        sum_weights_squared += t.w[i] * t.w[i];
+        sum_weights += t.weights[i];
+        sum_weights_squared += t.weights[i] * t.weights[i];
     }
     double mean_weights = sum_weights / t.nw;
     double std_weights = sqrt((sum_weights_squared / t.nw) - (mean_weights * mean_weights));
@@ -97,26 +108,26 @@ double train_ff_cell(const Tinn t, const double *const pos, const double *const 
 }
 
 // Performs forward propagation.
-void fprop(const Tinn t, const double *const in)
+void fprop(const FFCell t, const double *const in)
 {
     double debug_sum = 0.0;
-    log_debug("Computing forward propagation for Tinn with %d inputs and %d outputs", t.nips, t.nops);
+    log_debug("Computing forward propagation for FFCell with %d inputs and %d outputs", t.input_size, t.output_size);
     // Calculate the activation output for each output unit
-    for (int i = 0; i < t.nops; i++)
+    for (int i = 0; i < t.output_size; i++)
     {
         double sum = 0.0;
         // Calculate the weighted sum of the inputs
-        for (int j = 0; j < t.nips; j++)
-            sum += in[j] * t.w[i * t.nips + j];
+        for (int j = 0; j < t.input_size; j++)
+            sum += in[j] * t.weights[i * t.input_size + j];
         // Store the output of the activation function
-        t.o[i] = t.act(sum + t.b);
-        debug_sum += t.o[i]; // for debugging
+        t.output[i] = t.act(sum + t.bias);
+        debug_sum += t.output[i]; // for debugging
     }
     log_debug("Overall activation output: %f", debug_sum);
 }
 
 // Performs backward pass for the FF algorithm.
-static void bprop(const Tinn t, const double *const in_pos, const double *const in_neg,
+static void bprop(const FFCell t, const double *const in_pos, const double *const in_neg,
                   const double rate, const double g_pos, const double g_neg, const Loss loss_suite)
 {
     // Calculate the partial derivative of the loss with respect to the goodness of the positive and negative pass.
@@ -132,15 +143,15 @@ static void bprop(const Tinn t, const double *const in_pos, const double *const 
     double sum_weight_update_squared = 0.0;
 
     // Update the weights for each connection between input and output units
-    for (int i = 0; i < t.nips; i++)
+    for (int i = 0; i < t.input_size; i++)
     {
-        for (int j = 0; j < t.nops; j++)
+        for (int j = 0; j < t.output_size; j++)
         {
-            int wheight_index = j * t.nips + i;
+            int wheight_index = j * t.input_size + i;
 
             // Calculate the gradient of the loss with respect to the weight for the positive and negative pass
             const double gradient_pos = pdloss_pos * 2.0 * o_buffer[j] * in_pos[i];
-            const double gradient_neg = pdloss_neg * 2.0 * t.o[j] * in_neg[i];
+            const double gradient_neg = pdloss_neg * 2.0 * t.output[j] * in_neg[i];
             const double gradient = gradient_pos + gradient_neg;
             // log_debug("Positive correction gradient_pos: %.10g, negative correction gradient_neg: %.10g", gradient_pos, gradient_neg);
 
@@ -148,9 +159,9 @@ static void bprop(const Tinn t, const double *const in_pos, const double *const 
             const double weight_update = rate * adam_weight_update(t.adam, gradient, wheight_index);
 
             // Update the weight
-            t.w[wheight_index] -= weight_update;
+            t.weights[wheight_index] -= weight_update;
             // log_debug("Weight update: %.17g", weight_update);
-            // log_debug("Weight after correction: %.17g", t.w[j * t.nips + i]);
+            // log_debug("Weight after correction: %.17g", t.weights[j * t.input_size + i]);
 
             // Update statistics about weight updates.
             if (weight_update != 0.0)
@@ -187,20 +198,12 @@ double pdrelu(const double a)
     return a > 0.0 ? 1.0 : 0.0;
 }
 
-// Frees object from heap.
-void free_ff_cell(const Tinn t)
-{
-    free(t.w);
-    free(t.o);
-    adam_free(t.adam);
-}
-
-// Randomizes tinn weights and biases.
-static void wbrand(Tinn t)
+// Randomizes tinn weights and bias.
+static void wbrand(FFCell t)
 {
     for (int i = 0; i < t.nw; i++)
-        t.w[i] = frand() - 0.5;
-    t.b = frand() - 0.5;
+        t.weights[i] = frand() - 0.5;
+    t.bias = frand() - 0.5;
 }
 
 // Returns random doulbe in [0.0 - 1.0]

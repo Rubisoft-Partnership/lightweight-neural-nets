@@ -1,3 +1,23 @@
+/**
+ * @file main.c
+ * @brief This file contains the main function and related functions for training and evaluating a feedforward neural network.
+ *
+ * The main function sets up the necessary components, trains the neural network, and evaluates its performance.
+ * The code includes the necessary header files and defines the input and output sizes, layers sizes, and hyperparameters.
+ * It also defines the data structure for storing the input data and the neural network model.
+ *
+ * The setup function initializes the necessary components such as logging and data structures.
+ *
+ * The train_loop function performs the training loop, shuffling the data, generating samples, and updating the neural network weights.
+ *
+ * The evaluate function tests the trained neural network by making predictions on test data and calculating the confusion matrix.
+ *
+ * The main function calls the setup function, performs the training loop, calls the evaluate function, and cleans up the resources.
+ *
+ * @note This code assumes that the necessary header files and libraries are available.
+ * @note The input and output sizes, layers sizes, and hyperparameters are hard-coded in this code.
+ * @note The code assumes that the data structure and functions for data manipulation, logging, losses, and the confusion matrix are available.
+ */
 #include <time.h>
 #include <stdlib.h>
 
@@ -11,11 +31,12 @@
 
 // Input and output size is harded coded here as machine learning
 // repositories usually don't include the input and output size in the data itself.
-const int nips = DATA_FEATURES;
-const int nops = DATA_CLASSES;
+const int input_size = DATA_FEATURES;
+const int num_classes = DATA_CLASSES;
 const int layers_sizes[] = {DATA_FEATURES, 500};
 
 const int layers_number = sizeof(layers_sizes) / sizeof(layers_sizes[0]);
+
 // Hyper Parameters.
 double rate = 0.001;
 const int epochs = 5;
@@ -37,14 +58,14 @@ static void setup(void)
     log_debug("FFNet built with the following layers:");
     increase_indent();
     for (int i = 0; i < ffnet.num_cells; i++)
-        log_debug("Layer %d: %d inputs, %d outputs", i, ffnet.layers[i].nips, ffnet.layers[i].nops);
+        log_debug("Layer %d: %d inputs, %d outputs", i, ffnet.layers[i].input_size, ffnet.layers[i].output_size);
     decrease_indent();
 }
 
 static void train_loop(void)
 {
     clock_t start_time = clock();
-    FFsamples samples = new_ff_samples(nips);
+    FFsamples samples = new_ff_samples(input_size);
     for (int i = 0; i < epochs; i++)
     {
         clock_t epoch_start_time = clock();
@@ -52,17 +73,17 @@ static void train_loop(void)
         log_info("Epoch %d", i);
         increase_indent();
         shuffle_data(data);
-        double error = 0.0f;
+        double loss = 0.0f;
         for (int j = 0; j < data.rows; j++)
         {
             generate_samples(data, j, samples);
-            error = train_ff_net(ffnet, samples.pos, samples.neg, rate);
+            loss = train_ff_net(ffnet, samples.pos, samples.neg, rate);
         }
-         printf("\tLoss %.12f :: learning rate %f\n",
-             (double)error, // / i,
-             (double)rate);
-         double epoch_time = (double)(clock() - epoch_start_time) / CLOCKS_PER_SEC;
-         printf("\tEpoch time: %.2f seconds\n", epoch_time);
+        printf("\tLoss %.12f :: learning rate %f\n",
+               (double)loss,
+               (double)rate);
+        double epoch_time = (double)(clock() - epoch_start_time) / CLOCKS_PER_SEC;
+        printf("\tEpoch time: %.2f seconds\n", epoch_time);
         decrease_indent();
     }
     double total_time = (double)(clock() - start_time) / CLOCKS_PER_SEC;
@@ -87,7 +108,7 @@ void evaluate(void)
                 break;
             }
         }
-        const int pd = predict_ff_net(ffnet, in, nops, nips);
+        const int pd = predict_ff_net(ffnet, in, num_classes, input_size);
         addPrediction(gt, pd);
     }
     printf("\n");

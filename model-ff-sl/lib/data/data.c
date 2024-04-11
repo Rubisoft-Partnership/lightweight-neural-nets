@@ -56,11 +56,11 @@ void shuffle_data(const Data d)
 }
 
 // Instantiates a new FFsamples object
-FFsamples new_ff_samples(const int nips)
+FFsamples new_ff_samples(const int input_size)
 {
     FFsamples s = {
-        (double *)malloc((nips) * sizeof(double)),
-        (double *)malloc((nips) * sizeof(double))};
+        (double *)malloc((input_size) * sizeof(double)),
+        (double *)malloc((input_size) * sizeof(double))};
     return s;
 }
 
