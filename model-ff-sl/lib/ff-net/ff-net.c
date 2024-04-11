@@ -1,6 +1,6 @@
 /**
  * @file ff-net.c
- * @brief This file contains the implementation of a feedforward neural network.
+ * @brief This file contains the implementation of a FFNet for the FF algorithm.
  *
  * */
 
@@ -15,13 +15,13 @@
 #include <logging/logging.h>
 #include <ff-cell/ff-cell.h>
 
-// Buffer to store hidden activations and output activations.
+// Buffer to store output activations.
 #define H_BUFFER_SIZE 1024
 double o_buffer[H_BUFFER_SIZE]; // outputs buffer for positive pass
 
 
-// Builds a FFNet by creating multiple Tinn objects. layer_sizes includes the number of inputs, hidden neurons, and outputs units.
-FFNet ffnetbuild(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double treshold, Loss loss_suite)
+// Builds a FFNet by creating multiple Tinn objects. layer_sizes includes the number of inputs and outputs units.
+FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double treshold, Loss loss_suite)
 {
     FFNet ffnet;
     ffnet.loss_suite = loss_suite;

@@ -33,7 +33,7 @@ static void setup(void)
 
     data = build();
     Loss loss_suite = LOSS_FF;
-    ffnet = ffnetbuild(layers_sizes, layers_number, relu, pdrelu, threshold, loss_suite);
+    ffnet = new_ff_net(layers_sizes, layers_number, relu, pdrelu, threshold, loss_suite);
     log_debug("FFNet built with the following layers:");
     increase_indent();
     for (int i = 0; i < ffnet.num_cells; i++)
