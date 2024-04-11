@@ -35,6 +35,7 @@ FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), 
     FFNet ffnet;
     ffnet.loss_suite = loss_suite;
     ffnet.num_cells = num_layers - 1;
+    ffnet.threshold = treshold;
 
     log_info("Building FFNet with %d layers, %d ff cells", num_layers, ffnet.num_cells);
     char layers_str[256];
@@ -48,7 +49,7 @@ FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), 
     log_info("Layers: %s", layers_str);
 
     for (int i = 0; i < ffnet.num_cells; i++)
-        ffnet.layers[i] = new_ff_cell(layer_sizes[i], layer_sizes[i + 1], act, pdact, treshold);
+        ffnet.layers[i] = new_ff_cell(layer_sizes[i], layer_sizes[i + 1], act, pdact);
     return ffnet;
 }
 
@@ -75,9 +76,9 @@ void free_ff_net(FFNet ffnet)
 double train_ff_net(const FFNet ffnet, const double *const pos, const double *const neg, double rate)
 {
     double loss = 0.0;
-    loss += train_ff_cell(ffnet.layers[0], pos, neg, rate, ffnet.loss_suite);
+    loss += train_ff_cell(ffnet.layers[0], pos, neg, rate, ffnet.threshold, ffnet.loss_suite);
     for (int i = 1; i < ffnet.num_cells; i++)
-        loss += train_ff_cell(ffnet.layers[i], o_buffer, ffnet.layers[i - 1].output, rate, ffnet.loss_suite);
+        loss += train_ff_cell(ffnet.layers[i], o_buffer, ffnet.layers[i - 1].output, rate, ffnet.threshold, ffnet.loss_suite);
     return loss;
 }
 

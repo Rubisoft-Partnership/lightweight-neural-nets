@@ -30,10 +30,9 @@ typedef struct
     double *weights;    /**< All the weights. */
     double bias;        /**< Biases. */
     double *output;     /**< Output layer. */
-    int nw;             /**< Number of weights. */
+    int num_weights;             /**< Number of weights. */
     int input_size;     /**< Number of inputs. */
     int output_size;    /**< Number of outputs. */
-    double threshold;   /**< Hyperparameter for the FF algorithm. */
     double (*act)(const double);     /**< Activation function. */
     double (*pdact)(const double);   /**< Derivative of activation function. */
     Adam adam;          /**< Adam optimizer. */
@@ -62,31 +61,31 @@ double pdrelu(const double a);
  * @param threshold The hyperparameter for the FF algorithm.
  * @return The newly generated FFCell.
  */
-FFCell new_ff_cell(const int input_size, const int output_size, double (*act)(double), double (*pdact)(double), const double threshold);
+FFCell new_ff_cell(const int input_size, const int output_size, double (*act)(double), double (*pdact)(double));
 
 /**
  * @brief Frees the memory of a FFCell.
- * @param t The FFCell to be freed.
+ * @param ffcell The FFCell to be freed.
  */
-void free_ff_cell(FFCell t);
+void free_ff_cell(FFCell ffcell);
 
 /**
  * @brief Trains a FFCell by performing forward and backward pass with a given loss function.
- * @param t The FFCell to be trained.
+ * @param ffcell The FFCell to be trained.
  * @param pos The positive samples.
  * @param neg The negative samples.
  * @param rate The learning rate.
  * @param loss_suite The loss function suite.
  * @return The loss value after training.
  */
-double train_ff_cell(const FFCell t, const double *const pos, const double *const neg, double rate, const Loss loss_suite);
+double train_ff_cell(const FFCell ffcell, const double *const pos, const double *const neg, double rate, const double threshold, const Loss loss_suite);
 
 /**
  * @brief Performs the forward pass for a FFCell.
- * @param t The FFCell.
+ * @param ffcell The FFCell.
  * @param in The input values.
  */
-void fprop(const FFCell t, const double *const in);
+void fprop(const FFCell ffcell, const double *const in);
 
 /**
  * @brief Generates a sample with the label embedded.

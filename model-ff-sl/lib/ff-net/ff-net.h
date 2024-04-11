@@ -16,12 +16,13 @@
  * @struct FFNet
  * @brief Struct that represents a forward forward neural network.
  *
- * The FFNet struct contains an array of FFCell blocks, the number of cells, and the loss function suite.
+ * The FFNet struct contains an array of FFCell blocks, the number of cells, the threshold value, and the loss function suite.
  */
 typedef struct
 {
     FFCell layers[MAX_LAYERS_NUM];  ///< Array of FFCell blocks in the network.
     int num_cells;                  ///< Number of cells in the network.
+    double threshold;               ///< Threshold value for the cells in the network.
     Loss loss_suite;                ///< Loss function suite for the network.
 } FFNet;
 
