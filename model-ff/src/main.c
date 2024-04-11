@@ -61,7 +61,7 @@ void evaluate(void)
     {
         double *const in = data.in[i];
         double *const tg = data.tg[i];
-        const int pd = ffpredictnet(ffnet, in, nops, nips);
+        const int pd = predict_ff_net(ffnet, in, nops, nips);
         // Prints target.
         for (int i = 0; i < data.num_class; i++)
         {

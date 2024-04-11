@@ -61,7 +61,7 @@ double train_ff_net(const FFNet ffnet, const double *const pos, const double *co
 }
 
 // Inference function for FFNet.
-int ffpredictnet(const FFNet ffnet, const double *in, const int num_classes, const int insize)
+int predict_ff_net(const FFNet ffnet, const double *in, const int num_classes, const int insize)
 {
     log_debug("Predicting sample on model with cells: %d", ffnet.num_cells);
     double *netinput = (double *)malloc((insize) * sizeof(double));
@@ -70,6 +70,7 @@ int ffpredictnet(const FFNet ffnet, const double *in, const int num_classes, con
     for (int i = 0; i < num_classes; i++)
         goodnesses[i] = 0.0;
 
+    // For each class.
     for (int label = 0; label < num_classes; label++)
     {
         embed_label(netinput, in, label, insize, num_classes);

@@ -87,7 +87,7 @@ void evaluate(void)
                 break;
             }
         }
-        const int pd = ffpredictnet(ffnet, in, nops, nips);
+        const int pd = predict_ff_net(ffnet, in, nops, nips);
         addPrediction(gt, pd);
     }
     printf("\n");
