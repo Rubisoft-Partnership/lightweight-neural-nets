@@ -17,7 +17,7 @@ typedef struct
 
 double fftrainnet(const FFNet ffnet, const double *const pos, const double *const neg, double rate);
 FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double treshold, Loss loss_suite);
-void ffnetfree(FFNet ffnet);
+void free_ff_net(FFNet ffnet);
 int ffpredictnet(const FFNet ffnet, const double *in, const int num_classes, const int insize);
 
 // Activation function.

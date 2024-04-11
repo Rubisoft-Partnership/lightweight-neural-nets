@@ -106,7 +106,7 @@ int main(void)
 
     dfree(data);
     close_log_file();
-    ffnetfree(ffnet);
+    free_ff_net(ffnet);
 
     return 0;
 }

@@ -44,7 +44,7 @@ FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), 
 }
 
 // Frees the memory of a FFNet.
-void ffnetfree(FFNet ffnet)
+void free_ff_net(FFNet ffnet)
 {
     for (int i = 0; i < ffnet.num_cells; i++)
         free_ff_cell(ffnet.layers[i]);
