@@ -50,14 +50,14 @@ void free_ff_net(FFNet ffnet)
         free_ff_cell(ffnet.layers[i]);
 }
 
-double fftrainnet(const FFNet ffnet, const double *const pos, const double *const neg, double rate)
+// Trains a FFNet by training each cell.
+double train_ff_net(const FFNet ffnet, const double *const pos, const double *const neg, double rate)
 {
-    double error = 0.0;
-    error += train_ff_cell(ffnet.layers[0], pos, neg, rate, ffnet.loss_suite);
+    double loss = 0.0;
+    loss += train_ff_cell(ffnet.layers[0], pos, neg, rate, ffnet.loss_suite);
     for (int i = 1; i < ffnet.num_cells; i++)
-        error += train_ff_cell(ffnet.layers[i], o_buffer, ffnet.layers[i - 1].o, rate, ffnet.loss_suite);
-    // printf("error: %f\n", error);
-    return error;
+        loss += train_ff_cell(ffnet.layers[i], o_buffer, ffnet.layers[i - 1].o, rate, ffnet.loss_suite);
+    return loss;
 }
 
 // Inference function for FFNet.

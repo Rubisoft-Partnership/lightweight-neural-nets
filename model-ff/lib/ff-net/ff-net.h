@@ -14,7 +14,7 @@ typedef struct
     int num_hid_layers;
 } FFNet;
 
-double fftrainnet(const FFNet ffnet, const double *const pos, const double *const neg, double rate);
+double train_ff_net(const FFNet ffnet, const double *const pos, const double *const neg, double rate);
 FFNet ffnetbuild(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double treshold);
 void free_ff_net(FFNet ffnet);
 int ffpredictnet(const FFNet ffnet, const double *in, const int num_classes, const int insize);

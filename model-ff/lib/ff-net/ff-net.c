@@ -50,7 +50,7 @@ FFNet ffnetbuild(const int *layer_sizes, int num_layers, double (*act)(double), 
     return ffnet;
 }
 
-double fftrainnet(const FFNet ffnet, const double *const pos, const double *const neg, double rate)
+double train_ff_net(const FFNet ffnet, const double *const pos, const double *const neg, double rate)
 {
     // printf("Training FFNet...\n");
     double error = 0.0;

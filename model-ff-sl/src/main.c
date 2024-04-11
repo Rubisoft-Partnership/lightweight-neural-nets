@@ -56,7 +56,7 @@ static void train_loop(void)
         for (int j = 0; j < data.rows; j++)
         {
             generate_samples(data, j, samples);
-            error = fftrainnet(ffnet, samples.pos, samples.neg, rate);
+            error = train_ff_net(ffnet, samples.pos, samples.neg, rate);
         }
          printf("\tLoss %.12f :: learning rate %f\n",
              (double)error, // / i,
