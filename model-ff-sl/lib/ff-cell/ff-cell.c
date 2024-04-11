@@ -37,14 +37,16 @@ Tinn new_ff_cell(const int nips, const int nops, double (*act)(double), double (
     /// TODO: Fix hardcoding of Adam hyperparameters
 
     t.nw = nips * nops;                         // total number of weights
-    t.w = (double *)calloc(t.nw, sizeof(*t.w)); // weights (both [intput to hidden] and [hidden to output])
+    t.w = (double *)calloc(t.nw, sizeof(*t.w)); // weights
     t.o = (double *)calloc(nops, sizeof(*t.o)); // output neurons
     t.nips = nips;
     t.nops = nops;
     t.act = act;
     t.pdact = pdact;
     t.threshold = threshold;
+    // Randomize weights and biases.
     wbrand(t);
+    // Log the construction of the FF cell.
     increase_indent();
     log_debug("Tinn built with %d inputs, %d outputs, and %d weights", nips, nops, t.nw);
     decrease_indent();
