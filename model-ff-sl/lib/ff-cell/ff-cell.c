@@ -21,7 +21,7 @@
 extern double o_buffer[H_BUFFER_SIZE]; // outputs buffer
 
 // Forward pass for a FF cell.
-void fprop(const FFCell ffcell, const double *const in);
+void fprop_ff_cell(const FFCell ffcell, const double *const in);
 // Backward pass for a FF cell.
 static void bprop(const FFCell ffcell, const double *const in_pos, const double *const in_neg,
                   const double rate, const double g_pos, const double g_neg, const double threshold, const Loss loss_suite);
@@ -70,14 +70,14 @@ double train_ff_cell(const FFCell t, const double *const pos, const double *cons
     increase_indent();
 
     // Positive forward pass.
-    fprop(ffcell, pos);
+    fprop_ff_cell(ffcell, pos);
     // Copy positive activation output.
     memcpy(o_buffer, ffcell.output, ffcell.output_size * sizeof(*ffcell.output));
     // Calculate the goodness of the positive pass.
     double g_pos = goodness(ffcell.output, ffcell.output_size);
 
     // Negative forward pass.
-    fprop(ffcell, neg);
+    fprop_ff_cell(ffcell, neg);
     // Calculate the goodness of the negative pass.
     double g_neg = goodness(ffcell.output, ffcell.output_size);
 
@@ -107,7 +107,7 @@ double train_ff_cell(const FFCell t, const double *const pos, const double *cons
 }
 
 // Performs forward propagation.
-void fprop(const FFCell ffcell, const double *const in)
+void fprop_ff_cell(const FFCell ffcell, const double *const in)
 {
     double debug_sum = 0.0;
     log_debug("Computing forward propagation for FFCell with %d inputs and %d outputs", ffcell.input_size, ffcell.output_size);

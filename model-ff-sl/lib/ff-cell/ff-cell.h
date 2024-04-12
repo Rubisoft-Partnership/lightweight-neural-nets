@@ -38,19 +38,6 @@ typedef struct
     Adam adam;          /**< Adam optimizer. */
 } FFCell;
 
-/**
- * @brief Activation function: Rectified Linear Unit (ReLU).
- * @param a The input value.
- * @return The output value after applying the ReLU activation function.
- */
-double relu(const double a);
-
-/**
- * @brief Derivative of the ReLU activation function.
- * @param a The input value.
- * @return The derivative of the ReLU activation function at the given input value.
- */
-double pdrelu(const double a);
 
 /**
  * @brief Generates a new FFCell.
@@ -85,29 +72,18 @@ double train_ff_cell(const FFCell ffcell, const double *const pos, const double 
  * @param ffcell The FFCell.
  * @param in The input values.
  */
-void fprop(const FFCell ffcell, const double *const in);
+void fprop_ff_cell(const FFCell ffcell, const double *const in);
 
 /**
- * @brief Generates a sample with the label embedded.
- * @param sample The output sample.
- * @param in The input values.
- * @param label The label to be embedded.
- * @param insize The size of the input.
- * @param num_classes The number of classes.
+ * @brief Activation function: Rectified Linear Unit (ReLU).
+ * @param a The input value.
+ * @return The output value after applying the ReLU activation function.
  */
-void embed_label(double *sample, const double *in, const int label, const int insize, const int num_classes);
+double relu(const double a);
 
 /**
- * @brief Normalizes a vector.
- * @param output The output vector.
- * @param size The size of the vector.
+ * @brief Derivative of the ReLU activation function.
+ * @param a The input value.
+ * @return The derivative of the ReLU activation function at the given input value.
  */
-void normalize_vector(double *output, int size);
-
-/**
- * @brief Calculates the goodness of a vector.
- * @param vec The input vector.
- * @param size The size of the vector.
- * @return The goodness value.
- */
-double goodness(const double *vec, const int size);
+double pdrelu(const double a);

@@ -14,6 +14,7 @@
 
 #include <logging/logging.h>
 #include <ff-cell/ff-cell.h>
+#include <ff-utils/ff-utils.h>
 
 // Buffer to store output activations.
 #define H_BUFFER_SIZE 1024
@@ -106,7 +107,7 @@ int predict_ff_net(const FFNet ffnet, const double *input, const int num_classes
         embed_label(netinput, input, label, input_size, num_classes);
         for (int i = 0; i < ffnet.num_cells; i++)
         {
-            fprop(ffnet.layers[i], i == 0 ? netinput : ffnet.layers[i - 1].output);
+            fprop_ff_cell(ffnet.layers[i], i == 0 ? netinput : ffnet.layers[i - 1].output);
             goodnesses[label] += goodness(ffnet.layers[i].output, ffnet.layers[i].output_size);
             normalize_vector(ffnet.layers[i].output, ffnet.layers[i].output_size);
             log_debug("Forward propagated label %d to network cell %d with cumulative goodness: %f", label, i, goodnesses[label]);
