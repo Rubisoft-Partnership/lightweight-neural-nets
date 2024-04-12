@@ -1,9 +1,24 @@
+/**
+ * @file utils.c
+ * @brief This file contains utility functions for the lightweight neural network model.
+ *
+ * This file includes the necessary header files and defines utility functions used in the model.
+ * The functions in this file provide various utility operations such as file I/O, memory allocation, and random number generation.
+ */
+
 #include <stdlib.h>
 
 #include <utils/utils.h>
 
-// Return the number of lines in a file.
-int lns(FILE *const file)
+/**
+ * @brief Return the number of lines in a file.
+ *
+ * This function counts the number of lines in a given file.
+ *
+ * @param file The file to count the lines from.
+ * @return The number of lines in the file.
+ */
+int file_lines(FILE *const file)
 {
     int ch = EOF;
     int lines = 0;
@@ -20,8 +35,15 @@ int lns(FILE *const file)
     return lines;
 }
 
-// Read a line from a file.
-char *readln(FILE *const file)
+/**
+ * @brief Read a line from a file.
+ *
+ * This function reads a line from a given file and returns it as a dynamically allocated string.
+ *
+ * @param file The file to read the line from.
+ * @return The read line as a dynamically allocated string.
+ */
+char *read_line_from_file(FILE *const file)
 {
     int ch = EOF;
     int reads = 0;
@@ -37,8 +59,16 @@ char *readln(FILE *const file)
     return line;
 }
 
-// Create a matrix of doubles.
-double **new2d(const int rows, const int cols)
+/**
+ * @brief Create a matrix of doubles.
+ *
+ * This function creates a matrix of doubles with the specified number of rows and columns.
+ *
+ * @param rows The number of rows in the matrix.
+ * @param cols The number of columns in the matrix.
+ * @return The created matrix.
+ */
+double **new_matrix(const int rows, const int cols)
 {
     double **row = (double **)malloc((rows) * sizeof(double *));
     for (int r = 0; r < rows; r++)
@@ -46,19 +76,30 @@ double **new2d(const int rows, const int cols)
     return row;
 }
 
-static int seed = 0;
+static int current_seed = 0;
 
-
-void set_seed(const int s)
+/**
+ * @brief Set the seed for random number generation.
+ *
+ * This function sets the seed for generating random numbers.
+ *
+ * @param seed The seed value to set.
+ */
+void set_seed(const int seed)
 {
-    seed = s;
+    current_seed = seed;
 }
 
-// Generate a random number
+/**
+ * @brief Generate a random number.
+ *
+ * This function generates a random number using the current seed value.
+ *
+ * @return The generated random number.
+ */
 int get_random(void)
 {
-    srand(seed);
-    seed = rand();
+    srand(current_seed);
+    current_seed = rand();
     return rand();
 }
-

@@ -20,7 +20,7 @@
 Data new_data(const int feature_len, const int num_class, const int rows)
 {
     const Data data = {
-        new2d(rows, feature_len), new2d(rows, num_class), feature_len, num_class, rows};
+        new_matrix(rows, feature_len), new_matrix(rows, num_class), feature_len, num_class, rows};
     return data;
 }
 
@@ -145,11 +145,11 @@ Data data_build(void)
         printf("Could not open %s\n", DATA_DATASET_PATH);
         exit(1);
     }
-    const int rows = lns(file);
+    const int rows = file_lines(file);
     Data data = new_data(DATA_FEATURES, DATA_CLASSES, rows);
     for (int row = 0; row < rows; row++)
     {
-        char *line = readln(file);
+        char *line = read_line_from_file(file);
         parse_data(data, line, row);
         free(line);
     }
