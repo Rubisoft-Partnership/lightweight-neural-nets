@@ -22,26 +22,46 @@ extern double o_buffer[H_BUFFER_SIZE]; // outputs buffer
 
 // Forward pass for a FF cell.
 void fprop_ff_cell(const FFCell ffcell, const double *const in);
-// Backward pass for a FF cell.
-static void bprop(const FFCell ffcell, const double *const in_pos, const double *const in_neg,
-                  const double rate, const double g_pos, const double g_neg, const double threshold, const Loss loss_suite);
+/**
+ * Performs the backward pass for a feedforward (FF) cell.
+ *
+ * @param ffcell The FF cell to perform the backward pass on.
+ * @param in_pos The positive input values for the cell.
+ * @param in_neg The negative input values for the cell.
+ * @param g_pos The gradient of the positive input values.
+ * @param g_neg The gradient of the negative input values.
+ * @param learning_rate The learning rate for the cell.
+ * @param threshold The threshold value for the cell.
+ * @param loss_suite The loss function suite to use for computing gradients.
+ */
+static void bprop(const FFCell ffcell, const double *const in_pos, const double *const in_neg, const double g_pos, const double g_neg, const double learning_rate, const double threshold, const Loss loss_suite);
 
 // Random number generation for weights.
 static void wbrand(FFCell ffcell);
 static double frand(void);
 
-// Constructs a FF cell with number of inputs, number of outputs, activation function, and threshold.
-FFCell new_ff_cell(const int input_size, const int output_size, double (*act)(double), double (*pdact)(double))
+/**
+ * Constructs a FF cell with the specified number of inputs, number of outputs, activation function,
+ * and threshold.
+ *
+ * @param input_size The number of inputs for the FF cell.
+ * @param output_size The number of outputs for the FF cell.
+ * @param act The activation function for the FF cell.
+ * @param pdact The derivative of the activation function for the FF cell.
+ * @param beta1 The beta1 parameter for the Adam optimizer.
+ * @param beta2 The beta2 parameter for the Adam optimizer.
+ * @return The constructed FF cell.
+ */
+FFCell new_ff_cell(const int input_size, const int output_size, double (*act)(double), double (*pdact)(double), const double beta1, const double beta2)
 {
     FFCell ffcell;
+    ffcell.num_weights = input_size * output_size; // total number of weights
 
     // Adam optimizer
-    ffcell.adam = adam_create(0.9, 0.999, input_size * output_size);
-    /// TODO: Fix hardcoding of Adam hyperparameters
+    ffcell.adam = adam_create(beta1, beta2, ffcell.num_weights);
 
-    ffcell.num_weights = input_size * output_size;                             // total number of weights
-    ffcell.weights = (double *)calloc(ffcell.num_weights, sizeof(*ffcell.weights));      // weights
-    ffcell.output = (double *)calloc(output_size, sizeof(*ffcell.output)); // output neurons
+    ffcell.weights = (double *)calloc(ffcell.num_weights, sizeof(*ffcell.weights)); // weights
+    ffcell.output = (double *)calloc(output_size, sizeof(*ffcell.output));          // output neurons
     ffcell.input_size = input_size;
     ffcell.output_size = output_size;
     ffcell.act = act;
@@ -63,8 +83,17 @@ void free_ff_cell(const FFCell ffcell)
     adam_free(ffcell.adam);
 }
 
-// Trains a FF cell performing forward and backward pass with given a loss function.
-double train_ff_cell(const FFCell t, const double *const pos, const double *const neg, double rate, const double threshold, const Loss loss_suite)
+/**
+ * @brief Trains a FFCell by performing forward and backward pass with a given loss function.
+ * @param ffcell The FFCell to be trained.
+ * @param pos The positive samples.
+ * @param neg The negative samples.
+ * @param learning_rate The learning rate for the training.
+ * @param threshold The threshold value for the FFCell.
+ * @param loss_suite The loss function suite.
+ * @return The loss value after training.
+ */
+double train_ff_cell(const FFCell ffcell, const double *const pos, const double *const neg, const double learning_rate, const double threshold, const Loss loss_suite)
 {
     // Increase the indent level for logging
     increase_indent();
@@ -82,7 +111,7 @@ double train_ff_cell(const FFCell t, const double *const pos, const double *cons
     double g_neg = goodness(ffcell.output, ffcell.output_size);
 
     // Peforms weight update.
-    bprop(ffcell, pos, neg, rate, g_pos, g_neg, threshold, loss_suite);
+    bprop(ffcell, pos, neg, g_pos, g_neg, learning_rate, threshold, loss_suite);
 
     // Normalize the output of the layer
     normalize_vector(ffcell.output, ffcell.output_size);
@@ -126,8 +155,7 @@ void fprop_ff_cell(const FFCell ffcell, const double *const in)
 }
 
 // Performs backward pass for the FF algorithm.
-static void bprop(const FFCell ffcell, const double *const in_pos, const double *const in_neg,
-                  const double rate, const double g_pos, const double g_neg, const double threshold, const Loss loss_suite)
+static void bprop(const FFCell ffcell, const double *const in_pos, const double *const in_neg, const double g_pos, const double g_neg, const double learning_rate, const double threshold, const Loss loss_suite)
 {
     // Calculate the partial derivative of the loss with respect to the goodness of the positive and negative pass.
     const double pdloss_pos = loss_suite.pdloss_pos(g_pos, g_neg, threshold);
@@ -155,7 +183,7 @@ static void bprop(const FFCell ffcell, const double *const in_pos, const double 
             // log_debug("Positive correction gradient_pos: %.10g, negative correction gradient_neg: %.10g", gradient_pos, gradient_neg);
 
             // Weight update using Adam optimizer
-            const double weight_update = rate * adam_weight_update(ffcell.adam, gradient, wheight_index);
+            const double weight_update = learning_rate * adam_weight_update(ffcell.adam, gradient, wheight_index);
 
             // Update the weight
             ffcell.weights[wheight_index] -= weight_update;

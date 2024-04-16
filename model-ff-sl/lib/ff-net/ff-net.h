@@ -20,26 +20,30 @@
  */
 typedef struct
 {
-    FFCell layers[MAX_LAYERS_NUM];  ///< Array of FFCell blocks in the network.
-    int num_cells;                  ///< Number of cells in the network.
-    double threshold;               ///< Threshold value for the cells in the network.
-    Loss loss_suite;                ///< Loss function suite for the network.
+    FFCell layers[MAX_LAYERS_NUM]; ///< Array of FFCell blocks in the network.
+    int num_cells;                 ///< Number of cells in the network.
+    double threshold;              ///< Threshold value for the cells in the network.
+    Loss loss_suite;               ///< Loss function suite for the network.
 } FFNet;
 
 /**
- * @brief Builds a new FFNet by creating multiple FFCell objects.
+ * @brief Builds a FFNet by creating multiple FFCell objects.
  *
- * This function creates a new FFNet by initializing the layers with the given layer sizes, activation function, and threshold.
+ * This function constructs a feedforward neural network (FFNet) by creating multiple FFCell objects.
+ * The FFNet is built based on the provided layer sizes, activation function, derivative of the activation function,
+ * threshold value, beta1, beta2, and loss function suite.
  *
- * @param layer_sizes An array of integers representing the sizes of each layer in the network.
- * @param num_layers The number of layers in the network.
- * @param act The activation function for the cells in the network.
- * @param pdact The derivative of the activation function for the cells in the network.
- * @param threshold The threshold value for the cells in the network.
- * @param loss_suite The loss function suite for the network.
- * @return The newly created FFNet.
+ * @param layer_sizes The array of layer sizes, including the number of input and output units.
+ * @param num_layers The number of layers in the FFNet.
+ * @param act The activation function for the FFNet.
+ * @param pdact The derivative of the activation function for the FFNet.
+ * @param treshold The threshold value for the FFNet.
+ * @param beta1 The beta1 value of the Adam optimizer\.
+ * @param beta2 The beta2 value of the Adam optimizer\.
+ * @param loss_suite The loss function suite for the FFNet.
+ * @return FFNet The constructed FFNet.
  */
-FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double threshold, Loss loss_suite);
+FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double threshold, double beta1, double beta2, Loss loss_suite);
 
 /**
  * @brief Frees the memory allocated for a FFNet.
@@ -58,10 +62,10 @@ void free_ff_net(FFNet ffnet);
  * @param ffnet The FFNet to train.
  * @param pos Array of the positive sample.
  * @param neg Array of the negative sample.
- * @param rate The learning rate for training.
+ * @param learning_rate The learning rate for the training.
  * @return The training loss.
  */
-double train_ff_net(const FFNet ffnet, const double *const pos, const double *const neg, double rate);
+double train_ff_net(const FFNet ffnet, const double *const pos, const double *const neg, const double learning_rate);
 
 /**
  * @brief Performs inference with a FFNet.
@@ -75,6 +79,3 @@ double train_ff_net(const FFNet ffnet, const double *const pos, const double *co
  * @return The predicted class label.
  */
 int predict_ff_net(const FFNet ffnet, const double *input, const int num_classes, const int input_size);
-
-
-

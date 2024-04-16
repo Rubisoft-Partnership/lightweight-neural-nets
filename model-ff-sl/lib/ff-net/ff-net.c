@@ -23,15 +23,21 @@ double o_buffer[H_BUFFER_SIZE]; // outputs buffer for positive pass
 /**
  * @brief Builds a FFNet by creating multiple FFCell objects.
  *
+ * This function constructs a feedforward neural network (FFNet) by creating multiple FFCell objects.
+ * The FFNet is built based on the provided layer sizes, activation function, derivative of the activation function,
+ * threshold value, beta1, beta2, and loss function suite.
+ *
  * @param layer_sizes The array of layer sizes, including the number of input and output units.
  * @param num_layers The number of layers in the FFNet.
  * @param act The activation function for the FFNet.
  * @param pdact The derivative of the activation function for the FFNet.
  * @param treshold The threshold value for the FFNet.
+ * @param beta1 The beta1 value of the Adam optimizer\.
+ * @param beta2 The beta2 value of the Adam optimizer\.
  * @param loss_suite The loss function suite for the FFNet.
  * @return FFNet The constructed FFNet.
  */
-FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double treshold, Loss loss_suite)
+FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double treshold, const double beta1, const double beta2, Loss loss_suite)
 {
     FFNet ffnet;
     ffnet.loss_suite = loss_suite;
@@ -50,7 +56,7 @@ FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), 
     log_info("Layers: %s", layers_str);
 
     for (int i = 0; i < ffnet.num_cells; i++)
-        ffnet.layers[i] = new_ff_cell(layer_sizes[i], layer_sizes[i + 1], act, pdact);
+        ffnet.layers[i] = new_ff_cell(layer_sizes[i], layer_sizes[i + 1], act, pdact, beta1, beta2);
     return ffnet;
 }
 
@@ -71,15 +77,15 @@ void free_ff_net(FFNet ffnet)
  * @param ffnet The FFNet to train.
  * @param pos The positive training data.
  * @param neg The negative training data.
- * @param rate The learning rate.
+ * @param learning_rate The learning rate for the training.
  * @return double The total loss of the FFNet.
  */
-double train_ff_net(const FFNet ffnet, const double *const pos, const double *const neg, double rate)
+double train_ff_net(const FFNet ffnet, const double *const pos, const double *const neg, const double learning_rate)
 {
     double loss = 0.0;
-    loss += train_ff_cell(ffnet.layers[0], pos, neg, rate, ffnet.threshold, ffnet.loss_suite);
+    loss += train_ff_cell(ffnet.layers[0], pos, neg, learning_rate, ffnet.threshold, ffnet.loss_suite);
     for (int i = 1; i < ffnet.num_cells; i++)
-        loss += train_ff_cell(ffnet.layers[i], o_buffer, ffnet.layers[i - 1].output, rate, ffnet.threshold, ffnet.loss_suite);
+        loss += train_ff_cell(ffnet.layers[i], o_buffer, ffnet.layers[i - 1].output, learning_rate, ffnet.threshold, ffnet.loss_suite);
     return loss;
 }
 

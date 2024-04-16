@@ -38,7 +38,9 @@ const int layers_sizes[] = {DATA_FEATURES, 500};
 const int layers_number = sizeof(layers_sizes) / sizeof(layers_sizes[0]);
 
 // Hyper Parameters.
-double rate = 0.001;
+double learning_rate = 0.001;
+const double beta1 = 0.9;
+const double beta2 = 0.999;
 const int epochs = 5;
 const double threshold = 4.0;
 
@@ -53,8 +55,8 @@ static void setup(void)
     open_log_file_with_timestamp();
 
     data = data_build();
-    Loss loss_suite = LOSS_FF;
-    ffnet = new_ff_net(layers_sizes, layers_number, relu, pdrelu, threshold, loss_suite);
+    const Loss loss_suite = LOSS_FF;
+    ffnet = new_ff_net(layers_sizes, layers_number, relu, pdrelu, threshold, beta1, beta2, loss_suite);
     log_debug("FFNet built with the following layers:");
     increase_indent();
     for (int i = 0; i < ffnet.num_cells; i++)
@@ -77,11 +79,9 @@ static void train_loop(void)
         for (int j = 0; j < data.rows; j++)
         {
             generate_samples(data, j, samples);
-            loss = train_ff_net(ffnet, samples.pos, samples.neg, rate);
+            loss = train_ff_net(ffnet, samples.pos, samples.neg, learning_rate);
         }
-        printf("\tLoss %.12f :: learning rate %f\n",
-               (double)loss,
-               (double)rate);
+        printf("\tLoss %.12f\n", (double)loss);
         double epoch_time = (double)(clock() - epoch_start_time) / CLOCKS_PER_SEC;
         printf("\tEpoch time: %.2f seconds\n", epoch_time);
         decrease_indent();
