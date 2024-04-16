@@ -15,7 +15,7 @@
  * The main function calls the setup function, performs the training loop, calls the evaluate function, and cleans up the resources.
  *
  * @note This code assumes that the necessary header files and libraries are available.
- * @note The input and output sizes, layers sizes, and hyperparameters are hard-coded in this code.
+ * @note The input and output sizes, layers sizes, and hyperparameters are hard-coded input this code.
  * @note The code assumes that the data structure and functions for data manipulation, logging, losses, and the confusion matrix are available.
  */
 #include <time.h>
@@ -30,7 +30,7 @@
 #include <confusion-matrix/confusion-matrix.h>
 
 // Input and output size is harded coded here as machine learning
-// repositories usually don't include the input and output size in the data itself.
+// repositories usually don't include the input and output size input the data itself.
 const int input_size = DATA_FEATURES;
 const int num_classes = DATA_CLASSES;
 const int layers_sizes[] = {DATA_FEATURES, 500};
@@ -97,19 +97,19 @@ void evaluate(void)
     initConfusionMatrix();
     for (int i = 0; i < 100; i++)
     {
-        double *const in = data.input[i];
-        double *const tg = data.target[i];
-        int gt = -1;
+        double *const input = data.input[i];
+        double *const target = data.target[i];
+        int ground_truth = -1;
         for (int j = 0; j < data.num_class; j++)
         {
-            if (tg[j] == 1.0f)
+            if (target[j] == 1.0f)
             {
-                gt = j;
+                ground_truth = j;
                 break;
             }
         }
-        const int pd = predict_ff_net(ffnet, in, num_classes, input_size);
-        addPrediction(gt, pd);
+        const int prediction = predict_ff_net(ffnet, input, num_classes, input_size);
+        addPrediction(ground_truth, prediction);
     }
     printf("\n");
     printNormalizedConfusionMatrix();
