@@ -112,7 +112,6 @@ void evaluate(void)
         }
         const int prediction = predict_ff_net(ffnet, input, num_classes, input_size);
         addPrediction(ground_truth, prediction);
-        addPredictionAccuracy(ground_truth, prediction);
     }
     printf("Accuracy: %.2f\n", getAccuracy());
     printf("\n");
