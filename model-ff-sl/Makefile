@@ -20,7 +20,7 @@ METRICS_BASEPATH = $(PROJECT_BASEPATH)/../metrics
 SRC = src/main.c lib/ff-net/ff-net.c lib/ff-cell/ff-cell.c lib/logging/logging.c lib/data/data.c lib/utils/utils.c lib/adam/adam.c lib/losses/losses.c lib/ff-utils/ff-utils.c
 
 # Metrics library
-SRC += $(METRICS_BASEPATH)/lib/confusion-matrix/confusion-matrix.c $(METRICS_BASEPATH)/lib/accuracy/accuracy.c
+SRC += $(METRICS_BASEPATH)/lib/confusion-matrix/confusion-matrix.c $(METRICS_BASEPATH)/lib/accuracy/accuracy.c $(METRICS_BASEPATH)/lib/predictions/predictions.c
 
 INCLUDE = -I$(METRICS_BASEPATH)/lib
 

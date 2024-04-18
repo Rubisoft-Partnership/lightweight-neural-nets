@@ -29,6 +29,7 @@
 
 #include <confusion-matrix/confusion-matrix.h>
 #include <accuracy/accuracy.h>
+#include <predictions/predictions.h>
 
 // Input and output size is harded coded here as machine learning
 // repositories usually don't include the input and output size input the data itself.
@@ -95,7 +96,7 @@ static void train_loop(void)
 void evaluate(void)
 {
     log_info("Testing FFNet...");
-    initConfusionMatrix();
+    initPredictions(num_classes);
     for (int i = 0; i < 100; i++)
     {
         double *const input = data.input[i];
