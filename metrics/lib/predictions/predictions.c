@@ -22,7 +22,7 @@ Predictions predictions;
 /**
  * @brief Initializes the predictions structure by setting the number of predictions to 0.
  */
-void initPredictions()
+void init_redictions()
 {
     predictions.num_predictions = 0;
 }
@@ -37,7 +37,7 @@ void initPredictions()
  * @param true_label The true label of the prediction.
  * @param predicted_label The predicted label of the prediction.
  */
-void addPrediction(const int true_label, const int predicted_label)
+void add_prediction(const int true_label, const int predicted_label)
 {
     if (predictions.num_predictions < MAX_PREDICTIONS)
     {

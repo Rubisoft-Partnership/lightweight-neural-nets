@@ -20,7 +20,7 @@ typedef struct
 /**
  * @brief Initializes the predictions structure by setting the number of predictions to 0.
  */
-void initPredictions();
+void init_redictions();
 
 /**
  * @brief Adds a prediction to the predictions structure.
@@ -28,4 +28,4 @@ void initPredictions();
  * @param true_label The true label of the prediction.
  * @param predicted_label The predicted label of the prediction.
  */
-void addPrediction(const int true_label, const int predicted_label);
+void add_prediction(const int true_label, const int predicted_label);

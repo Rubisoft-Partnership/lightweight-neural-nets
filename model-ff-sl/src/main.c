@@ -96,7 +96,7 @@ static void train_loop(void)
 void evaluate(void)
 {
     log_info("Testing FFNet...");
-    initPredictions(num_classes);
+    init_redictions(num_classes);
     for (int i = 0; i < 100; i++)
     {
         double *const input = data.input[i];
@@ -111,11 +111,11 @@ void evaluate(void)
             }
         }
         const int prediction = predict_ff_net(ffnet, input, num_classes, input_size);
-        addPrediction(ground_truth, prediction);
+        add_prediction(ground_truth, prediction);
     }
-    printf("Accuracy: %.2f\n", getAccuracy());
+    printf("Accuracy: %.2f\n", get_accuracy());
     printf("\n");
-    printNormalizedConfusionMatrix();
+    print_normalized_confusion_matrix();
 }
 
 int main(void)

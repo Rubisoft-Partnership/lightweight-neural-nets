@@ -22,7 +22,7 @@ extern Predictions predictions;
  *
  * @return The accuracy metric as a float value.
  */
-float getAccuracy()
+float get_accuracy()
 {
     int correct_predictions = 0;
     for (int i = 0; i < predictions.num_predictions; i++)

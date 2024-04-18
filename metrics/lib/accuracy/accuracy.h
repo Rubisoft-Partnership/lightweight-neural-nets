@@ -12,4 +12,4 @@
  *
  * @return The accuracy metric as a double value.
  */
-float getAccuracy();
+float get_accuracy();

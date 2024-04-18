@@ -68,7 +68,7 @@ void free_confusion_matrix(int **confusionMatrix)
  *
  * @param None
  */
-void printConfusionMatrix()
+void print_confusion_matrix()
 {
     int **confusionMatrix = new_confusion_matrix();
     const int width = 7; // Adjust the cell width as needed
@@ -125,7 +125,7 @@ void printConfusionMatrix()
  *
  * @param None
  */
-void printNormalizedConfusionMatrix()
+void print_normalized_confusion_matrix()
 {
     int **confusionMatrix = new_confusion_matrix();
     const int width = 7; // Width of each cell in the table
