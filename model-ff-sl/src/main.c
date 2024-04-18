@@ -28,6 +28,7 @@
 #include <losses/losses.h>
 
 #include <confusion-matrix/confusion-matrix.h>
+#include <accuracy/accuracy.h>
 
 // Input and output size is harded coded here as machine learning
 // repositories usually don't include the input and output size input the data itself.
@@ -110,7 +111,9 @@ void evaluate(void)
         }
         const int prediction = predict_ff_net(ffnet, input, num_classes, input_size);
         addPrediction(ground_truth, prediction);
+        addPredictionAccuracy(ground_truth, prediction);
     }
+    printf("Accuracy: %.2f\n", getAccuracy());
     printf("\n");
     printNormalizedConfusionMatrix();
 }
