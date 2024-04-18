@@ -10,19 +10,52 @@
 #include <time.h>
 #include <stdarg.h>
 
+/**
+ * @brief The current log level for logging messages.
+ */
 static LogLevel currentLogLevel;
+
+/**
+ * @brief The global log file pointer.
+ */
 static FILE *globalLogFile;
+
+/**
+ * @brief The current indentation level for log messages.
+ */
 static int indentLevel = 0;
 
-// Log functions
+/**
+ * Logs a message with the specified log level.
+ *
+ * @param level The log level of the message.
+ * @param format The format string for the message.
+ * @param args The variable arguments list for the format string.
+ */
 void log_message(LogLevel level, const char *format, va_list args);
 
-// Function to set the current log level
+/**
+ * Sets the current log level.
+ *
+ * This function allows you to set the log level for the logging system.
+ * The log level determines which log messages will be displayed.
+ *
+ * @param level The log level to set.
+ */
 void set_log_level(LogLevel level)
 {
     currentLogLevel = level;
 }
 
+/**
+ * @brief Open a log file with a timestamp.
+ *
+ * The log file is created with a filename in the format "log_<timestamp>.log".
+ * The log file is opened in write mode.
+ * If the log file fails to open, an error message is printed and the program exits.
+ *
+ * @param None
+ */
 void open_log_file_with_timestamp(void)
 {
     // Get the current time
@@ -46,6 +79,13 @@ void open_log_file_with_timestamp(void)
     }
 }
 
+/**
+ * @brief Closes the log file if it is open.
+ *
+ * This function checks if the globalLogFile is not NULL and closes the file using the fclose function.
+ *
+ * @param None
+ */
 void close_log_file(void)
 {
     if (globalLogFile)
@@ -53,7 +93,13 @@ void close_log_file(void)
         fclose(globalLogFile);
     }
 }
-
+/**
+ * Logs a message with the specified log level.
+ *
+ * @param level The log level of the message.
+ * @param format The format string for the message.
+ * @param args The variable arguments list for the format string.
+ */
 void log_message(LogLevel level, const char *format, va_list args)
 {
     if (level < currentLogLevel)
@@ -92,6 +138,12 @@ void log_message(LogLevel level, const char *format, va_list args)
     fflush(globalLogFile);
 }
 
+/**
+ * Logs a debug message with the specified format and arguments.
+ *
+ * @param format The format string for the debug message.
+ * @param ... The variable number of arguments to be formatted and logged.
+ */
 void log_debug(const char *format, ...)
 {
     va_list args;
@@ -100,6 +152,12 @@ void log_debug(const char *format, ...)
     va_end(args);
 }
 
+/**
+ * Logs an informational message.
+ *
+ * @param format The format string for the message.
+ * @param ... The variable arguments to be formatted and logged.
+ */
 void log_info(const char *format, ...)
 {
     va_list args;
@@ -108,6 +166,12 @@ void log_info(const char *format, ...)
     va_end(args);
 }
 
+/**
+ * Logs a warning message.
+ *
+ * @param format The format string for the message.
+ * @param ... The variable arguments to be formatted and logged.
+ */
 void log_warn(const char *format, ...)
 {
     va_list args;
@@ -116,6 +180,12 @@ void log_warn(const char *format, ...)
     va_end(args);
 }
 
+/**
+ * Logs an error message.
+ *
+ * @param format The format string for the message.
+ * @param ... The variable arguments to be formatted and logged.
+ */
 void log_error(const char *format, ...)
 {
     va_list args;
@@ -124,11 +194,25 @@ void log_error(const char *format, ...)
     va_end(args);
 }
 
+/**
+ * @brief Increases the current indentation level.
+ *
+ * This function is used to increase the current indentation level. It increments the value of the `indentLevel` variable by 1.
+ *
+ * @param None
+ */
 void increase_indent(void)
 {
     indentLevel++;
 }
 
+/**
+ * @brief Decreases the current indentation level.
+ *
+ * This function is used to decrease the current indentation level. It decrements the value of the `indentLevel` variable by 1.
+ *
+ * @param None
+ */
 void decrease_indent(void)
 {
     indentLevel--;

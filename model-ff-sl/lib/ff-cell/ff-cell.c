@@ -1,130 +1,196 @@
 /**
  * @file ff-cell.c
- * @brief This file contains the implementation of a feedforward neural network block.
+ * @brief This file contains the implementation of a FF cell for the FF algorithm.
  *
- * */
+ * The FF cell is a building block of the FF algorithm, which is used for training neural networks.
+ * This file contains the implementation of the FF cell, including functions for forward propagation,
+ * backward propagation, weight initialization, and activation functions.
+ */
 
 #include <ff-cell/ff-cell.h>
 
-#include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#include <time.h>
-#include <stdarg.h>
 
 #include <logging/logging.h>
 #include <utils/utils.h>
+#include <losses/losses.h>
+#include <ff-utils/ff-utils.h>
 
 // Buffer to store activations and output activations for the positive pass.
 extern double o_buffer[H_BUFFER_SIZE]; // outputs buffer
 
-// Function declarations.
-static void ffbprop(const Tinn t, const double *const in_pos, const double *const in_neg,
-                    const double rate, const double g_pos, const double g_neg);
-static double fferr(const double g_pos, const double g_neg, const double threshold);
-double goodness(const double *vec, const int size);
-static double stable_sigmoid(double x);
+// Forward pass for a FF cell.
+void fprop_ff_cell(const FFCell ffcell, const double *const in);
+/**
+ * Performs the backward pass for a feedforward (FF) cell.
+ *
+ * @param ffcell The FF cell to perform the backward pass on.
+ * @param in_pos The positive input values for the cell.
+ * @param in_neg The negative input values for the cell.
+ * @param g_pos The gradient of the positive input values.
+ * @param g_neg The gradient of the negative input values.
+ * @param learning_rate The learning rate for the cell.
+ * @param threshold The threshold value for the cell.
+ * @param loss_suite The loss function suite to use for computing gradients.
+ */
+static void bprop(const FFCell ffcell, const double *const in_pos, const double *const in_neg, const double g_pos, const double g_neg, const double learning_rate, const double threshold, const Loss loss_suite);
 
-// From Tinn.c, but modified
-void fprop(const Tinn t, const double *const in);
-
-// From Tinn.c
-static void wbrand(Tinn t);
+// Random number generation for weights.
+static void wbrand(FFCell ffcell);
 static double frand(void);
 
-// Generates inputs for inference given input and label
-void embed_label(double *sample, const double *in, const int label, const int insize, const int num_classes)
+/**
+ * Constructs a FF cell with the specified number of inputs, number of outputs, activation function,
+ * and threshold.
+ *
+ * @param input_size The number of inputs for the FF cell.
+ * @param output_size The number of outputs for the FF cell.
+ * @param act The activation function for the FF cell.
+ * @param pdact The derivative of the activation function for the FF cell.
+ * @param beta1 The beta1 parameter for the Adam optimizer.
+ * @param beta2 The beta2 parameter for the Adam optimizer.
+ * @return The constructed FF cell.
+ */
+FFCell new_ff_cell(const int input_size, const int output_size, double (*act)(double), double (*pdact)(double), const double beta1, const double beta2)
 {
-    memcpy(sample, in, insize * sizeof(*in));
-    memset(&sample[insize - num_classes], 0, num_classes * sizeof(*sample));
-    sample[insize - num_classes + label] = 1.0;
+    FFCell ffcell;
+    ffcell.num_weights = input_size * output_size; // total number of weights
+
+    // Adam optimizer
+    ffcell.adam = adam_create(beta1, beta2, ffcell.num_weights);
+
+    ffcell.weights = (double *)calloc(ffcell.num_weights, sizeof(*ffcell.weights)); // weights
+    ffcell.output = (double *)calloc(output_size, sizeof(*ffcell.output));          // output neurons
+    ffcell.input_size = input_size;
+    ffcell.output_size = output_size;
+    ffcell.act = act;
+    ffcell.pdact = pdact;
+    // Randomize weights and bias.
+    wbrand(ffcell);
+    // Log the construction of the FF cell.
+    increase_indent();
+    log_debug("FFCell built with %d inputs, %d outputs, and %d weights", input_size, output_size, ffcell.num_weights);
+    decrease_indent();
+    return ffcell;
 }
 
-// Trains a tinn with an input and target output with a learning rate. Returns target to output error.
-double fftrain(const Tinn t, const double *const pos, const double *const neg, double rate)
+// Frees object from heap.
+void free_ff_cell(const FFCell ffcell)
 {
+    free(ffcell.weights);
+    free(ffcell.output);
+    adam_free(ffcell.adam);
+}
+
+/**
+ * @brief Trains a FFCell by performing forward and backward pass with a given loss function.
+ * @param ffcell The FFCell to be trained.
+ * @param pos The positive samples.
+ * @param neg The negative samples.
+ * @param learning_rate The learning rate for the training.
+ * @param threshold The threshold value for the FFCell.
+ * @param loss_suite The loss function suite.
+ * @return The loss value after training.
+ */
+double train_ff_cell(const FFCell ffcell, const double *const pos, const double *const neg, const double learning_rate, const double threshold, const Loss loss_suite)
+{
+    // Increase the indent level for logging
     increase_indent();
-    // Positive pass.
-    fprop(t, pos);
+
+    // Positive forward pass.
+    fprop_ff_cell(ffcell, pos);
     // Copy positive activation output.
-    memcpy(o_buffer, t.o, t.nops * sizeof(*t.o));
-    double g_pos = goodness(t.o, t.nops);
+    memcpy(o_buffer, ffcell.output, ffcell.output_size * sizeof(*ffcell.output));
+    // Calculate the goodness of the positive pass.
+    double g_pos = goodness(ffcell.output, ffcell.output_size);
 
-    // Negative pass.
-    fprop(t, neg);
-    double g_neg = goodness(t.o, t.nops);
+    // Negative forward pass.
+    fprop_ff_cell(ffcell, neg);
+    // Calculate the goodness of the negative pass.
+    double g_neg = goodness(ffcell.output, ffcell.output_size);
 
-    // Peforms gradient descent.
-    ffbprop(t, pos, neg, rate, g_pos, g_neg);
+    // Peforms weight update.
+    bprop(ffcell, pos, neg, g_pos, g_neg, learning_rate, threshold, loss_suite);
 
     // Normalize the output of the layer
-    normalize_vector(t.o, t.nops);
-    normalize_vector(o_buffer, t.nops);
+    normalize_vector(ffcell.output, ffcell.output_size);
+    normalize_vector(o_buffer, ffcell.output_size);
 
-    // Calculate the average and standard deviation of weight values
+    // Calculate the average and standard deviation of weight values for debugging.
     double sum_weights = 0.0;
     double sum_weights_squared = 0.0;
-    for (int i = 0; i < t.nw; i++)
+    for (int i = 0; i < ffcell.num_weights; i++)
     {
-        sum_weights += t.w[i];
-        sum_weights_squared += t.w[i] * t.w[i];
+        sum_weights += ffcell.weights[i];
+        sum_weights_squared += ffcell.weights[i] * ffcell.weights[i];
     }
-    double mean_weights = sum_weights / t.nw;
-    double std_weights = sqrt((sum_weights_squared / t.nw) - (mean_weights * mean_weights));
+    double mean_weights = sum_weights / ffcell.num_weights;
+    double std_weights = sqrt((sum_weights_squared / ffcell.num_weights) - (mean_weights * mean_weights));
     decrease_indent();
     log_info("Mean weight value: %f\n", mean_weights);
     log_info("Standard deviation of weight value: %f\n", std_weights);
 
-    // printf("g_pos: %f, g_neg: %f, err: %f\n", g_pos, g_neg, fferr(g_pos, g_neg, t.threshold));
-    return fferr(g_pos, g_neg, t.threshold);
+    // Return the loss of the layer
+    return loss_suite.loss(g_pos, g_neg, threshold);
 }
 
-void normalize_vector(double *output, int size)
+// Performs forward propagation.
+void fprop_ff_cell(const FFCell ffcell, const double *const in)
 {
-    double norm = 0.0;
-    for (int i = 0; i < size; i++)
-        norm += output[i] * output[i];
-    norm = sqrt(norm);
-    for (int i = 0; i < size; i++)
-        output[i] /= norm;
+    double debug_sum = 0.0;
+    log_debug("Computing forward propagation for FFCell with %d inputs and %d outputs", ffcell.input_size, ffcell.output_size);
+    // Calculate the activation output for each output unit
+    for (int i = 0; i < ffcell.output_size; i++)
+    {
+        double sum = 0.0;
+        // Calculate the weighted sum of the inputs
+        for (int j = 0; j < ffcell.input_size; j++)
+            sum += in[j] * ffcell.weights[i * ffcell.input_size + j];
+        // Store the output of the activation function
+        ffcell.output[i] = ffcell.act(sum + ffcell.bias);
+        debug_sum += ffcell.output[i]; // for debugging
+    }
+    log_debug("Overall activation output: %f", debug_sum);
 }
 
-// Performs back propagation for the FF algorithm.
-static void ffbprop(const Tinn t, const double *const in_pos, const double *const in_neg,
-                    const double rate, const double g_pos, const double g_neg)
+// Performs backward pass for the FF algorithm.
+static void bprop(const FFCell ffcell, const double *const in_pos, const double *const in_neg, const double g_pos, const double g_neg, const double learning_rate, const double threshold, const Loss loss_suite)
 {
-    // Calculate the partial derivative of the loss with respect to the goodness of the positive and negative pass
-    const double pdloss_pos = -stable_sigmoid(t.threshold - g_pos);
-    const double pdloss_neg = stable_sigmoid(g_neg - t.threshold);
+    // Calculate the partial derivative of the loss with respect to the goodness of the positive and negative pass.
+    const double pdloss_pos = loss_suite.pdloss_pos(g_pos, g_neg, threshold);
+    const double pdloss_neg = loss_suite.pdloss_neg(g_pos, g_neg, threshold);
     log_debug("G_pos: %f, G_neg: %f", g_pos, g_neg);
-    log_debug("Loss: %.17g", fferr(g_pos, g_neg, t.threshold));
+    log_debug("Loss: %.17g", loss_suite.loss(g_pos, g_neg, threshold));
     log_debug("Partial derivative of the loss with resect to the goodness pos: %.17g, neg: %.17g", pdloss_pos, pdloss_neg);
 
+    // Debugging variables statistics about weight updates.
     int updated_weights = 0;
     double sum_weight_update = 0.0;
     double sum_weight_update_squared = 0.0;
 
-    for (int i = 0; i < t.nips; i++)
+    // Update the weights for each connection between input and output units
+    for (int i = 0; i < ffcell.input_size; i++)
     {
-        for (int j = 0; j < t.nops; j++)
+        for (int j = 0; j < ffcell.output_size; j++)
         {
-            int wheight_index = j * t.nips + i;
-            // log_debug("Weight from unit [%d] to unit [%d]: %.17g", i, j, t.w[j * t.nips + i]);
+            int wheight_index = j * ffcell.input_size + i;
 
             // Calculate the gradient of the loss with respect to the weight for the positive and negative pass
             const double gradient_pos = pdloss_pos * 2.0 * o_buffer[j] * in_pos[i];
-            const double gradient_neg = pdloss_neg * 2.0 * t.o[j] * in_neg[i];
+            const double gradient_neg = pdloss_neg * 2.0 * ffcell.output[j] * in_neg[i];
             const double gradient = gradient_pos + gradient_neg;
             // log_debug("Positive correction gradient_pos: %.10g, negative correction gradient_neg: %.10g", gradient_pos, gradient_neg);
 
             // Weight update using Adam optimizer
-            const double weight_update = rate * adam_weight_update(t.adam, gradient, wheight_index);
+            const double weight_update = learning_rate * adam_weight_update(ffcell.adam, gradient, wheight_index);
 
             // Update the weight
-            t.w[wheight_index] -= weight_update;
+            ffcell.weights[wheight_index] -= weight_update;
             // log_debug("Weight update: %.17g", weight_update);
-            // log_debug("Weight after correction: %.17g", t.w[j * t.nips + i]);
+            // log_debug("Weight after correction: %.17g", ffcell.weights[j * ffcell.input_size + i]);
 
+            // Update statistics about weight updates.
             if (weight_update != 0.0)
             {
                 updated_weights++;
@@ -147,140 +213,27 @@ static void ffbprop(const Tinn t, const double *const in_pos, const double *cons
     log_debug("Standard deviation of weight update: %f\n", std_weight_update);
 }
 
-// Computes error using the FFLoss function.
-static double fferr(const double g_pos, const double g_neg, const double threshold)
-{
-    // numerical stability fix:
-    // double first_term = log(1 + exp(-fabs(pos_exponent))) + pos_exponent > 0.0 ? pos_exponent : 0.0;
-    // double second_term = log(1 + exp(-fabs(neg_exponent))) + neg_exponent > 0.0 ? neg_exponent : 0.0;
-    // log_debug("g_pos: %f, g_neg: %f, err: %f", g_pos, g_neg, first_term + second_term);
-    // return first_term + second_term;
-    // equivalent to:
-    return log(1.0 + exp(-g_pos + threshold)) + log(1.0 + exp(g_neg - threshold));
-}
-
-static double stable_sigmoid(double x)
-{
-    if (x >= 0)
-        return 1.0 / (1.0 + exp(-x) + 1e-4);
-    else
-    {
-        /// TODO: Fix underflow here
-        double exp_x = exp(x);
-        // log_debug("sigmoid input x: %.17g, exp_x: %.17g", x, exp_x);
-        return exp_x / (1.0 + exp_x + 1e-4);
-    }
-}
-
-// Returns the goodness of a layer.
-double goodness(const double *vec, const int size)
-{
-    double sum = 0.0;
-    for (int i = 0; i < size; i++)
-        sum += vec[i] * vec[i];
-    return sum;
-}
-
 // ReLU activation function.
 double relu(const double a)
 {
-    // return a;
     return a > 0.0 ? a : 0.0;
 }
 
 // ReLU derivative.
 double pdrelu(const double a)
 {
-    // return 1;
     return a > 0.0 ? 1.0 : 0.0;
 }
 
-// Sigmoid activation function.
-double sigmoid(const double a)
+// Randomizes tinn weights and bias.
+static void wbrand(FFCell ffcell)
 {
-    return 1.0 / (1.0 + exp(-a));
+    for (int i = 0; i < ffcell.num_weights; i++)
+        ffcell.weights[i] = frand() - 0.5;
+    ffcell.bias = frand() - 0.5;
 }
 
-// Sigmoid derivative.
-double pdsigmoid(const double a)
-{
-    return a * (1.0 - a);
-}
-
-// Performs forward propagation.
-void fprop(const Tinn t, const double *const in)
-{
-    double debug_sum = 0.0;
-    log_debug("Computing forward propagation for Tinn with %d inputs and %d outputs", t.nips, t.nops);
-    // Calculate hidden layer neuron values.
-    for (int i = 0; i < t.nops; i++)
-    {
-        double sum = 0.0;
-        for (int j = 0; j < t.nips; j++)
-            sum += in[j] * t.w[i * t.nips + j];
-        t.o[i] = t.act(sum + t.b);
-        debug_sum += t.o[i]; // for debugging
-    }
-    log_debug("Overall activation output: %f", debug_sum);
-}
-
-// Constructs a tinn with number of inputs, number of hidden neurons, and number of outputs
-Tinn xtbuild(const int nips, const int nops, double (*act)(double), double (*pdact)(double), const double threshold)
-{
-    Tinn t;
-
-    // Adam optimizer
-    t.adam = adam_create(0.9, 0.999, nips * nops);
-    /// TODO: Fix hardcoding of Adam hyperparameters
-
-    t.nw = nips * nops;                         // total number of weights
-    t.w = (double *)calloc(t.nw, sizeof(*t.w)); // weights (both [intput to hidden] and [hidden to output])
-    t.o = (double *)calloc(nops, sizeof(*t.o)); // output neurons
-    t.nips = nips;
-    t.nops = nops;
-    t.act = act;
-    t.pdact = pdact;
-    t.threshold = threshold;
-    wbrand(t);
-    increase_indent();
-    log_debug("Tinn built with %d inputs, %d outputs, and %d weights", nips, nops, t.nw);
-    decrease_indent();
-    return t;
-}
-
-// Frees object from heap.
-void xtfree(const Tinn t)
-{
-    free(t.w);
-    free(t.o);
-    adam_free(t.adam);
-}
-
-// Prints an array of doubles. Useful for printing predictions.
-void xtprint(const double *arr, const int size)
-{
-    for (int i = 0; i < size; i++)
-        printf("%f ", (double)arr[i]);
-    printf("\n");
-}
-
-// Returns an output prediction given an input.
-double *xtpredict(const Tinn t, const double *const in)
-{
-    fprop(t, in);
-    return t.o;
-}
-
-// Randomizes tinn weights and biases.
-static void wbrand(Tinn t)
-{
-    for (int i = 0; i < t.nw; i++)
-        t.w[i] = frand() - 0.5;
-    t.b = frand() - 0.5;
-}
-
-
-// Returns doubleing point random from 0.0 - 1.0.
+// Returns random doulbe in [0.0 - 1.0]
 static double frand(void)
 {
     return get_random() / (double)RAND_MAX;

@@ -1,58 +1,93 @@
+/**
+ * @file ff-cell.h
+ * @brief Header file for the FFCell struct and related functions.
+ */
+
 #pragma once
 
 #include <stdio.h>
 #include <adam/adam.h>
+#include <losses/losses.h>
 
-// Size of buffer to store hidden activations and output activations.
+/**
+ * @def H_BUFFER_SIZE
+ * @brief Size of buffer to store output activations.
+ */
 #define H_BUFFER_SIZE 1024
 
+/**
+ * @def MAX_CLASSES
+ * @brief Maximum number of classes.
+ */
 #define MAX_CLASSES 16
 
+/**
+ * @struct FFCell
+ * @brief FFCell struct that contains the weights, bias, and output layer.
+ */
 typedef struct
 {
-    // All the weights.
-    double *w;
-    // Biases.
-    double b;
-    // Output layer.
-    double *o;
-    // Number of biases.
-    int nb;
-    // Number of weights.
-    int nw;
-    // Number of inputs.
-    int nips;
-    // Number of outputs.
-    int nops;
-    // Hyperparameter for the FF algorithm.
-    double threshold;
-    // Activation function.
-    double (*act)(const double);
-    // Derivative of activation function.
-    double (*pdact)(const double);
-    // Adam optimizer.
-    Adam adam;
-} Tinn;
+    double *weights;               /**< All the weights. */
+    double bias;                   /**< Biases. */
+    double *output;                /**< Output layer. */
+    int num_weights;               /**< Number of weights. */
+    int input_size;                /**< Number of inputs. */
+    int output_size;               /**< Number of outputs. */
+    double (*act)(const double);   /**< Activation function. */
+    double (*pdact)(const double); /**< Derivative of activation function. */
+    Adam adam;                     /**< Adam optimizer. */
+} FFCell;
 
-// Activation function.
+/**
+ * @brief Generates a new FFCell.
+ *
+ * This function generates a new FFCell with the specified input size, output size, activation function, derivative of the activation function, and hyperparameters for the FF algorithm.
+ *
+ * @param input_size The number of inputs.
+ * @param output_size The number of outputs.
+ * @param act The activation function.
+ * @param pdact The derivative of the activation function.
+ * @param beta1 The hyperparameter for the FF algorithm.
+ * @param beta2 The hyperparameter for the FF algorithm.
+ * @return The newly generated FFCell.
+ */
+FFCell new_ff_cell(const int input_size, const int output_size, double (*act)(double), double (*pdact)(double), const double beta1, const double beta2);
 
+/**
+ * @brief Frees the memory of a FFCell.
+ * @param ffcell The FFCell to be freed.
+ */
+void free_ff_cell(FFCell ffcell);
+
+/**
+ * @brief Trains a FFCell by performing forward and backward pass with a given loss function.
+ * @param ffcell The FFCell to be trained.
+ * @param pos The positive samples.
+ * @param neg The negative samples.
+ * @param learning_rate The learning rate for the training.
+ * @param threshold The threshold value for the FFCell.
+ * @param loss_suite The loss function suite.
+ * @return The loss value after training.
+ */
+double train_ff_cell(const FFCell ffcell, const double *const pos, const double *const neg, const double learning_rate, const double threshold, const Loss loss_suite);
+
+/**
+ * @brief Performs the forward pass for a FFCell.
+ * @param ffcell The FFCell.
+ * @param in The input values.
+ */
+void fprop_ff_cell(const FFCell ffcell, const double *const in);
+
+/**
+ * @brief Activation function: Rectified Linear Unit (ReLU).
+ * @param a The input value.
+ * @return The output value after applying the ReLU activation function.
+ */
 double relu(const double a);
+
+/**
+ * @brief Derivative of the ReLU activation function.
+ * @param a The input value.
+ * @return The derivative of the ReLU activation function at the given input value.
+ */
 double pdrelu(const double a);
-
-double sigmoid(const double a);
-double pdsigmoid(const double a);
-double fftrain(const Tinn t, const double *const pos, const double *const neg, double rate);
-Tinn xtbuild(const int nips, const int nops, double (*act)(double), double (*pdact)(double), const double threshold);
-void xtfree(Tinn t);
-void embed_label(double *sample, const double *in, const int label, const int insize, const int num_classes);
-void normalize_vector(double *output, int size);
-double goodness(const double *vec, const int size);
-
-// From Tinn.c, but modified
-void fprop(const Tinn t, const double *const in);
-/*
---------------------------------------------------------------------------------------------------------------------------
-*/
-// Tinn original functions
-
-void xtprint(const double *arr, const int size);

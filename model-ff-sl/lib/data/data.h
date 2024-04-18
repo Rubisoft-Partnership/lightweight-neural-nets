@@ -1,3 +1,11 @@
+/**
+ * @file data.h
+ * @brief Header file for data handling in the lightweight neural network model.
+ * 
+ * This file contains the declarations for data handling functions and structures used in the model.
+ * It provides functions for loading, preprocessing, and manipulating data for training and testing the neural network.
+ */
+
 #pragma once
 
 #include <time.h>
@@ -36,9 +44,9 @@
 typedef struct
 {
     // 2D floating point array of input.
-    double **in;
+    double **input;
     // 2D floating point array of target.
-    double **tg;
+    double **target;
     // Number of inputs to neural network.
     int feature_len;
     // Number of outputs to neural network.
@@ -56,11 +64,66 @@ typedef struct
     double *neg;
 } FFsamples;
 
-Data ndata(const int feature_len, const int num_class, const int rows);
-void parse(const Data data, char *line, const int row);
-void dfree(const Data d);
-void shuffle(const Data d);
-FFsamples new_samples(const int nips);
-void free_samples(FFsamples s);
-void generate_samples(const Data d, const int row, FFsamples s);
-Data build(void);
+/**
+ * @brief Creates a new data object.
+ * 
+ * @param feature_len Number of inputs to the neural network.
+ * @param num_class Number of outputs to the neural network.
+ * @param rows Number of rows in the file (number of sets for neural network).
+ * @return Data The newly created data object.
+ */
+Data new_data(const int feature_len, const int num_class, const int rows);
+
+/**
+ * @brief Frees the memory of a data object.
+ * 
+ * @param data The data object to free.
+ */
+void free_data(const Data data);
+
+/**
+ * @brief Builds a data object from a file.
+ * 
+ * @return Data The built data object.
+ */
+Data data_build(void);
+
+/**
+ * @brief Parses a line from a file into a data object.
+ * 
+ * @param data The data object to parse into.
+ * @param line The line to parse.
+ * @param row The row index of the data object.
+ */
+void parse_data(const Data data, char *line, const int row);
+
+/**
+ * @brief Shuffles the data object.
+ * 
+ * @param data The data object to shuffle.
+ */
+void shuffle_data(const Data data);
+
+/**
+ * @brief Creates a new FFsamples object.
+ * 
+ * @param input_size The size of the input.
+ * @return FFsamples The newly created FFsamples object.
+ */
+FFsamples new_ff_samples(const int input_size);
+
+/**
+ * @brief Frees the memory of a FFsamples object.
+ * 
+ * @param samples The FFsamples object to free.
+ */
+void free_ff_samples(FFsamples samples);
+
+/**
+ * @brief Generates a positive and a negative sample for the FF algorithm by embedding the one-hot encoded target in the input.
+ * 
+ * @param data The data object.
+ * @param row The row index of the data object.
+ * @param samples The FFsamples object to store the generated samples.
+ */
+void generate_samples(const Data data, const int row, FFsamples samples);
