@@ -4,6 +4,8 @@ out_folder=${1:-dataset/mnist}
 base_url="https://raw.githubusercontent.com/phoebetronic/mnist/main/"
 train_file="mnist_train.csv"
 test_file="mnist_test.csv"
+new_train_file="train.csv"
+new_test_file="test.csv"
 
 
 if [ ! -d $out_folder ]; then
@@ -19,3 +21,6 @@ unzip $out_folder/$test_file.zip -d $out_folder
 
 rm $out_folder/$train_file.zip $out_folder/$test_file.zip
 rm -rf $out_folder/__MACOSX
+
+mv $out_folder/$train_file $out_folder/$new_train_file
+mv $out_folder/$test_file $out_folder/$new_test_file
