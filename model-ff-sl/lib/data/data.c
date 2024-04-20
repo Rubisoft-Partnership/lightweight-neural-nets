@@ -10,6 +10,44 @@
 #include <logging/logging.h>
 
 /**
+ * Splits the dataset into training, testing, and validation sets.
+ *
+ * @return The dataset containing the split sets.
+ */
+Dataset dataset_split(void)
+{
+    Dataset dataset;
+    dataset.train = data_build(DATA_TRAIN_PATH);
+    dataset.test = data_build(DATA_TEST_PATH);
+    dataset.validation = data_build(DATA_VALIDATION_PATH);
+
+    log_debug("Dataset train split: %d samples.", dataset.train->rows);
+    log_debug("Dataset test split: %d samples.", dataset.test->rows);
+    log_debug("Dataset validation split: %d samples.", dataset.validation->rows);
+
+    if (dataset.train->rows == 0 || dataset.test->rows == 0)
+    {
+        log_error("Train and test splits cannot be empty. Exiting.");
+        free_dataset(dataset);
+        exit(EXIT_FAILURE);
+    }
+    return dataset;
+}
+
+/**
+ * Frees the memory allocated for the dataset.
+ *
+ * @param dataset The dataset to free.
+ */
+void free_dataset(Dataset dataset)
+{
+    log_debug("Freeing dataset splits.");
+    free_data(dataset.train);
+    free_data(dataset.test);
+    free_data(dataset.validation);
+}
+
+/**
  * @brief Creates a new data object.
  * 
  * @param feature_len The length of each input feature.
@@ -19,12 +57,14 @@
  */
 Data *new_data(const int feature_len, const int num_class, const int rows)
 {
+    log_debug("Creating new Data object with %d features, %d classes, and %d rows.", feature_len, num_class, rows);
     Data *data = malloc(sizeof(Data));
     data->input = new_matrix(rows, feature_len);
     data->target = new_matrix(rows, num_class);
     data->feature_len = feature_len;
     data->num_class = num_class;
     data->rows = rows;
+    log_debug("Data object created at address %p.", (void *)data);
     return data;
 }
 
@@ -35,6 +75,7 @@ Data *new_data(const int feature_len, const int num_class, const int rows)
  */
 void free_data(Data *data)
 {
+    log_debug("Freeing Data object at address %p.", (void *)data);
     for (int row = 0; row < data->rows; row++)
     {
         free(data->input[row]);
@@ -72,6 +113,7 @@ void parse_data(Data *data, char *line, const int row)
  */
 void shuffle_data(Data *data)
 {
+    log_debug("Shuffling data object at address %p.", (void *)data);
     for (int a = 0; a < data->rows; a++)
     {
         const int b = get_random() % data->rows;
@@ -94,9 +136,11 @@ void shuffle_data(Data *data)
  */
 FFsamples new_ff_samples(const int input_size)
 {
+    log_debug("Creating new FFsamples object with input size %d.", input_size);
     FFsamples samples = {
         (double *)malloc((input_size) * sizeof(double)),
         (double *)malloc((input_size) * sizeof(double))};
+    log_debug("FFsamples object created at address %p.", (void *)&samples);
     return samples;
 }
 
@@ -107,6 +151,7 @@ FFsamples new_ff_samples(const int input_size)
  */
 void free_ff_samples(FFsamples samples)
 {
+    log_debug("Freeing FFsamples object at address %p.", (void *)&samples);
     free(samples.pos);
     free(samples.neg);
 }
@@ -139,16 +184,18 @@ void generate_samples(const Data *data, const int row, FFsamples samples)
 /**
  * @brief Builds a data object by parsing a file and extracting the inputs and outputs for the neural network.
  * 
+ * @param file_path The path of the file to read from.
  * @return The built data object.
  */
-Data *data_build(void)
+Data *data_build(const char *file_path)
 {
-    log_debug("Building data from %s", DATA_DATASET_PATH);
-    FILE *file = fopen(DATA_DATASET_PATH, "r");
+    log_debug("Building data from %s", file_path);
+    FILE *file = fopen(file_path, "r");
     if (file == NULL)
     {
-        printf("Could not open %s\n", DATA_DATASET_PATH);
-        exit(1);
+        log_error("Could not open %s\n", file_path);
+        Data *empty_data = new_data(DATA_FEATURES, DATA_CLASSES, 0);
+        return empty_data;
     }
     const int rows = file_lines(file);
     Data *data = new_data(DATA_FEATURES, DATA_CLASSES, rows);
@@ -159,5 +206,6 @@ Data *data_build(void)
         free(line);
     }
     fclose(file);
+    log_debug("Built Data object at address: %p with %d samples", (void *)data, rows);
     return data;
 }

@@ -44,7 +44,7 @@ const double beta2 = 0.999;
 const int epochs = 5;
 const double threshold = 4.0;
 
-Data *data;
+Dataset data;
 FFNet ffnet;
 
 static void setup(void)
@@ -54,7 +54,7 @@ static void setup(void)
     set_log_level(LOG_DEBUG);
     open_log_file_with_timestamp();
 
-    data = data_build();
+    data = dataset_split();
     const Loss loss_suite = LOSS_FF;
     ffnet = new_ff_net(layers_sizes, layers_number, relu, pdrelu, threshold, beta1, beta2, loss_suite);
     log_debug("FFNet built with the following layers:");
@@ -74,11 +74,11 @@ static void train_loop(void)
         printf("Epoch %d\n", i);
         log_info("Epoch %d", i);
         increase_indent();
-        shuffle_data(data);
+        shuffle_data(data.train);
         double loss = 0.0f;
-        for (int j = 0; j < data->rows; j++)
+        for (int j = 0; j < data.train->rows; j++)
         {
-            generate_samples(data, j, samples);
+            generate_samples(data.train, j, samples);
             loss = train_ff_net(ffnet, samples.pos, samples.neg, learning_rate);
         }
         printf("\tLoss %.12f\n", (double)loss);
@@ -95,12 +95,12 @@ void evaluate(void)
 {
     log_info("Testing FFNet...");
     initConfusionMatrix();
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < data.test->rows; i++)
     {
-        double *const input = data->input[i];
-        double *const target = data->target[i];
+        double *const input = data.test->input[i];
+        double *const target = data.test->target[i];
         int ground_truth = -1;
-        for (int j = 0; j < data->num_class; j++)
+        for (int j = 0; j < data.test->num_class; j++)
         {
             if (target[j] == 1.0f)
             {
@@ -125,7 +125,7 @@ int main(void)
     printf("Testing...\n");
     evaluate();
 
-    free_data(data);
+    free_dataset(data);
     close_log_file();
     free_ff_net(ffnet);
 

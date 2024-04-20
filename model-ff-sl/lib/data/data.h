@@ -24,24 +24,36 @@
 #endif
 #define DATA_DATASET_BASEPATH PROJECT_BASEPATH "/../dataset/"
 
+// Each dataset must have a folder with the dataset name containing the following files:
+// - train.txt: the training data split.
+// - test.txt: the testing data split.
+#define DATA_TRAIN_SPLIT "train.txt"
+#define DATA_TEST_SPLIT "test.txt"
+#define DATA_VALIDATION_SPLIT "validation.txt"
+
 #define DATA_MNIST_CLASSES 10
 #define DATA_MNIST_FEATURES 784
-#define DATA_MNIST_PATH "mnist/mnist_train.txt"
+#define DATA_MNIST_PATH "mnist/"
 
 #define DATA_DIGITS_CLASSES 10
 #define DATA_DIGITS_FEATURES 74
-#define DATA_DIGITS_PATH "digits/digits.txt"
+#define DATA_DIGITS_PATH "digits/"
 
 #ifdef DATA_MNIST
 #define DATA_CLASSES DATA_MNIST_CLASSES
 #define DATA_FEATURES DATA_MNIST_FEATURES
-#define DATA_DATASET_PATH DATA_DATASET_BASEPATH DATA_MNIST_PATH
+#define DATA_TRAIN_PATH DATA_DATASET_BASEPATH DATA_MNIST_PATH DATA_TRAIN_SPLIT
+#define DATA_TEST_PATH DATA_DATASET_BASEPATH DATA_MNIST_PATH DATA_TEST_SPLIT
+#define DATA_VALIDATION_PATH DATA_DATASET_BASEPATH DATA_MNIST_PATH DATA_VALIDATION_SPLIT
 #endif
 
 #ifdef DATA_DIGITS
 #define DATA_CLASSES DATA_DIGITS_CLASSES
 #define DATA_FEATURES DATA_DIGITS_FEATURES
 #define DATA_DATASET_PATH DATA_DATASET_BASEPATH DATA_DIGITS_PATH
+#define DATA_TRAIN_PATH DATA_DATASET_BASEPATH DATA_DIGITS_PATH DATA_TRAIN_SPLIT
+#define DATA_TEST_PATH DATA_DATASET_BASEPATH DATA_DIGITS_PATH DATA_TEST_SPLIT
+#define DATA_VALIDATION_PATH DATA_DATASET_BASEPATH DATA_DIGITS_PATH DATA_VALIDATION_SPLIT
 #endif
 
 // Data object.
@@ -90,7 +102,7 @@ void free_data(Data *data);
  * 
  * @return Data The built data object.
  */
-Data *data_build(void);
+Data *data_build(const char *file_path);
 
 /**
  * @brief Parses a line from a file into a data object.
@@ -131,3 +143,29 @@ void free_ff_samples(FFsamples samples);
  * @param samples The FFsamples object to store the generated samples.
  */
 void generate_samples(const Data *data, const int row, FFsamples samples);
+
+/**
+ * @brief Structure representing a dataset.
+ *
+ * This structure holds pointers to the training, testing, and optional validation data.
+ */
+typedef struct
+{
+    Data *train;      /**< Pointer to the training data */
+    Data *test;       /**< Pointer to the testing data */
+    Data *validation; /**< Pointer to the validation data (optional) */
+} Dataset;
+
+/**
+ * @brief Splits the dataset into training, testing, and optional validation data.
+ *
+ * @return The dataset structure containing the split data.
+ */
+Dataset dataset_split(void);
+
+/**
+ * @brief Frees the memory allocated for the dataset.
+ *
+ * @param dataset The dataset to be freed.
+ */
+void free_dataset(Dataset dataset);
