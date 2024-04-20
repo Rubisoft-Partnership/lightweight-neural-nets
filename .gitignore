@@ -10,6 +10,7 @@ build
 *.o
 *.plist
 *.yml
+*.DS_Store
 
 # Python venv files
 
