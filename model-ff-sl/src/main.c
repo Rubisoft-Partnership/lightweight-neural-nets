@@ -44,7 +44,7 @@ const double beta2 = 0.999;
 const int epochs = 5;
 const double threshold = 4.0;
 
-Data data;
+Data *data;
 FFNet ffnet;
 
 static void setup(void)
@@ -76,7 +76,7 @@ static void train_loop(void)
         increase_indent();
         shuffle_data(data);
         double loss = 0.0f;
-        for (int j = 0; j < data.rows; j++)
+        for (int j = 0; j < data->rows; j++)
         {
             generate_samples(data, j, samples);
             loss = train_ff_net(ffnet, samples.pos, samples.neg, learning_rate);
@@ -97,10 +97,10 @@ void evaluate(void)
     initConfusionMatrix();
     for (int i = 0; i < 100; i++)
     {
-        double *const input = data.input[i];
-        double *const target = data.target[i];
+        double *const input = data->input[i];
+        double *const target = data->target[i];
         int ground_truth = -1;
-        for (int j = 0; j < data.num_class; j++)
+        for (int j = 0; j < data->num_class; j++)
         {
             if (target[j] == 1.0f)
             {

@@ -72,21 +72,21 @@ typedef struct
  * @param rows Number of rows in the file (number of sets for neural network).
  * @return Data The newly created data object.
  */
-Data new_data(const int feature_len, const int num_class, const int rows);
+Data *new_data(const int feature_len, const int num_class, const int rows);
 
 /**
  * @brief Frees the memory of a data object.
  * 
  * @param data The data object to free.
  */
-void free_data(const Data data);
+void free_data(Data *data);
 
 /**
  * @brief Builds a data object from a file.
  * 
  * @return Data The built data object.
  */
-Data data_build(void);
+Data *data_build(void);
 
 /**
  * @brief Parses a line from a file into a data object.
@@ -95,14 +95,14 @@ Data data_build(void);
  * @param line The line to parse.
  * @param row The row index of the data object.
  */
-void parse_data(const Data data, char *line, const int row);
+void parse_data(Data *data, char *line, const int row);
 
 /**
  * @brief Shuffles the data object.
  * 
  * @param data The data object to shuffle.
  */
-void shuffle_data(const Data data);
+void shuffle_data(Data *data);
 
 /**
  * @brief Creates a new FFsamples object.
@@ -126,4 +126,4 @@ void free_ff_samples(FFsamples samples);
  * @param row The row index of the data object.
  * @param samples The FFsamples object to store the generated samples.
  */
-void generate_samples(const Data data, const int row, FFsamples samples);
+void generate_samples(const Data *data, const int row, FFsamples samples);
