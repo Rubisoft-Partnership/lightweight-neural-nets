@@ -18,6 +18,10 @@
     #define DATA_DIGITS
 #endif
 
+// Default project basepath is current directory.
+#ifndef PROJECT_BASEPATH
+#define PROJECT_BASEPATH ""
+#endif
 #define DATA_DATASET_BASEPATH PROJECT_BASEPATH "/../dataset/"
 
 #define DATA_MNIST_CLASSES 10
