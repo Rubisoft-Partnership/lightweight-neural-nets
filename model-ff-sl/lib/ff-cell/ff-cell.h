@@ -6,6 +6,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <data/data.h>
 #include <adam/adam.h>
 #include <losses/losses.h>
 
@@ -30,6 +31,7 @@ typedef struct
     double *weights;               /**< All the weights. */
     double bias;                   /**< Biases. */
     double *output;                /**< Output layer. */
+    double *gradient;              /**< Gradient of each weight for a batch. */
     int num_weights;               /**< Number of weights. */
     int input_size;                /**< Number of inputs. */
     int output_size;               /**< Number of outputs. */
@@ -69,7 +71,7 @@ void free_ff_cell(FFCell ffcell);
  * @param loss_suite The loss function suite.
  * @return The loss value after training.
  */
-double train_ff_cell(const FFCell ffcell, const double *const pos, const double *const neg, const double learning_rate, const double threshold, const Loss loss_suite);
+double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_rate, const double threshold, const Loss loss_suite);
 
 /**
  * @brief Performs the forward pass for a FFCell.
