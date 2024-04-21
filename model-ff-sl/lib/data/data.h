@@ -1,7 +1,7 @@
 /**
  * @file data.h
  * @brief Header file for data handling in the lightweight neural network model.
- * 
+ *
  * This file contains the declarations for data handling functions and structures used in the model.
  * It provides functions for loading, preprocessing, and manipulating data for training and testing the neural network.
  */
@@ -15,7 +15,7 @@
 
 // Set digits as default dataset.
 #if !defined(DATA_MNIST) && !defined(DATA_DIGITS)
-    #define DATA_DIGITS
+#define DATA_DIGITS
 #endif
 
 #define DATA_DATASET_BASEPATH PROJECT_BASEPATH "/../dataset/"
@@ -55,18 +55,20 @@ typedef struct
     int rows;
 } Data;
 
-// FFsamples object.
+// FFBatch object.
 typedef struct
 {
-    // floating point array of FF positive sample <input, correct_label>
-    double *pos;
-    // floating point array of FF negative sample <input, incorrect_label>
-    double *neg;
-} FFsamples;
+    // 2D floating point array of FF positive sample <input, correct_label>
+    double **pos;
+    // 2D floating point array of FF negative sample <input, incorrect_label>
+    double **neg;
+    // Number of samples in the batch.
+    int size;
+} FFBatch;
 
 /**
  * @brief Creates a new data object.
- * 
+ *
  * @param feature_len Number of inputs to the neural network.
  * @param num_class Number of outputs to the neural network.
  * @param rows Number of rows in the file (number of sets for neural network).
@@ -76,21 +78,21 @@ Data new_data(const int feature_len, const int num_class, const int rows);
 
 /**
  * @brief Frees the memory of a data object.
- * 
+ *
  * @param data The data object to free.
  */
 void free_data(const Data data);
 
 /**
  * @brief Builds a data object from a file.
- * 
+ *
  * @return Data The built data object.
  */
 Data data_build(void);
 
 /**
  * @brief Parses a line from a file into a data object.
- * 
+ *
  * @param data The data object to parse into.
  * @param line The line to parse.
  * @param row The row index of the data object.
@@ -99,31 +101,41 @@ void parse_data(const Data data, char *line, const int row);
 
 /**
  * @brief Shuffles the data object.
- * 
+ *
  * @param data The data object to shuffle.
  */
 void shuffle_data(const Data data);
 
 /**
- * @brief Creates a new FFsamples object.
- * 
- * @param input_size The size of the input.
- * @return FFsamples The newly created FFsamples object.
+ * @brief Creates a new batch of feedforward samples.
+ *
+ * @param size The size of the batch.
+ * @return FFBatch The newly created FFBatch object.
  */
-FFsamples new_ff_samples(const int input_size);
+FFBatch new_ff_batch(const int batch_size, const int sample_size);
 
 /**
- * @brief Frees the memory of a FFsamples object.
- * 
- * @param samples The FFsamples object to free.
+ * @brief Frees the memory allocated for a batch of feedforward samples.
+ *
+ * @param batch The FFBatch object to free.
  */
-void free_ff_samples(FFsamples samples);
+void free_ff_batch(const FFBatch batch);
+
+/**
+ * @brief Generates a positive and a negative sample for the FF algorithm.
+ *
+ * @param data The data object.
+ * @param row The row index of the data object.
+ * @param pos The positive sample.
+ * @param neg The negative sample.
+ */
+void generate_samples(const Data data, const int row, double *pos, double *neg);
 
 /**
  * @brief Generates a positive and a negative sample for the FF algorithm by embedding the one-hot encoded target in the input.
- * 
+ *
  * @param data The data object.
  * @param row The row index of the data object.
- * @param samples The FFsamples object to store the generated samples.
+ * @param batch The FFBatch object to store the generated samples.
  */
-void generate_samples(const Data data, const int row, FFsamples samples);
+void generate_batch(const Data data, const int row, FFBatch batch);
