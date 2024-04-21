@@ -10,6 +10,24 @@
 
 #include <utils/utils.h>
 
+
+/**
+ * Finds the maximum integer value in an array.
+ *
+ * @param array The array of integers.
+ * @param size The size of the array.
+ * @return The maximum integer value in the array.
+ */
+int max_int(const int* array, const int size) {
+    int max = array[0];
+    for(int i = 1; i < size; i++) {
+        if(array[i] > max) {
+            max = array[i];
+        }
+    }
+    return max;
+}
+
 /**
  * @brief Return the number of lines in a file.
  *
@@ -59,6 +77,7 @@ char *read_line_from_file(FILE *const file)
     return line;
 }
 
+// TODO: enforce contiguous memory allocation.
 /**
  * @brief Create a matrix of doubles.
  *
