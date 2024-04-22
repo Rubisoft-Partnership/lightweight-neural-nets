@@ -8,6 +8,9 @@ build
 *.tinn
 *.log
 *.o
+*.plist
+*.yml
+*.DS_Store
 
 # Python venv files
 

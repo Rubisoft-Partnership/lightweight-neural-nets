@@ -9,6 +9,10 @@
 
 #include <stdio.h>
 
+// Default project basepath is current directory.
+#ifndef PROJECT_BASEPATH
+#define PROJECT_BASEPATH ""
+#endif
 #define LOGGING_LOG_PATH PROJECT_BASEPATH "/logs"
 
 /**

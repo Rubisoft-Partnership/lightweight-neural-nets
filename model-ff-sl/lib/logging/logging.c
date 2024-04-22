@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdarg.h>
+#include <sys/stat.h>
 
 /**
  * @brief The current log level for logging messages.
@@ -69,6 +70,9 @@ void open_log_file_with_timestamp(void)
     // Construct the full path
     char fullPath[256];
     snprintf(fullPath, sizeof(fullPath), "%s/log_%s.log", LOGGING_LOG_PATH, logFilename);
+
+    // Create the log directory if it doesn't exist
+    mkdir(LOGGING_LOG_PATH, 0777);
 
     // Open the log file
     globalLogFile = fopen(fullPath, "w");
