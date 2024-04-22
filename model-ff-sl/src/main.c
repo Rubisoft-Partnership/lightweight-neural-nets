@@ -42,6 +42,7 @@ double learning_rate = 0.001;
 const double beta1 = 0.9;
 const double beta2 = 0.999;
 const int epochs = 5;
+const int batch_size = 10;
 const double threshold = 4.0;
 
 Dataset data;
@@ -67,8 +68,10 @@ static void setup(void)
 static void train_loop(void)
 {
     clock_t start_time = clock();
-    FFsamples samples = new_ff_samples(input_size);
-    for (int i = 0; i < epochs; i++)
+    // Since batch is used for all layers, sample size is set to the maximum of the layers sizes.
+    FFBatch batch = new_ff_batch(batch_size, max_int(layers_sizes, layers_number));
+
+    for (int i = 0; i < epochs; i++) // iterate over epochs
     {
         clock_t epoch_start_time = clock();
         printf("Epoch %d\n", i);
@@ -76,19 +79,21 @@ static void train_loop(void)
         increase_indent();
         shuffle_data(data.train);
         double loss = 0.0f;
-        for (int j = 0; j < data.train->rows; j++)
+        int num_batches = data.train->rows / batch_size;
+        for (int j = 0; j < num_batches; j++) // iterate over batches
         {
-            generate_samples(data.train, j, samples);
-            loss = train_ff_net(ffnet, samples.pos, samples.neg, learning_rate);
+            generate_batch(data.train, j, batch); // generate positive and negative samples
+            loss += train_ff_net(ffnet, batch, learning_rate);
         }
-        printf("\tLoss %.12f\n", (double)loss);
+        printf("\tLoss %.12f\n", (double)loss / num_batches);
         double epoch_time = (double)(clock() - epoch_start_time) / CLOCKS_PER_SEC;
         printf("\tEpoch time: %.2f seconds\n", epoch_time);
         decrease_indent();
     }
     double total_time = (double)(clock() - start_time) / CLOCKS_PER_SEC;
     printf("\nTotal training time: %.2f seconds\n\n", total_time);
-    free_ff_samples(samples);
+
+    free_ff_batch(batch);
 }
 
 void evaluate(void)
