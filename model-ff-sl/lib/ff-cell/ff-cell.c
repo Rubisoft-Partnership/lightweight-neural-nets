@@ -21,21 +21,33 @@
 // Buffer to store activations and output activations for the positive pass.
 extern double o_buffer[H_BUFFER_SIZE]; // outputs buffer
 
-// Forward pass for a FF cell.
+/**
+ * Performs the forward pass for a feedforward (FF) cell.
+ *
+ * @param ffcell The FFCell object representing the FF cell.
+ * @param in The input data for the forward pass.
+ */
 void fprop_ff_cell(const FFCell ffcell, const double *const in);
+
 /**
  * Performs the backward pass for a feedforward (FF) cell.
  *
  * @param ffcell The FF cell to perform the backward pass on.
- * @param in_pos The positive input values for the cell.
- * @param in_neg The negative input values for the cell.
- * @param g_pos The gradient of the positive input values.
- * @param g_neg The gradient of the negative input values.
  * @param learning_rate The learning rate for the cell.
- * @param threshold The threshold value for the cell.
- * @param loss_suite The loss function suite to use for computing gradients.
  */
 static void bprop(const FFCell ffcell, const double learning_rate);
+
+/**
+ * Computes the gradient for the given of a sample of the batch for the FF cell and stores it in the gradient array.
+ *
+ * @param ffcell The FFCell for which the gradient is computed.
+ * @param in_pos The positive input values.
+ * @param in_neg The negative input values.
+ * @param g_pos The positive goodness value.
+ * @param g_neg The negative goodness value.
+ * @param threshold The threshold value.
+ * @param loss_suite The loss function suite to be used.
+ */
 static void compute_gradient(const FFCell ffcell, const double *const in_pos, const double *const in_neg,
                              const double g_pos, const double g_neg, const double threshold, const Loss loss_suite);
 
@@ -90,10 +102,9 @@ void free_ff_cell(const FFCell ffcell)
 }
 
 /**
- * @brief Trains a FFCell by performing forward and backward pass with a given loss function.
+ * @brief Trains a FFCell by performing forward and backward pass with a given a batch of data.
  * @param ffcell The FFCell to be trained.
- * @param pos The positive samples.
- * @param neg The negative samples.
+ * @param batch The batch of data to train on.
  * @param learning_rate The learning rate for the training.
  * @param threshold The threshold value for the FFCell.
  * @param loss_suite The loss function suite.
@@ -191,7 +202,7 @@ static void compute_gradient(const FFCell ffcell, const double *const in_pos, co
     log_debug("Loss: %.17g", loss_suite.loss(g_pos, g_neg, threshold));
     log_debug("Partial derivative of the loss with resect to the goodness pos: %.17g, neg: %.17g", pdloss_pos, pdloss_neg);
 
-    // TODO: change loops to i < ffcell.num_weights
+    ///TODO: change loops to i < ffcell.num_weights
     for (int i = 0; i < ffcell.input_size; i++)
     {
         for (int j = 0; j < ffcell.output_size; j++)
@@ -217,7 +228,7 @@ static void bprop(const FFCell ffcell, const double learning_rate)
 
     // Update the weights for each connection between input and output units
 
-    // TODO: change loops to i < ffcell.num_weights
+    ///TODO: change loops to i < ffcell.num_weights
     for (int i = 0; i < ffcell.input_size; i++)
     {
         for (int j = 0; j < ffcell.output_size; j++)

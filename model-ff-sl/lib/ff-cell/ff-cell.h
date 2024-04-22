@@ -62,10 +62,9 @@ FFCell new_ff_cell(const int input_size, const int output_size, double (*act)(do
 void free_ff_cell(FFCell ffcell);
 
 /**
- * @brief Trains a FFCell by performing forward and backward pass with a given loss function.
+ * @brief Trains a FFCell by performing forward and backward pass with a given a batch of data.
  * @param ffcell The FFCell to be trained.
- * @param pos The positive samples.
- * @param neg The negative samples.
+ * @param batch The batch of data to train on.
  * @param learning_rate The learning rate for the training.
  * @param threshold The threshold value for the FFCell.
  * @param loss_suite The loss function suite.

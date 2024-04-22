@@ -109,7 +109,8 @@ void shuffle_data(const Data data);
 /**
  * @brief Creates a new batch of feedforward samples.
  *
- * @param size The size of the batch.
+ * @param batch_size The size of the batch.
+ * @param sample_size The size of each sample.
  * @return FFBatch The newly created FFBatch object.
  */
 FFBatch new_ff_batch(const int batch_size, const int sample_size);
@@ -132,7 +133,7 @@ void free_ff_batch(const FFBatch batch);
 void generate_samples(const Data data, const int row, double *pos, double *neg);
 
 /**
- * @brief Generates a positive and a negative sample for the FF algorithm by embedding the one-hot encoded target in the input.
+ * @brief Generates a batch of feedforward samples.
  *
  * @param data The data object.
  * @param row The row index of the data object.

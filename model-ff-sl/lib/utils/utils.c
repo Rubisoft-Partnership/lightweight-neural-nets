@@ -77,7 +77,7 @@ char *read_line_from_file(FILE *const file)
     return line;
 }
 
-// TODO: enforce contiguous memory allocation.
+///TODO: enforce contiguous memory allocation.
 /**
  * @brief Create a matrix of doubles.
  *

@@ -28,7 +28,7 @@ Data new_data(const int feature_len, const int num_class, const int rows)
     return data;
 }
 
-// TODO: adapt to contiguous memory allocation calling free once.
+///TODO: adapt to contiguous memory allocation calling free once.
 /**
  * @brief Frees a data object from the heap.
  *
@@ -89,7 +89,8 @@ void shuffle_data(const Data data)
 /**
  * Creates a new batch of feedforward samples.
  *
- * @param size The size of the batch.
+ * @param batch_size The size of the batch.
+ * @param sample_size The size of each sample.
  * @return The newly created FFBatch.
  */
 FFBatch new_ff_batch(const int batch_size, const int sample_size)
@@ -132,11 +133,13 @@ void generate_samples(const Data data, const int row, double *pos, double *neg)
     memcpy(pos, data.input[row], (data.feature_len - data.num_class) * sizeof(double));
     memcpy(neg, data.input[row], (data.feature_len - data.num_class) * sizeof(double));
     memcpy(&pos[data.feature_len - data.num_class], data.target[row], data.num_class * sizeof(double));
+    // Set the negative sample's label to 0.0f
     memset(&neg[data.feature_len - data.num_class], 0, data.num_class * sizeof(double));
-    // Set the positive sample's label to 0.0f
+    // Find the label of the positive sample and store it in `one_pos`
     int one_pos = -1;
     for (int i = data.feature_len - data.num_class; i < data.feature_len; i++)
         if (pos[i] == 1.0f)
+            // Store the index of the positive sample's label
             one_pos = i - (data.feature_len - data.num_class);
     // Generate a random label for the negative sample different from the positive sample's label
     int step = 1 + get_random() % (data.num_class - 1);
@@ -145,6 +148,13 @@ void generate_samples(const Data data, const int row, double *pos, double *neg)
     neg[(data.feature_len - data.num_class) + neg_label] = 1.0f;
 }
 
+/**
+ * @brief Generates a batch of feedforward samples.
+ *
+ * @param data The data object.
+ * @param row The row index of the data object.
+ * @param batch The FFBatch object to store the generated samples.
+ */
 void generate_batch(const Data data, const int batch_index, FFBatch batch)
 {
     log_debug("Generating batch %d", batch_index);
