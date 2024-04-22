@@ -27,5 +27,5 @@ def mnist_csv_to_custom_format(csv_filepath, output_filepath):
             output_file.write(converted_line)
 
 # Run the function to perform the conversion
-mnist_csv_to_custom_format("mnist_test.csv", "mnist_test.txt")
-mnist_csv_to_custom_format("mnist_train.csv", "mnist_train.txt")
+mnist_csv_to_custom_format("test.csv", "test.txt")
+mnist_csv_to_custom_format("train.csv", "train.txt")
