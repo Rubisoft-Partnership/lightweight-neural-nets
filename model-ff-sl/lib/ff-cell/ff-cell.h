@@ -6,6 +6,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <data/data.h>
 #include <adam/adam.h>
 #include <losses/losses.h>
 
@@ -30,6 +31,7 @@ typedef struct
     double *weights;               /**< All the weights. */
     double bias;                   /**< Biases. */
     double *output;                /**< Output layer. */
+    double *gradient;              /**< Gradient of each weight for a batch. */
     int num_weights;               /**< Number of weights. */
     int input_size;                /**< Number of inputs. */
     int output_size;               /**< Number of outputs. */
@@ -60,16 +62,15 @@ FFCell new_ff_cell(const int input_size, const int output_size, double (*act)(do
 void free_ff_cell(FFCell ffcell);
 
 /**
- * @brief Trains a FFCell by performing forward and backward pass with a given loss function.
+ * @brief Trains a FFCell by performing forward and backward pass with a given a batch of data.
  * @param ffcell The FFCell to be trained.
- * @param pos The positive samples.
- * @param neg The negative samples.
+ * @param batch The batch of data to train on.
  * @param learning_rate The learning rate for the training.
  * @param threshold The threshold value for the FFCell.
  * @param loss_suite The loss function suite.
  * @return The loss value after training.
  */
-double train_ff_cell(const FFCell ffcell, const double *const pos, const double *const neg, const double learning_rate, const double threshold, const Loss loss_suite);
+double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_rate, const double threshold, const Loss loss_suite);
 
 /**
  * @brief Performs the forward pass for a FFCell.

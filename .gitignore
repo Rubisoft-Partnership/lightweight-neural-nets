@@ -8,7 +8,10 @@ build
 *.tinn
 *.log
 *.o
+*.plist
+*.yml
+*.DS_Store
 
 # Python venv files
 
-dataset/digit_dataset/venv/*
+**/venv/**

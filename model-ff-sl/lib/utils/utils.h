@@ -7,6 +7,15 @@
 #include <stdio.h>
 
 /**
+ * Finds the maximum integer value in an array.
+ *
+ * @param array The array of integers.
+ * @param size The size of the array.
+ * @return The maximum integer value in the array.
+ */
+int max_int(const int* array, const int size);
+
+/**
  * @brief Reads a line from a file.
  *
  * @param file The file to read from.

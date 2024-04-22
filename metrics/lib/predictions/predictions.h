@@ -20,7 +20,7 @@ typedef struct
 /**
  * @brief Initializes the predictions structure by setting the number of predictions to 0.
  */
-void init_redictions();
+void init_predictions();
 
 /**
  * @brief Adds a prediction to the predictions structure.

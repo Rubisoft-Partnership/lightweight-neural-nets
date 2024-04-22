@@ -1,4 +1,5 @@
-BIN = target/main.out
+BIN_PATH = target
+BIN_FILE = main.out
 PROJECT_BASEPATH = $(realpath .)
 
 CFLAGS = -std=c99 -Wall -Wextra -pedantic -Ofast -flto -march=native -Ilib -DPROJECT_BASEPATH=\"$(PROJECT_BASEPATH)\" -g
@@ -17,6 +18,7 @@ CC = gcc
 
 METRICS_BASEPATH = $(PROJECT_BASEPATH)/../metrics
 
+# FF library
 SRC = src/main.c lib/ff-net/ff-net.c lib/ff-cell/ff-cell.c lib/logging/logging.c lib/data/data.c lib/utils/utils.c lib/adam/adam.c lib/losses/losses.c lib/ff-utils/ff-utils.c
 
 # Metrics library
@@ -25,10 +27,11 @@ SRC += $(METRICS_BASEPATH)/lib/confusion-matrix/confusion-matrix.c $(METRICS_BAS
 INCLUDE = -I$(METRICS_BASEPATH)/lib
 
 all:
-	$(CC) -o $(BIN) $(SRC) $(CFLAGS) $(DATASET_DEF) $(LDFLAGS) $(INCLUDE)
+	mkdir -p $(BIN_PATH)
+	$(CC) -o $(BIN_PATH)/$(BIN_FILE) $(SRC) $(CFLAGS) $(DATASET_DEF) $(LDFLAGS) $(INCLUDE)
 
 run:
-	./$(BIN)
+	./$(BIN_PATH)/$(BIN_FILE)
 
 clean:
-	rm -f $(BIN)
+	rm -f $(BIN_PATH)/$(BIN_FILE)

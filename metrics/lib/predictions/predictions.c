@@ -22,7 +22,7 @@ Predictions predictions;
 /**
  * @brief Initializes the predictions structure by setting the number of predictions to 0.
  */
-void init_redictions()
+void init_predictions()
 {
     predictions.num_predictions = 0;
 }
