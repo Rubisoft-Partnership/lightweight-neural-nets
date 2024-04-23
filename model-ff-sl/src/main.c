@@ -26,14 +26,11 @@
 #include <logging/logging.h>
 #include <utils/utils.h>
 #include <losses/losses.h>
-
 #include <confusion-matrix/confusion-matrix.h>
 
-// Input and output size is harded coded here as machine learning
-// repositories usually don't include the input and output size input the data itself.
 const int input_size = DATA_FEATURES;
 const int num_classes = DATA_CLASSES;
-const int layers_sizes[] = {DATA_FEATURES, 500};
+const int layers_sizes[] = {DATA_FEATURES, 500, 500, 500};
 
 const int layers_number = sizeof(layers_sizes) / sizeof(layers_sizes[0]);
 
@@ -49,19 +46,18 @@ FFNet ffnet;
 
 static void setup(void)
 {
-    // Comment to repeat the same results
-    // set_seed(time(NULL));
+    // set_seed(time(NULL)); // comment for reproducibility
     set_log_level(LOG_DEBUG);
     open_log_file_with_timestamp();
 
     data = data_build();
     const Loss loss_suite = LOSS_FF;
-    ffnet = new_ff_net(layers_sizes, layers_number, relu, pdrelu, threshold, beta1, beta2, loss_suite);
-    log_debug("FFNet built with the following layers:");
-    increase_indent();
-    for (int i = 0; i < ffnet.num_cells; i++)
-        log_debug("Layer %d: %d inputs, %d outputs", i, ffnet.layers[i].input_size, ffnet.layers[i].output_size);
-    decrease_indent();
+
+    // Load the model from checkpoint file.
+    load_ff_net(&ffnet, "ffnet.bin", relu, pdrelu, beta1, beta2);
+
+    // Build the model from scratch.
+    //ffnet = new_ff_net(layers_sizes, layers_number, relu, pdrelu, threshold, beta1, beta2, loss_suite);
 }
 
 static void train_loop(void)
@@ -73,7 +69,6 @@ static void train_loop(void)
         clock_t epoch_start_time = clock();
         printf("Epoch %d\n", i);
         log_info("Epoch %d", i);
-        increase_indent();
         shuffle_data(data);
         double loss = 0.0f;
         for (int j = 0; j < data.rows; j++)
@@ -84,7 +79,6 @@ static void train_loop(void)
         printf("\tLoss %.12f\n", (double)loss);
         double epoch_time = (double)(clock() - epoch_start_time) / CLOCKS_PER_SEC;
         printf("\tEpoch time: %.2f seconds\n", epoch_time);
-        decrease_indent();
     }
     double total_time = (double)(clock() - start_time) / CLOCKS_PER_SEC;
     printf("\nTotal training time: %.2f seconds\n\n", total_time);
@@ -113,6 +107,9 @@ void evaluate(void)
     }
     printf("\n");
     printNormalizedConfusionMatrix();
+
+    // Save the model to a checkpoint file.
+    save_ff_net(ffnet, "ffnet.bin");
 }
 
 int main(void)
@@ -126,8 +123,7 @@ int main(void)
     evaluate();
 
     free_data(data);
-    close_log_file();
     free_ff_net(ffnet);
-
+    close_log_file();
     return 0;
 }
