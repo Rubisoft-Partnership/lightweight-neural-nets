@@ -35,7 +35,7 @@ const int layers_sizes[] = {DATA_FEATURES, 500, 500, 500};
 const int layers_number = sizeof(layers_sizes) / sizeof(layers_sizes[0]);
 
 // Hyper Parameters.
-double learning_rate = 0.001;
+double learning_rate = 0.005;
 const double beta1 = 0.9;
 const double beta2 = 0.999;
 const int epochs = 5;
@@ -55,10 +55,10 @@ static void setup(void)
     const Loss loss_suite = LOSS_FF;
 
     // Load the model from checkpoint file.
-    load_ff_net(&ffnet, "ffnet.bin", relu, pdrelu, beta1, beta2);
+    // load_ff_net(&ffnet, "ffnet.bin", relu, pdrelu, beta1, beta2);
 
     // Build the model from scratch.
-    //ffnet = new_ff_net(layers_sizes, layers_number, relu, pdrelu, threshold, beta1, beta2, loss_suite);
+    ffnet = new_ff_net(layers_sizes, layers_number, relu, pdrelu, threshold, beta1, beta2, loss_suite);
 }
 
 static void train_loop(void)
