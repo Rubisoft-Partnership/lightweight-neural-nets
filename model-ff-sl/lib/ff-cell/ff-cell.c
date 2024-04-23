@@ -266,6 +266,58 @@ static void bprop(const FFCell ffcell, const double learning_rate)
     log_debug("Standard deviation of weight update: %f\n", std_weight_update);
 }
 
+/**
+ * Saves the FFCell structure to a file.
+ *
+ * This function writes the weights, bias, number of weights, input size, and output size
+ * of the FFCell structure to the specified file.
+ *
+ * @param ffcell The FFCell structure to be saved.
+ * @param file The file pointer to write the FFCell structure to.
+ */
+void save_ff_cell(const FFCell ffcell, FILE *file)
+{
+    log_debug("Saving FFCell with %d inputs, %d outputs, and %d weights", ffcell.input_size, ffcell.output_size, ffcell.num_weights);
+    // Write the input and output size of the FFCell to the file.
+    fwrite(&ffcell.input_size, sizeof(ffcell.input_size), 1, file);
+    fwrite(&ffcell.output_size, sizeof(ffcell.output_size), 1, file);
+
+    // Save the weights and bias of the FFCell to the file.
+    fwrite(ffcell.weights, sizeof(*ffcell.weights), ffcell.num_weights, file);
+    fwrite(&ffcell.bias, sizeof(ffcell.bias), 1, file);
+}
+
+/**
+ * Loads an FFCell object from a file.
+ *
+ * @param file The file to read the FFCell object from.
+ * @param act Pointer to the activation function.
+ * @param pdact Pointer to the derivative of the activation function.
+ * @param beta1 The beta1 parameter for the FFCell object.
+ * @param beta2 The beta2 parameter for the FFCell object.
+ * @return The loaded FFCell object.
+ */
+FFCell load_ff_cell(FILE *file, double (*act)(double), double (*pdact)(double), const double beta1, const double beta2)
+{
+    // Read input and output size from file.
+    int input_size = 0;
+    int output_size = 0;
+    fread(&input_size, sizeof(input_size), 1, file);
+    fread(&output_size, sizeof(output_size), 1, file);
+
+    log_debug("Loading FFCell with %d inputs and %d outputs", input_size, output_size);
+
+    // Allocate memory to create FFCell object.
+    FFCell ffcell = new_ff_cell(input_size, output_size, act, pdact, beta1, beta2);
+
+    // Load weights and bias from the file.
+    fread(ffcell.weights, sizeof(*ffcell.weights), ffcell.num_weights, file);
+    fread(&ffcell.bias, sizeof(ffcell.bias), 1, file);
+
+    log_debug("FFCell loaded with %d inputs, %d outputs, and %d weights", ffcell.input_size, ffcell.output_size, ffcell.num_weights);
+    return ffcell;
+}
+
 // ReLU activation function.
 double relu(const double a)
 {
@@ -278,7 +330,7 @@ double pdrelu(const double a)
     return a > 0.0 ? 1.0 : 0.0;
 }
 
-// Randomizes tinn weights and bias.
+// Randomizes weights and bias.
 static void wbrand(FFCell ffcell)
 {
     for (int i = 0; i < ffcell.num_weights; i++)
@@ -286,7 +338,7 @@ static void wbrand(FFCell ffcell)
     ffcell.bias = frand() - 0.5;
 }
 
-// Returns random doulbe in [0.0 - 1.0]
+// Returns random double in [0.0 - 1.0]
 static double frand(void)
 {
     return get_random() / (double)RAND_MAX;
