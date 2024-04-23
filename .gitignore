@@ -15,4 +15,4 @@ build
 *.bin
 
 # Python venv files
-dataset/digit_dataset/venv/*
+**/venv/**

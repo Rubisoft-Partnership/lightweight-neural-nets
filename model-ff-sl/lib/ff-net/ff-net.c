@@ -16,6 +16,7 @@
 #include <stdarg.h>
 
 #include <logging/logging.h>
+#include <data/data.h>
 #include <ff-cell/ff-cell.h>
 #include <ff-utils/ff-utils.h>
 
@@ -79,18 +80,19 @@ void free_ff_net(FFNet ffnet)
 /**
  * @brief Trains a FFNet by training each cell.
  *
+ * This function trains a FFNet by training each cell in the network using the given positive and negative samples and learning rate.
+ *
  * @param ffnet The FFNet to train.
- * @param pos The positive training data.
- * @param neg The negative training data.
+ * @param batch Batch containing an array for positive samples and an array for negative samples.
  * @param learning_rate The learning rate for the training.
- * @return double The total loss of the FFNet.
+ * @return The training loss.
  */
-double train_ff_net(const FFNet ffnet, const double *const pos, const double *const neg, const double learning_rate)
+double train_ff_net(const FFNet ffnet, const FFBatch batch, const double learning_rate)
 {
     double loss = 0.0;
-    loss += train_ff_cell(ffnet.layers[0], pos, neg, learning_rate, ffnet.threshold, ffnet.loss_suite);
+    loss += train_ff_cell(ffnet.layers[0], batch, learning_rate, ffnet.threshold, ffnet.loss_suite);
     for (int i = 1; i < ffnet.num_cells; i++)
-        loss += train_ff_cell(ffnet.layers[i], o_buffer, ffnet.layers[i - 1].output, learning_rate, ffnet.threshold, ffnet.loss_suite);
+        loss += train_ff_cell(ffnet.layers[i], batch, learning_rate, ffnet.threshold, ffnet.loss_suite);
     return loss;
 }
 

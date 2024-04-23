@@ -62,12 +62,11 @@ void free_ff_net(FFNet ffnet);
  * This function trains a FFNet by training each cell in the network using the given positive and negative samples and learning rate.
  *
  * @param ffnet The FFNet to train.
- * @param pos Array of the positive sample.
- * @param neg Array of the negative sample.
+ * @param batch Batch containing an array for positive samples and an array for negative samples.
  * @param learning_rate The learning rate for the training.
  * @return The training loss.
  */
-double train_ff_net(const FFNet ffnet, const double *const pos, const double *const neg, const double learning_rate);
+double train_ff_net(const FFNet ffnet, const FFBatch batch, const double learning_rate);
 
 /**
  * @brief Performs inference with a FFNet.

@@ -7,7 +7,7 @@
 static int confusionMatrix[NUM_CLASSES][NUM_CLASSES];
 
 // Initialize the confusion matrix
-void initConfusionMatrix()
+void initConfusionMatrix(void)
 {
     for (int i = 0; i < NUM_CLASSES; ++i)
     {
@@ -32,7 +32,7 @@ void addPrediction(int true_label, int predicted_label)
 }
 
 // Pretty print the normalized confusion matrix
-void printNormalizedConfusionMatrix()
+void printNormalizedConfusionMatrix(void)
 {
     int width = 7; // Width of each cell in the table
     int sample_num = 0;
@@ -99,7 +99,7 @@ void printNormalizedConfusionMatrix()
     printf("|\n");
 }
 
-void printConfusionMatrix()
+void printConfusionMatrix(void)
 {
     int width = 7; // Adjust the cell width as needed
 
