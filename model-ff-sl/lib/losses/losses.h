@@ -11,11 +11,22 @@
 #pragma once
 
 /**
+ * @brief Enum representing the type of loss function.
+ */
+enum LossType
+{
+    LOSS_FF_TYPE,
+    LOSS_SYMBA_TYPE
+};
+
+/**
  * @brief Struct representing a Loss function and its partial derivatives.
  */
 typedef struct
 {
-    // Loss function.
+    // Loss type.
+    enum LossType type;
+    // Loss function handler.
     double (*loss)(const double, const double, const double);
     // Partial derivative of the loss function for the positive pass.
     double (*pdloss_pos)(const double, const double, const double);
@@ -87,10 +98,10 @@ double symba_pdloss_neg(const double g_pos, const double g_neg, const double thr
  * @brief Original Forward Forward loss function.
  */
 #define LOSS_FF \
-    (Loss) { ff_loss, ff_pdloss_pos, ff_pdloss_neg }
+    ((Loss){LOSS_FF_TYPE, ff_loss, ff_pdloss_pos, ff_pdloss_neg})
 
 /**
  * @brief SymBa loss function.
  */
 #define LOSS_SYMBA \
-    (Loss) { symba_loss, symba_pdloss_pos, symba_pdloss_neg }
+    ((Loss){LOSS_SYMBA_TYPE, symba_loss, symba_pdloss_pos, symba_pdloss_neg})

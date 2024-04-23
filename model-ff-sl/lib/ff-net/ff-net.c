@@ -6,6 +6,9 @@
 
 #include <ff-net/ff-net.h>
 
+#include <stdio.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -58,6 +61,8 @@ FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), 
 
     for (int i = 0; i < ffnet.num_cells; i++)
         ffnet.layers[i] = new_ff_cell(layer_sizes[i], layer_sizes[i + 1], act, pdact, beta1, beta2);
+    
+    log_info("FFNet built with %d layers", ffnet.num_cells);
     return ffnet;
 }
 
@@ -131,4 +136,117 @@ int predict_ff_net(const FFNet ffnet, const double *input, const int num_classes
             max_goodness_index = i;
     }
     return max_goodness_index;
+}
+
+/**
+ * @brief Saves a FFNet to a file.
+ *
+ * @param ffnet The FFNet to save.
+ * @param filename The name of the file to save the FFNet.
+ */
+void save_ff_net(const FFNet ffnet, const char *filename)
+{
+    // Create the checkpoint directory if it does not exist
+    if (access(FFNET_CHECKPOINT_PATH, F_OK) == -1)
+    {
+        if (mkdir(FFNET_CHECKPOINT_PATH, 0777) == -1)
+        {
+            log_error("Could not create checkpoint directory %s", FFNET_CHECKPOINT_PATH);
+            return;
+        }
+    }
+
+    FILE *file = NULL;
+    char full_path[256];
+
+    if (filename == NULL) // no filename provided
+    {
+        // Get the current time
+        time_t now = time(NULL);
+        struct tm *tm_info = localtime(&now);
+
+        // Create checkpoint filename
+        char checkpoint_filename[256];
+        strftime(checkpoint_filename, sizeof(checkpoint_filename), "%Y-%m-%d_%H-%M-%S", tm_info);
+
+        // Construct the full path
+        char full_path[256];
+        snprintf(full_path, sizeof(full_path), "%s/checkpoint_%s.bin", FFNET_CHECKPOINT_PATH, checkpoint_filename);
+
+        log_info("No filename provided, saving FFNet to file %s", full_path);
+    }
+    else
+    {
+        snprintf(full_path, sizeof(full_path), "%s/%s", FFNET_CHECKPOINT_PATH, filename);
+        log_info("Saving FFNet to file %s", full_path);
+    }
+
+    file = fopen(full_path, "wb");
+    if (file == NULL)
+    {
+        log_error("Could not open file %s for writing", full_path);
+        return;
+    }
+
+    fwrite(&ffnet.num_cells, sizeof(ffnet.num_cells), 1, file);
+    fwrite(&ffnet.threshold, sizeof(ffnet.threshold), 1, file);
+    fwrite(&ffnet.loss_suite.type, sizeof(ffnet.loss_suite.type), 1, file);
+
+    for (int i = 0; i < ffnet.num_cells; i++)
+        save_ff_cell(ffnet.layers[i], file);
+
+    fclose(file);
+    log_info("Saved FFNet to file %s", filename);
+}
+
+/**
+ * @brief Loads a FFNet from a file.
+ *
+ * @param ffnet The FFNet to load.
+ * @param filename The name of the file to load the FFNet.
+ * @param act The activation function.
+ * @param pdact The derivative of the activation function.
+ * @param beta1 The hyperparameter for the FF algorithm.
+ * @param beta2 The hyperparameter for the FF algorithm.
+ */
+void load_ff_net(FFNet *ffnet, const char *filename, double (*act)(double), double (*pdact)(double),
+                 const double beta1, const double beta2)
+{
+    char full_path[256];
+    snprintf(full_path, sizeof(full_path), "%s/%s", FFNET_CHECKPOINT_PATH, filename);
+
+    log_debug("Loading FFNet from file %s", full_path);
+    FILE *file = fopen(full_path, "rb");
+    if (file == NULL)
+    {
+        log_error("Could not open file %s for reading", full_path);
+        return;
+    }
+
+    // Read the FFNet number of cells, threshold and loss function type.
+    fread(&ffnet->num_cells, sizeof(ffnet->num_cells), 1, file);
+    fread(&ffnet->threshold, sizeof(ffnet->threshold), 1, file);
+    enum LossType loss_type;
+    fread(&loss_type, sizeof(loss_type), 1, file);
+
+    log_debug("FFNet has %d cells, threshold %f and loss function type %d", ffnet->num_cells, ffnet->threshold, loss_type);
+
+    switch (loss_type) // set the loss function
+    {
+    case LOSS_FF_TYPE:
+        ffnet->loss_suite = LOSS_FF;
+        break;
+    case LOSS_SYMBA_TYPE:
+        ffnet->loss_suite = LOSS_SYMBA;
+        break;
+    default:
+        log_error("Unknown loss function type %d", ffnet->loss_suite.type);
+        return;
+    }
+
+    for (int i = 0; i < ffnet->num_cells; i++)
+        ffnet->layers[i] = load_ff_cell(file, act, pdact, beta1, beta2);
+
+    fclose(file);
+    log_info("Loaded FFNet from file %s", filename);
 }

@@ -1,7 +1,8 @@
 *.out
 *.json
 *.txt
-model-bp/models/*
+*/models/*
+*/checkpoints/*
 .vscode/*
 build
 *.csv
@@ -11,7 +12,7 @@ build
 *.plist
 *.yml
 *.DS_Store
+*.bin
 
 # Python venv files
-
 **/venv/**

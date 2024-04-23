@@ -12,6 +12,8 @@
 
 #define MAX_LAYERS_NUM 64
 
+#define FFNET_CHECKPOINT_PATH PROJECT_BASEPATH "/checkpoints"
+
 /**
  * @struct FFNet
  * @brief Struct that represents a forward forward neural network.
@@ -78,3 +80,28 @@ double train_ff_net(const FFNet ffnet, const FFBatch batch, const double learnin
  * @return The predicted class label.
  */
 int predict_ff_net(const FFNet ffnet, const double *input, const int num_classes, const int input_size);
+
+/**
+ * @brief Saves a FFNet to a file.
+ *
+ * This function saves a FFNet to a file.
+ *
+ * @param ffnet The FFNet to save.
+ * @param filename The name of the file to save the FFNet.
+ */
+void save_ff_net(const FFNet ffnet, const char *filename);
+
+/**
+ * @brief Loads a FFNet from a file.
+ *
+ * This function loads a FFNet from a file.
+ *
+ * @param ffnet The FFNet to load.
+ * @param filename The name of the file to load the FFNet.
+ * @param act The activation function for the FFNet.
+ * @param pdact The derivative of the activation function for the FFNet.
+ * @param beta1 The beta1 value of the Adam optimizer.
+ * @param beta2 The beta2 value of the Adam optimizer.
+ */
+void load_ff_net(FFNet *ffnet, const char *filename, double (*act)(double), double (*pdact)(double),
+                 const double beta1, const double beta2);
