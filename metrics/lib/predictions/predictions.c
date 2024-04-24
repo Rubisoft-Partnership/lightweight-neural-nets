@@ -49,7 +49,7 @@ void reset_predictions()
  * @param true_label The true label of the prediction.
  * @param predicted_label The predicted label of the prediction.
  */
-void add_prediction(const int true_label, const int predicted_label)
+void add_prediction(const Label true_label, const Label predicted_label)
 {
     if (predictions.num_predictions < MAX_PREDICTIONS)
     {

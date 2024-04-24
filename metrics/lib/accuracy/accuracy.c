@@ -48,12 +48,12 @@ float get_balanced_accuracy(void)
 {
     int correct_predictions[NUM_CLASSES];
     // Initialize correct predictions to the number of predictions for each class
-    for (int i = 0; i < NUM_CLASSES; i++)
+    for (Label i = 0; i < NUM_CLASSES; i++)
     {
         correct_predictions[i] = predictions.num_predictions;
     }
 
-    for (int i = 0; i < predictions.num_predictions; i++)
+    for (Label i = 0; i < predictions.num_predictions; i++)
     {
         // If the prediction is incorrect, decrement the correct predictions for both the true and predicted labels
         if (predictions.true_labels[i] != predictions.predicted_labels[i])
@@ -63,7 +63,7 @@ float get_balanced_accuracy(void)
         }
     }
     int sum = 0;
-    for (int i = 0; i < NUM_CLASSES; i++)
+    for (Label i = 0; i < NUM_CLASSES; i++)
     {
         sum += correct_predictions[i];
     }

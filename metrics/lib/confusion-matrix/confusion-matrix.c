@@ -31,14 +31,14 @@ extern Predictions predictions;
 int **new_confusion_matrix()
 {
     int **confusionMatrix = (int **)calloc(NUM_CLASSES, sizeof(int *));
-    for (int i = 0; i < NUM_CLASSES; i++)
+    for (Label i = 0; i < NUM_CLASSES; i++)
     {
         confusionMatrix[i] = (int *)calloc(NUM_CLASSES, sizeof(int));
     }
     for (int i = 0; i < predictions.num_predictions; i++)
     {
-        int true_label = predictions.true_labels[i];
-        int predicted_label = predictions.predicted_labels[i];
+        Label true_label = predictions.true_labels[i];
+        Label predicted_label = predictions.predicted_labels[i];
         confusionMatrix[true_label][predicted_label]++;
     }
     return confusionMatrix;
@@ -51,7 +51,7 @@ int **new_confusion_matrix()
  */
 void free_confusion_matrix(int **confusionMatrix)
 {
-    for (int i = 0; i < NUM_CLASSES; i++)
+    for (Label i = 0; i < NUM_CLASSES; i++)
     {
         free(confusionMatrix[i]);
     }
