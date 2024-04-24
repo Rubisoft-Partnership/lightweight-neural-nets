@@ -25,6 +25,15 @@ typedef struct
 void init_predictions();
 
 /**
+ * @brief Resets the predictions.
+ *
+ * This function resets the predictions made by the neural network model.
+ * After calling this function, the predictions will be cleared and ready
+ * for new predictions.
+ */
+void reset_predictions();
+
+/**
  * @brief Adds a prediction to the predictions structure.
  *
  * @param true_label The true label of the prediction.

@@ -28,6 +28,18 @@ void init_predictions()
 }
 
 /**
+ * @brief Resets the predictions.
+ *
+ * This function resets the predictions made by the neural network model.
+ * After calling this function, the predictions will be cleared and ready
+ * for new predictions.
+ */
+void reset_predictions()
+{
+    predictions.num_predictions = 0;
+}
+
+/**
  * @brief Adds a prediction to the predictions structure.
  *
  * This function adds a prediction to the predictions structure.
