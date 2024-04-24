@@ -24,6 +24,8 @@ extern Predictions predictions;
  */
 float get_accuracy(void)
 {
+    if (predictions.num_predictions == 0)
+        return 0.0;
     int correct_predictions = 0;
     for (int i = 0; i < predictions.num_predictions; i++)
     {
@@ -46,6 +48,9 @@ float get_accuracy(void)
  */
 float get_balanced_accuracy(void)
 {
+    if (predictions.num_predictions == 0)
+        return 0.0;
+    
     int correct_predictions[NUM_CLASSES];
     // Initialize correct predictions to the number of predictions for each class
     for (Label i = 0; i < NUM_CLASSES; i++)
