@@ -15,9 +15,7 @@ CPPFLAGS = -Wall -Wextra -pedantic -std=c++14 -Ilib
 METRICS_BASEPATH = $(PROJECT_BASEPATH)/../metrics
 
 # Metrics Source Files
-METRICS_SRC = $(METRICS_BASEPATH)/lib/confusion-matrix/confusion-matrix.c \
-              $(METRICS_BASEPATH)/lib/accuracy/accuracy.c \
-              $(METRICS_BASEPATH)/lib/predictions/predictions.c
+METRICS_SRC = $(wildcard $(METRICS_BASEPATH)/lib/*/*.c)
 METRICS_OBJ = $(addprefix $(BUILD_PATH)/, $(notdir $(patsubst %.c,%.o,$(METRICS_SRC))))
 
 #Include Paths
@@ -57,4 +55,3 @@ $(BIN_PATH)/$(BIN_FILE): $(TDNN_OBJ) $(METRICS_OBJ)
 clean:
 	rm -f $(BIN_PATH)/$(BIN_FILE)
 	rm -f $(OBJ_FILES)
-
