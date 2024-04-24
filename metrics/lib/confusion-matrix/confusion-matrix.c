@@ -11,7 +11,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define NUM_CLASSES 10
 
 /**
  * Predictions struct that holds the true and predicted labels.

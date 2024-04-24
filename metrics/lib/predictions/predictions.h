@@ -5,6 +5,8 @@
 
 #pragma once
 
+#define NUM_CLASSES 10
+
 #define MAX_PREDICTIONS 16384 /**< The maximum number of predictions that can be stored. */
 
 /**

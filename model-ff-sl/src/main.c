@@ -113,6 +113,7 @@ void evaluate(void)
         add_prediction(ground_truth, prediction);
     }
     printf("Accuracy: %.2f\n", get_accuracy());
+    printf("Balanced accuracy: %.2f\n", get_balanced_accuracy());
     printf("\n");
     print_normalized_confusion_matrix();
     

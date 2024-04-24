@@ -41,6 +41,7 @@ void generate_metrics(tiny_dnn::result results)
     print_normalized_confusion_matrix();
     //print accuracy
     std::cout << "Accuracy: " << get_accuracy() << std::endl;
+    std::cout << "Balanced accuracy: " << get_balanced_accuracy() << std::endl;
 }
 
 static void train(const std::string &data_dir_path,
