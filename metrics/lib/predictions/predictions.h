@@ -5,7 +5,7 @@
 
 #pragma once
 
-#define MAX_PREDICTIONS 2048 /**< The maximum number of predictions that can be stored. */
+#define MAX_PREDICTIONS 16384 /**< The maximum number of predictions that can be stored. */
 
 /**
  * @brief Struct representing a set of predictions.

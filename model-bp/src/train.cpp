@@ -1,7 +1,13 @@
 #include <iostream>
 #include <vector>
 
-#include "tiny_dnn/tiny_dnn.h"
+#include <tiny_dnn/tiny_dnn.h>
+
+extern "C" {
+    #include <confusion-matrix/confusion-matrix.h>
+    #include <predictions/predictions.h>
+    #include <accuracy/accuracy.h>
+}
 
 static void construct_net(tiny_dnn::network<tiny_dnn::sequential> &nn,
                           const std::vector<int> &layer_units)
@@ -15,6 +21,26 @@ static void construct_net(tiny_dnn::network<tiny_dnn::sequential> &nn,
     // construct nets
     nn = tiny_dnn::make_mlp<tanh>(layer_units.begin(), layer_units.end());
     nn << softmax();
+}
+
+void generate_metrics(tiny_dnn::result results)
+{
+    init_predictions();
+    //itearate over confusion matrix
+    for (int i = 0; i < results.confusion_matrix.size(); i++)
+    {
+        for (int j = 0; j < results.confusion_matrix[i].size(); j++)
+        {
+            for (int k = 0; k < results.confusion_matrix[i][j]; k++)
+            {
+                add_prediction(i, j);
+            }
+        }
+    }
+    //print confusion matrix
+    print_normalized_confusion_matrix();
+    //print accuracy
+    std::cout << "Accuracy: " << get_accuracy() << std::endl;
 }
 
 static void train(const std::string &data_dir_path,
@@ -78,7 +104,8 @@ static void train(const std::string &data_dir_path,
     std::cout << "end training." << std::endl;
 
     // test and show results
-    nn.test(test_images, test_labels).print_detail(std::cout);
+    generate_metrics(nn.test(test_images, test_labels));
+   
     // save network model & trained weights
     nn.save("models/bp-model");
 }
