@@ -35,7 +35,7 @@ float get_average_recall(void)
             false_negatives[predictions.true_labels[i]]++;
     }
 
-    // Calculate average precision
+    // Calculate average recall
     float average_recall = 0.0;
     for (Label i = 0; i < NUM_CLASSES; i++)
     {

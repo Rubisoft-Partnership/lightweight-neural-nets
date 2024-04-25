@@ -42,6 +42,7 @@ void generate_metrics(tiny_dnn::result results)
     std::cout << "Balanced accuracy: " << get_balanced_accuracy() << std::endl;
     std::cout << "Average precision: " << get_average_precision() << std::endl;
     std::cout << "Average recall: " << get_average_recall() << std::endl;
+    std::cout << "F1 score: " << get_average_f1_score() << std::endl;
 }
 
 static void train(const std::string &data_dir_path,

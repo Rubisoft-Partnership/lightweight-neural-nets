@@ -115,6 +115,7 @@ void evaluate(void)
     printf("Balanced accuracy: %.2f\n", get_balanced_accuracy());
     printf("Average precision: %.2f\n", get_average_precision());
     printf("Average recall: %.2f\n", get_average_recall());
+    printf("F1 score: %.2f\n", get_average_f1_score());
     printf("\n");
     print_normalized_confusion_matrix();
     

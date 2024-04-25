@@ -18,3 +18,4 @@
 #include <accuracy/accuracy.h>
 #include <precision/precision.h>
 #include <recall/recall.h>
+#include <f1-score/f1-score.h>
