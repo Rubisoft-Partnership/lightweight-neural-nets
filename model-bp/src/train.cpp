@@ -8,6 +8,7 @@ extern "C" {
     #include <confusion-matrix/confusion-matrix.h>
     #include <accuracy/accuracy.h>
     #include <precision/precision.h>
+    #include <recall/recall.h>
 }
 
 static void construct_net(tiny_dnn::network<tiny_dnn::sequential> &nn,
@@ -44,6 +45,7 @@ void generate_metrics(tiny_dnn::result results)
     std::cout << "Accuracy: " << get_accuracy() << std::endl;
     std::cout << "Balanced accuracy: " << get_balanced_accuracy() << std::endl;
     std::cout << "Average precision: " << get_average_precision() << std::endl;
+    std::cout << "Average recall: " << get_average_recall() << std::endl;
 }
 
 static void train(const std::string &data_dir_path,

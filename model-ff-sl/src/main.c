@@ -32,6 +32,7 @@
 #include <confusion-matrix/confusion-matrix.h>
 #include <accuracy/accuracy.h>
 #include <precision/precision.h>
+#include <recall/recall.h>
 
 const int input_size = DATA_FEATURES;
 const int num_classes = DATA_CLASSES;
@@ -118,6 +119,7 @@ void evaluate(void)
     printf("Accuracy: %.2f\n", get_accuracy());
     printf("Balanced accuracy: %.2f\n", get_balanced_accuracy());
     printf("Average precision: %.2f\n", get_average_precision());
+    printf("Average recall: %.2f\n", get_average_recall());
     printf("\n");
     print_normalized_confusion_matrix();
     
