@@ -27,12 +27,7 @@
 #include <utils/utils.h>
 #include <losses/losses.h>
 
-// Metrics
-#include <predictions/predictions.h>
-#include <confusion-matrix/confusion-matrix.h>
-#include <accuracy/accuracy.h>
-#include <precision/precision.h>
-#include <recall/recall.h>
+#include <metrics.h>
 
 const int input_size = DATA_FEATURES;
 const int num_classes = DATA_CLASSES;

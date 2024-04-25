@@ -4,11 +4,7 @@
 #include <tiny_dnn/tiny_dnn.h>
 
 extern "C" {
-    #include <predictions/predictions.h>
-    #include <confusion-matrix/confusion-matrix.h>
-    #include <accuracy/accuracy.h>
-    #include <precision/precision.h>
-    #include <recall/recall.h>
+    #include <metrics.h>
 }
 
 static void construct_net(tiny_dnn::network<tiny_dnn::sequential> &nn,
