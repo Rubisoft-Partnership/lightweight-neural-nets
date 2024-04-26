@@ -29,6 +29,9 @@
 
 #include <metrics.h>
 
+#define PROGRESS_BAR_WIDTH 50
+int progress_bar_step = 0;
+
 const int input_size = DATA_FEATURES;
 const int num_classes = DATA_CLASSES;
 const int layers_sizes[] = {DATA_FEATURES, 500, 500, 500};
@@ -45,6 +48,12 @@ const double threshold = 4.0;
 
 Dataset data;
 FFNet ffnet;
+
+void init_progress_bar();
+void update_progress_bar(const int batch_index, const int batch_size);
+void finish_progress_bar();
+
+void print_elapsed_time(const int seconds_elapsed);
 
 static void setup(void)
 {
@@ -76,17 +85,28 @@ static void train_loop(void)
         shuffle_data(data.train);
         double loss = 0.0f;
         int num_batches = data.train->rows / batch_size;
+        // Print progress bar
+        init_progress_bar();
+
         for (int j = 0; j < num_batches; j++) // iterate over batches
         {
+            // Update progress bar
+            update_progress_bar(j, num_batches);
+
             generate_batch(data.train, j, batch); // generate positive and negative samples
             loss += train_ff_net(ffnet, batch, learning_rate);
         }
+        finish_progress_bar();
         printf("\tLoss %.12f\n", (double)loss / num_batches);
-        double epoch_time = (double)(clock() - epoch_start_time) / CLOCKS_PER_SEC;
-        printf("\tEpoch time: %.2f seconds\n", epoch_time);
+        int epoch_time = (clock() - epoch_start_time) / CLOCKS_PER_SEC;
+        printf("\tEpoch time: ", epoch_time);
+        print_elapsed_time(epoch_time);
+        printf("\n\n");
     }
-    double total_time = (double)(clock() - start_time) / CLOCKS_PER_SEC;
-    printf("\nTotal training time: %.2f seconds\n\n", total_time);
+    int total_time = (clock() - start_time) / CLOCKS_PER_SEC;
+    printf("Total training time: ");
+    print_elapsed_time(total_time);
+    printf("\n\n");
 
     free_ff_batch(batch);
 }
@@ -118,7 +138,7 @@ void evaluate(void)
     printf("F1 score: %.2f\n", get_average_f1_score());
     printf("\n");
     print_normalized_confusion_matrix();
-    
+
     // Save the model to a checkpoint file.
     save_ff_net(ffnet, "ffnet.bin");
 }
@@ -137,4 +157,35 @@ int main(void)
     free_ff_net(ffnet);
     close_log_file();
     return 0;
+}
+
+void init_progress_bar()
+{
+    progress_bar_step = 0;
+    printf("|");
+    for (int i = 0; i < PROGRESS_BAR_WIDTH; i++)
+        printf("-");
+    printf("|\n|");
+}
+
+void update_progress_bar(const int batch_index, const int batch_size)
+{
+    if (progress_bar_step <= (batch_index * PROGRESS_BAR_WIDTH) / batch_size)
+    {
+        printf("*");
+        fflush(stdout);
+        progress_bar_step++;
+    }
+}
+
+void finish_progress_bar()
+{
+    printf("|\n");
+}
+
+void print_elapsed_time(const int seconds_elapsed)
+{
+    const int hours = seconds_elapsed / 3600;
+    const int minutes = (seconds_elapsed % 3600) / 60;
+    printf("%02d:%02d:%02d", hours, minutes, seconds_elapsed % 60);
 }
