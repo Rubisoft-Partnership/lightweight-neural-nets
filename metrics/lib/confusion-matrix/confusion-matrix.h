@@ -25,3 +25,24 @@ void print_confusion_matrix();
  * @param None
  */
 void print_normalized_confusion_matrix();
+
+/**
+ * Calculates and returns the normalized confusion matrix.
+ * 
+ * @return A 2D array of floats representing the normalized confusion matrix.
+ */
+float** get_normalized_confusion_matrix(void);
+
+
+/**
+ * Frees the memory allocated for a normalized confusion matrix.
+ *
+ * This function takes a 2D array representing a normalized confusion matrix and frees the memory
+ * allocated for it. The normalized confusion matrix is a square matrix where each element
+ * represents the probability of predicting a certain class given the true class. The function
+ * iterates over each row of the matrix and frees the memory allocated for it, and then frees the
+ * memory allocated for the matrix itself.
+ *
+ * @param normalized_confusion_matrix The normalized confusion matrix to be freed.
+ */
+void free_normalized_confusion_matrix(float **normalized_confusion_matrix);

@@ -55,6 +55,18 @@ void finish_progress_bar();
 
 void print_elapsed_time(const int seconds_elapsed);
 
+typedef struct
+{
+    float accuracy;
+    float balanced_accuracy;
+    float average_precision;
+    float average_recall;
+    float average_f1_score;
+    float** normalized_confusion_matrix;
+} Metrics;
+
+Metrics metrics;
+
 static void setup(void)
 {
     // set_seed(time(NULL)); // comment for reproducibility
@@ -102,6 +114,7 @@ static void train_loop(void)
         printf("\tEpoch time: ", epoch_time);
         print_elapsed_time(epoch_time);
         printf("\n\n");
+        evaluate();
     }
     int total_time = (clock() - start_time) / CLOCKS_PER_SEC;
     printf("Total training time: ");
@@ -114,7 +127,7 @@ static void train_loop(void)
 void evaluate(void)
 {
     log_info("Testing FFNet...");
-    init_predictions(num_classes);
+    init_predictions();
     for (int i = 0; i < data.test->rows; i++)
     {
         double *const input = data.test->input[i];
@@ -131,12 +144,19 @@ void evaluate(void)
         const int prediction = predict_ff_net(ffnet, input, num_classes, input_size);
         add_prediction(ground_truth, prediction);
     }
-    printf("Accuracy: %.2f\n", get_accuracy());
-    printf("Balanced accuracy: %.2f\n", get_balanced_accuracy());
-    printf("Average precision: %.2f\n", get_average_precision());
-    printf("Average recall: %.2f\n", get_average_recall());
-    printf("F1 score: %.2f\n", get_average_f1_score());
-    printf("\n");
+    metrics.accuracy = get_accuracy();
+    metrics.balanced_accuracy = get_balanced_accuracy();
+    metrics.average_precision = get_average_precision();
+    metrics.average_recall = get_average_recall();
+    metrics.average_f1_score = get_average_f1_score();
+    metrics.normalized_confusion_matrix = get_normalized_confusion_matrix();
+
+    // Print metrics
+    printf("Accuracy: %.4f\n", metrics.accuracy);
+    printf("Balanced Accuracy: %.4f\n", metrics.balanced_accuracy);
+    printf("Average Precision: %.4f\n", metrics.average_precision);
+    printf("Average Recall: %.4f\n", metrics.average_recall);
+    printf("Average F1 Score: %.4f\n", metrics.average_f1_score);
     print_normalized_confusion_matrix();
 
     // Save the model to a checkpoint file.
