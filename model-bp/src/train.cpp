@@ -3,8 +3,9 @@
 
 #include <tiny_dnn/tiny_dnn.h>
 
-extern "C" {
-    #include <metrics.h>
+extern "C"
+{
+#include <metrics.h>
 }
 
 static void construct_net(tiny_dnn::network<tiny_dnn::sequential> &nn,
@@ -21,10 +22,10 @@ static void construct_net(tiny_dnn::network<tiny_dnn::sequential> &nn,
     nn << softmax();
 }
 
-void generate_metrics(tiny_dnn::result results)
+Metrics get_metrics(tiny_dnn::result results)
 {
     init_predictions();
-    //itearate over confusion matrix
+    // itearate over confusion matrix
     for (int i = 0; i < results.confusion_matrix.size(); i++)
     {
         for (int j = 0; j < results.confusion_matrix[i].size(); j++)
@@ -35,14 +36,9 @@ void generate_metrics(tiny_dnn::result results)
             }
         }
     }
-    //print confusion matrix
-    print_normalized_confusion_matrix();
-    //print accuracy
-    std::cout << "Accuracy: " << get_accuracy() << std::endl;
-    std::cout << "Balanced accuracy: " << get_balanced_accuracy() << std::endl;
-    std::cout << "Average precision: " << get_average_precision() << std::endl;
-    std::cout << "Average recall: " << get_average_recall() << std::endl;
-    std::cout << "F1 score: " << get_average_f1_score() << std::endl;
+    Metrics metrics = generate_metrics();
+    print_metrics(metrics);
+    return metrics;
 }
 
 static void train(const std::string &data_dir_path,
@@ -89,7 +85,7 @@ static void train(const std::string &data_dir_path,
                   << t.elapsed() << "s elapsed." << std::endl;
         ++epoch;
         tiny_dnn::result res = nn.test(test_images, test_labels);
-        std::cout << res.num_success << "/" << res.num_total << std::endl;
+        Metrics metrics = get_metrics(res);
 
         disp.restart(train_images.size());
         t.restart();
@@ -105,9 +101,6 @@ static void train(const std::string &data_dir_path,
 
     std::cout << "end training." << std::endl;
 
-    // test and show results
-    generate_metrics(nn.test(test_images, test_labels));
-   
     // save network model & trained weights
     nn.save("models/bp-model");
 }

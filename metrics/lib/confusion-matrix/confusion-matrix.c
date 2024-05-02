@@ -109,6 +109,7 @@ float **get_normalized_confusion_matrix(void)
             }
         }
     }
+    return normalized_confusion_matrix;
 }
 
 /**

@@ -15,7 +15,7 @@ CPPFLAGS = -Wall -Wextra -pedantic -std=c++14 -Ilib
 METRICS_BASEPATH = $(PROJECT_BASEPATH)/../metrics
 
 # Metrics Source Files
-METRICS_SRC = $(wildcard $(METRICS_BASEPATH)/lib/*/*.c)
+METRICS_SRC = $(wildcard $(METRICS_BASEPATH)/lib/*/*.c) $(METRICS_BASEPATH)/lib/metrics.c
 METRICS_OBJ = $(addprefix $(BUILD_PATH)/, $(notdir $(patsubst %.c,%.o,$(METRICS_SRC))))
 
 #Include Paths

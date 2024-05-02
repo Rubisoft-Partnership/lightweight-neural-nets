@@ -55,16 +55,6 @@ void finish_progress_bar();
 
 void print_elapsed_time(const int seconds_elapsed);
 
-typedef struct
-{
-    float accuracy;
-    float balanced_accuracy;
-    float average_precision;
-    float average_recall;
-    float average_f1_score;
-    float** normalized_confusion_matrix;
-} Metrics;
-
 Metrics metrics;
 
 static void setup(void)
@@ -144,20 +134,9 @@ void evaluate(void)
         const int prediction = predict_ff_net(ffnet, input, num_classes, input_size);
         add_prediction(ground_truth, prediction);
     }
-    metrics.accuracy = get_accuracy();
-    metrics.balanced_accuracy = get_balanced_accuracy();
-    metrics.average_precision = get_average_precision();
-    metrics.average_recall = get_average_recall();
-    metrics.average_f1_score = get_average_f1_score();
-    metrics.normalized_confusion_matrix = get_normalized_confusion_matrix();
-
-    // Print metrics
-    printf("Accuracy: %.4f\n", metrics.accuracy);
-    printf("Balanced Accuracy: %.4f\n", metrics.balanced_accuracy);
-    printf("Average Precision: %.4f\n", metrics.average_precision);
-    printf("Average Recall: %.4f\n", metrics.average_recall);
-    printf("Average F1 Score: %.4f\n", metrics.average_f1_score);
-    print_normalized_confusion_matrix();
+    reset_metrics(metrics);
+    metrics = generate_metrics();
+    print_metrics(metrics);
 
     // Save the model to a checkpoint file.
     save_ff_net(ffnet, "ffnet.bin");
