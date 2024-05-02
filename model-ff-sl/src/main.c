@@ -34,17 +34,16 @@ int progress_bar_step = 0;
 
 const int input_size = DATA_FEATURES;
 const int num_classes = DATA_CLASSES;
-const int layers_sizes[] = {DATA_FEATURES, 500, 500, 500};
-
-const int layers_number = sizeof(layers_sizes) / sizeof(layers_sizes[0]);
+int layers_sizes[20] = {DATA_FEATURES, 500, 500, 500};
+int layers_number = 4;
 
 // Hyper Parameters.
 double learning_rate = 0.005;
 const double beta1 = 0.9;
 const double beta2 = 0.999;
-const int epochs = 5;
-const int batch_size = 10;
-const double threshold = 4.0;
+int epochs = 5;
+int batch_size = 10;
+double threshold = 4.0;
 
 Dataset data;
 FFNet ffnet;
@@ -52,6 +51,8 @@ FFNet ffnet;
 void init_progress_bar();
 void update_progress_bar(const int batch_index, const int batch_size);
 void finish_progress_bar();
+
+void parse_args(int argc, char **argv);
 
 void print_elapsed_time(const int seconds_elapsed);
 
@@ -142,8 +143,9 @@ void evaluate(void)
     save_ff_net(ffnet, "ffnet.bin");
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
+    parse_args(argc, argv);
     setup();
 
     train_loop();
@@ -180,6 +182,61 @@ void update_progress_bar(const int batch_index, const int batch_size)
 void finish_progress_bar()
 {
     printf("|\n");
+}
+
+void parse_args(int argc, char **argv)
+{
+    if (argc == 1)
+        return;
+    if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)
+    {
+        printf("Usage: %s [OPTIONS]\n", argv[0]);
+        printf("Options:\n");
+        printf("  -lr, --learning_rate\tLearning rate for the optimizer (default: %.4f)\n", learning_rate);
+        printf("  -e,  --epochs\t\tNumber of epochs for training (default: %d)\n", epochs);
+        printf("  -bs, --batch_size\tBatch size for training (default: %d)\n", batch_size);
+        printf("  -t,  --threshold\tThreshold for the activation function (default: %.2f)\n", threshold);
+        printf("  -lu, --layer-units\tWidth of each layer (default: ");
+        for (int i = 0; i < layers_number; i++)
+        {
+            printf("%d ", layers_sizes[i]);
+        }
+        printf(")\n");
+        exit(0);
+    }
+    for (int i = 1; i < argc; i++)
+    {
+        if (strcmp(argv[i], "-lr") == 0 || strcmp(argv[i], "--learning_rate") == 0)
+        {
+            learning_rate = atof(argv[i + 1]);
+            i++;
+        }
+        else if (strcmp(argv[i], "-e") == 0 || strcmp(argv[i], "--epochs") == 0)
+        {
+            epochs = atoi(argv[i + 1]);
+            i++;
+        }
+        else if (strcmp(argv[i], "-bs") == 0 || strcmp(argv[i], "--batch_size") == 0)
+        {
+            batch_size = atoi(argv[i + 1]);
+            i++;
+        }
+        else if (strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--threshold") == 0)
+        {
+            threshold = atof(argv[i + 1]);
+            i++;
+        }
+        else if (strcmp(argv[i], "-lu") == 0 || strcmp(argv[i], "--layer-units") == 0)
+        {
+            layers_number = 0;
+            while (i + 1 < argc && argv[i + 1][0] != '-')
+            {
+                layers_sizes[layers_number] = atoi(argv[i + 1]);
+                layers_number++;
+                i++;
+            }
+        }
+    }
 }
 
 void print_elapsed_time(const int seconds_elapsed)
