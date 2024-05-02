@@ -1,8 +1,8 @@
 #include <iostream>
 #include <iomanip>
 
-#include "tiny_dnn/tiny_dnn.h"
-#include "../model-bp/src/train.cpp"
+#include <tiny_dnn/tiny_dnn.h>
+#include <../model-bp/src/train.cpp>
 
 static void usage(const char *argv0)
 {
