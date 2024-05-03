@@ -196,7 +196,7 @@ void parse_args(int argc, char **argv)
         printf("  -e,  --epochs\t\tNumber of epochs for training (default: %d)\n", epochs);
         printf("  -bs, --batch_size\tBatch size for training (default: %d)\n", batch_size);
         printf("  -t,  --threshold\tThreshold for the activation function (default: %.2f)\n", threshold);
-        printf("  -lu, --layer-units\tWidth of each layer (default: ");
+        printf("  -lu, --layer_units\tWidth of each layer (default: ");
         for (int i = 0; i < layers_number; i++)
         {
             printf("%d ", layers_sizes[i]);
@@ -226,7 +226,7 @@ void parse_args(int argc, char **argv)
             threshold = atof(argv[i + 1]);
             i++;
         }
-        else if (strcmp(argv[i], "-lu") == 0 || strcmp(argv[i], "--layer-units") == 0)
+        else if (strcmp(argv[i], "-lu") == 0 || strcmp(argv[i], "--layer_units") == 0)
         {
             layers_number = 0;
             while (i + 1 < argc && argv[i + 1][0] != '-')
