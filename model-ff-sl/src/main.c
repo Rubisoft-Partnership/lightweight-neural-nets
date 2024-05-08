@@ -78,6 +78,19 @@ static void setup(void)
 
     // Build the model from scratch.
     ffnet = new_ff_net(layers_sizes, layers_number, relu, pdrelu, threshold, beta1, beta2, loss_suite);
+
+    printf("Running with the following parameters:\n");
+    printf("\tDataset path: %s\n", dataset_path);
+    printf("\tLearning rate: %.4f\n", learning_rate);
+    printf("\tEpochs: %d\n", epochs);
+    printf("\tBatch size: %d\n", batch_size);
+    printf("\tThreshold: %.2f\n", threshold);
+    printf("\tLayer units: ");
+    for (int i = 0; i < layers_number; i++)
+    {
+        printf("%d ", layers_sizes[i]);
+    }
+    printf("\n\n");
 }
 
 static void train_loop(void)
