@@ -4,7 +4,7 @@
 #include <tiny_dnn/tiny_dnn.h>
 #include <../model-bp/src/train.cpp>
 
-void usage(char *argv0, double learning_rate, int epochs, std::vector<int> layer_units, int batch_size)
+void usage(char *argv0, double learning_rate, int epochs, std::vector<int> layer_units, int batch_size, std::string data_path)
 {
     std::cout << "Usage: " << argv0 << " [OPTIONS]" << std::endl;
     std::cout << "Options:" << std::endl;
@@ -17,6 +17,7 @@ void usage(char *argv0, double learning_rate, int epochs, std::vector<int> layer
         std::cout << layer_units[i] << " ";
     }
     std::cout << ")" << std::endl;
+    std::cout << "  -dp, --dataset_path\tPath to the dataset (default: " << data_path << ")" << std::endl;
 }
 
 int main(int argc, char **argv)
@@ -29,7 +30,7 @@ int main(int argc, char **argv)
 
     if (argc == 2 && (argv[1] == "--help" || argv[1] == "-h"))
     {
-        usage(argv[0], learning_rate, epochs, layer_units, batch_size);
+        usage(argv[0], learning_rate, epochs, layer_units, batch_size, data_path);
         exit(0);
     }
     for (int count = 1; count + 1 < argc; count += 2)
@@ -64,20 +65,20 @@ int main(int argc, char **argv)
             }
             count -= 2;
         }
-        else if (argname == "--data_path")
+        else if (argname == "--dataset_path" || argname == "-dp")
         {
             data_path = std::string(argv[count + 1]);
         }
         else
         {
-            usage(argv[0], learning_rate, epochs, layer_units, batch_size);
+            usage(argv[0], learning_rate, epochs, layer_units, batch_size, data_path);
             exit(-1);
         }
     }
     if (data_path == "")
     {
         std::cerr << "Data path not specified." << std::endl;
-        usage(argv[0], learning_rate, epochs, layer_units, batch_size);
+        usage(argv[0], learning_rate, epochs, layer_units, batch_size, data_path);
         exit(-1);
     }
     if (learning_rate <= 0)

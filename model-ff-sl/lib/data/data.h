@@ -13,48 +13,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-// Set digits as default dataset.
-#if !defined(DATA_MNIST) && !defined(DATA_DIGITS)
-#define DATA_DIGITS
-#endif
-
-// Default project basepath is current directory.
-#ifndef PROJECT_BASEPATH
-#define PROJECT_BASEPATH ""
-#endif
-#define DATA_DATASET_BASEPATH PROJECT_BASEPATH "/../dataset/"
 
 // Each dataset must have a folder with the dataset name containing the following files:
 // - train.txt: the training data split.
 // - test.txt: the testing data split.
+// - validation.txt: the validation data split (optional).
 #define DATA_TRAIN_SPLIT "train.txt"
 #define DATA_TEST_SPLIT "test.txt"
 #define DATA_VALIDATION_SPLIT "validation.txt"
-
-#define DATA_MNIST_CLASSES 10
-#define DATA_MNIST_FEATURES 784
-#define DATA_MNIST_PATH "mnist/"
-
-#define DATA_DIGITS_CLASSES 10
-#define DATA_DIGITS_FEATURES 74
-#define DATA_DIGITS_PATH "digits/"
-
-#ifdef DATA_MNIST
-#define DATA_CLASSES DATA_MNIST_CLASSES
-#define DATA_FEATURES DATA_MNIST_FEATURES
-#define DATA_TRAIN_PATH DATA_DATASET_BASEPATH DATA_MNIST_PATH DATA_TRAIN_SPLIT
-#define DATA_TEST_PATH DATA_DATASET_BASEPATH DATA_MNIST_PATH DATA_TEST_SPLIT
-#define DATA_VALIDATION_PATH DATA_DATASET_BASEPATH DATA_MNIST_PATH DATA_VALIDATION_SPLIT
-#endif
-
-#ifdef DATA_DIGITS
-#define DATA_CLASSES DATA_DIGITS_CLASSES
-#define DATA_FEATURES DATA_DIGITS_FEATURES
-#define DATA_DATASET_PATH DATA_DATASET_BASEPATH DATA_DIGITS_PATH
-#define DATA_TRAIN_PATH DATA_DATASET_BASEPATH DATA_DIGITS_PATH DATA_TRAIN_SPLIT
-#define DATA_TEST_PATH DATA_DATASET_BASEPATH DATA_DIGITS_PATH DATA_TEST_SPLIT
-#define DATA_VALIDATION_PATH DATA_DATASET_BASEPATH DATA_DIGITS_PATH DATA_VALIDATION_SPLIT
-#endif
 
 // Data object.
 typedef struct
@@ -99,12 +65,17 @@ Data *new_data(const int feature_len, const int num_class, const int rows);
  */
 void free_data(Data *data);
 
+
 /**
- * @brief Builds a data object from a file.
+ * @brief Creates a new data object from a file.
  *
- * @return Data The built data object.
+ * @param file_path The path to the file containing the data.
+ * @param num_features The number of features in the dataset.
+ * @param num_classes The number of classes in the dataset.
+ *
+ * @return The data object created from the file.
  */
-Data *data_build(const char *file_path);
+Data *data_build(const char *file_path, const int num_features, const int num_classes);
 
 /**
  * @brief Parses a line from a file into a data object.
@@ -172,9 +143,12 @@ typedef struct
 /**
  * @brief Splits the dataset into training, testing, and optional validation data.
  *
+ * @param dataset_basepath The base path of the dataset, containing the training, testing, and optional validation data.
+ * @param num_classes The number of classes in the dataset.
+ *
  * @return The dataset structure containing the split data.
  */
-Dataset dataset_split(void);
+Dataset dataset_split(const char *dataset_basepath, const int num_classes);
 
 /**
  * @brief Frees the memory allocated for the dataset.

@@ -32,9 +32,11 @@
 #define PROGRESS_BAR_WIDTH 50
 int progress_bar_step = 0;
 
-const int input_size = DATA_FEATURES;
-const int num_classes = DATA_CLASSES;
-int layers_sizes[20] = {DATA_FEATURES, 500, 500, 500};
+// Default dataset parameters and model architecture.
+char *dataset_path = "../dataset/digits/";
+int num_classes = 10;
+int input_size = 74;
+int layers_sizes[20] = {74, 500, 500, 500};
 int layers_number = 4;
 
 // Hyper Parameters.
@@ -64,7 +66,11 @@ static void setup(void)
     set_log_level(LOG_DEBUG);
     open_log_file_with_timestamp();
 
-    data = dataset_split();
+    data = dataset_split(dataset_path, num_classes);
+    // Read the input size from the dataset and set the first layer size.
+    input_size = data.train->feature_len;
+    layers_sizes[0] = input_size;
+
     const Loss loss_suite = LOSS_FF;
 
     // Load the model from checkpoint file.
@@ -141,6 +147,7 @@ void evaluate(void)
 
     // Save the model to a checkpoint file.
     save_ff_net(ffnet, "ffnet.bin");
+    log_debug("FFNet saved to ffnet.bin");
 }
 
 int main(int argc, char **argv)
@@ -202,6 +209,7 @@ void parse_args(int argc, char **argv)
             printf("%d ", layers_sizes[i]);
         }
         printf(")\n");
+        printf("  -dp, --dataset_path\tPath to the dataset (default: %s)\n", dataset_path);
         exit(0);
     }
     for (int i = 1; i < argc; i++)
@@ -235,6 +243,16 @@ void parse_args(int argc, char **argv)
                 layers_number++;
                 i++;
             }
+        }
+        else if (strcmp(argv[i], "-dp") == 0 || strcmp(argv[i], "--dataset_path") == 0)
+        {
+            dataset_path = argv[i + 1];
+            i++;
+        }
+        else
+        {
+            log_error("Unknown option: %s", argv[i]);
+            exit(1);
         }
     }
 }
