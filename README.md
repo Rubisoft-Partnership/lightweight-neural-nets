@@ -51,45 +51,50 @@ $\bar{z} := a(\bar{h})$
 
 ### Backward pass
 
-Updating weights:
+All weights are udated using this formula:
 
-$
-w_{i, j} =
-w_{i, j} -\alpha\frac{\delta L}{\delta w_{i, j}} =
-w_{i, j} -
-\alpha\Bigl(\frac{\delta L_{pos}}{\delta w_{i, j}} + 
+$$
+w_{i,j}=w_{i, j}-\alpha\frac{\delta L}{\delta w_{i, j}}=
+w_{i, j}-\alpha\Bigl(\frac{\delta L_{pos}}{\delta w_{i, j}} +
 \frac{\delta L_{neg}}{\delta w_{i, j}}\Bigr)
-$
+$$
 
-$
+Gradient of the positive pass:
+
+$$
 \frac{\delta L_{pos}}{\delta w_{i, j}} = 
 \frac{\delta L_{pos}}{\delta G(z)}
 \frac{\delta G(z)}{\delta z_{j}} 
 \frac{\delta z_{i}}{\delta w_{i,j}}
-$
+$$
 
-$
+Gradient of the loss with respect to the goodness for the positive pass:
+
+$$
 \frac{\delta L_{pos}}{\delta G(z)} =
 -\sigma\bigl(\theta - G(z)\bigr)
-$
+$$
 
-$
-\frac{\delta G(z)}{\delta z_{j}} =
-2z_{j}
-$
+Gradient of the goodness with respect to the j-th activation:
 
-Using ReLu activation function:
+$$
+\frac{\delta G(z)}{\delta z_{j}} = 2z_{j}
+$$
 
-$
+Gradient of the j-th activation with respect to the weight <i,j>:
+
+$$
 \frac{\delta z_{j}}{\delta w_{i,j}} =
 \frac{\delta a\bigl(\sum\limits_iw_{i,j} x_i\bigr)}{\delta w_{i,j}} =
 \begin{cases}
     x_i & \text{if} \space h_j \ge 0 \\
-    0 & \text{if} \space h_j \lt 0 \\
+    0 & \text{if} \space h_j \lt 0
 \end{cases}
-$
+$$
 
-$
+Putting all the pieces together for the positive pass:
+
+$$
 \frac{\delta L_{pos}}{\delta w_{i, j}} =
 \begin{cases}
     -\sigma\bigl(\theta - G(z)\bigr)2z_{j}x_i & \text{if} \space h_j \ge 0 \\
@@ -100,34 +105,38 @@ $
     0 & \text{if} \space z_j \lt 0  \\
 \end{cases} =
 -\sigma\bigl(\theta - G(z)\bigr)2z_{j}z_i
-$
+$$
 
 > Note that $z_j$ is never smaller than zero as it's the result of ReLu activation.
 
 Similarly for the negative pass we have:
 
-$
-\frac{\delta L_{neg}}{\delta w_{i, j}} = 
+$$
+\frac{\delta L_{neg}}{\delta w_{i,j}}=
 \frac{\delta L_{neg}}{\delta G(\bar{z})}
-\frac{\delta G(\bar{z})}{\delta \bar{z}_{j}}
-\frac{\delta \bar{z}_{i}}{\delta w_{i,j}}
-$
+\frac{\delta G(\bar{z})}{\delta \bar z_{j}}
+\frac{\delta \bar z_{i}}{\delta w_{i,j}}
+$$
 
-$
-\frac{\delta L_{neg}}{\delta G(\bar{z})} =
+This is the only piece that differs form the positive:
+
+$$
+\frac{\delta L_{neg}}{\delta G(\bar{z})}=
 \sigma\bigl(G(\bar{z}) - \theta\bigr)
-$
+$$
 
-$
-\frac{\delta L_{neg}}{\delta w_{i, j}} =
+Gradient for the negative pass:
+
+$$
+\frac{\delta L_{neg}}{\delta w_{i,j}}=
 \begin{cases}
-    \sigma\bigl(G(\bar{z}) - \theta\bigr)2\bar{z}_{j}\bar{x}_i & \text{if} \space \bar{z}_j \ge 0 \\
-    0 & \text{if} \space \bar{z}_j \lt 0  \\
-\end{cases} =
-\sigma\bigl(G(\bar{z}) - \theta\bigr)2z_{j}\bar{z}_i
-$
+    \sigma\bigl(G(\bar z)-\theta\bigr)2\bar z_j\bar x_i & \text{if} \space \bar z_j \ge 0\\
+    0 & \text{if}\space \bar z_j\lt 0
+\end{cases}
+=\sigma\bigl(G(\bar{z})-\theta\bigr)2z_{j}\bar{z}_i
+$$
 
-Finally:
+Finally we get:
 
 $$
 w_{i, j} = w_{i, j} -\alpha\Bigl(-\sigma\bigl(\theta - G(z)\bigr)2z_{j}x_i + \sigma\bigl(G(\bar{z}) - \theta\bigr)2\bar z_{j}\bar{x}_i\Bigr)
