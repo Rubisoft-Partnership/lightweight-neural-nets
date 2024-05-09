@@ -28,6 +28,7 @@
 #include <losses/losses.h>
 
 #include <metrics.h>
+#include <csv-logging/csv-logging.h>
 
 #define PROGRESS_BAR_WIDTH 50
 int progress_bar_step = 0;
@@ -48,6 +49,9 @@ const double threshold = 4.0;
 
 Dataset data;
 FFNet ffnet;
+
+FILE *metrics_file;
+char *metrics_file_path;
 
 void init_progress_bar();
 void update_progress_bar(const int batch_index, const int batch_size);
@@ -75,6 +79,11 @@ static void setup(void)
 
 static void train_loop(void)
 {
+    metrics_file_path = "metrics.csv";
+    metrics_file = fopen(metrics_file_path, "w");
+    if (metrics_file == NULL)
+        log_error("Error opening file %s", metrics_file_path);
+
     clock_t start_time = clock();
     // Since batch is used for all layers, sample size is set to the maximum of the layers sizes.
     FFBatch batch = new_ff_batch(batch_size, max_int(layers_sizes, layers_number));
@@ -105,11 +114,14 @@ static void train_loop(void)
         print_elapsed_time(epoch_time);
         printf("\n\n");
         evaluate();
+        log_metrics(metrics_file, metrics, i);
     }
     int total_time = (clock() - start_time) / CLOCKS_PER_SEC;
     printf("Total training time: ");
     print_elapsed_time(total_time);
     printf("\n\n");
+
+    fclose(metrics_file);
 
     free_ff_batch(batch);
 }
@@ -149,12 +161,26 @@ int main(void)
     train_loop();
     log_info("Training done");
 
-    printf("Testing...\n");
-    evaluate();
-
     free_dataset(data);
     free_ff_net(ffnet);
     close_log_file();
+
+    int num_metrics;
+    Metrics* all_metrics = get_all_metrics(metrics_file_path, &num_metrics);
+    printf("Accuracy for every epoch:\n");
+    printf("Epoch\t\t");
+    for (int i = 0; i < num_metrics; i++)
+        printf("  %d\t", i);
+    printf("\n");
+    printf("Accuracy\t");
+    for (int i = 0; i < num_metrics; i++)
+        printf("%.3f\t", all_metrics[i].accuracy);
+    printf("\n");
+    for (int i = 0; i < num_metrics; i++)
+        reset_metrics(all_metrics[i]);
+    free(all_metrics);
+    
+
     return 0;
 }
 

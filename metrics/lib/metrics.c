@@ -17,6 +17,11 @@ Metrics generate_metrics(void)
 
 void print_metrics(Metrics metrics)
 {
+    if (metrics.normalized_confusion_matrix == NULL)
+    {
+        printf("No metrics to print.\n");
+        return;
+    }
     printf("Accuracy: %f\n", metrics.accuracy);
     printf("Average F1 Score: %f\n", metrics.average_f1_score);
     printf("Average Precision: %f\n", metrics.average_precision);
@@ -34,4 +39,5 @@ void reset_metrics(Metrics metrics)
     metrics.average_recall = 0;
     metrics.balanced_accuracy = 0;
     free(metrics.normalized_confusion_matrix);
+    metrics.normalized_confusion_matrix = NULL;
 }
