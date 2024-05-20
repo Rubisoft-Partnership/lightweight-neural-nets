@@ -10,7 +10,7 @@
 #include <ff-cell/ff-cell.h>
 #include <losses/losses.h>
 
-#define MAX_LAYERS_NUM 64
+#define MAX_LAYERS_NUM 16
 
 #define FFNET_CHECKPOINT_PATH PROJECT_BASEPATH "/checkpoints"
 
@@ -22,10 +22,10 @@
  */
 typedef struct
 {
-    FFCell layers[MAX_LAYERS_NUM]; ///< Array of FFCell blocks in the network.
-    int num_cells;                 ///< Number of cells in the network.
-    double threshold;              ///< Threshold value for the cells in the network.
-    Loss loss_suite;               ///< Loss function suite for the network.
+    FFCell layers[MAX_LAYERS_NUM]; // Array of FFCell blocks in the network.
+    int num_cells;                 // Number of cells in the network.
+    double threshold;              // Threshold value for the cells in the network.
+    Loss loss_suite;               // Loss function suite for the network.
 } FFNet;
 
 /**
