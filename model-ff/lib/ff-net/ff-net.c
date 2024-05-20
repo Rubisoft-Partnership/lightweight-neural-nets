@@ -41,14 +41,15 @@ double o_buffer[H_BUFFER_SIZE]; // outputs buffer for positive pass
  * @param loss_suite The loss function suite for the FFNet.
  * @return FFNet The constructed FFNet.
  */
-FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double treshold, const double beta1, const double beta2, Loss loss_suite)
+FFNet *new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double),
+                  const double treshold, const double beta1, const double beta2, Loss loss_suite)
 {
-    FFNet ffnet;
-    ffnet.loss_suite = loss_suite;
-    ffnet.num_cells = num_layers - 1;
-    ffnet.threshold = treshold;
+    FFNet *ffnet = (FFNet *)malloc(sizeof(FFNet));
+    ffnet->loss_suite = loss_suite;
+    ffnet->num_cells = num_layers - 1;
+    ffnet->threshold = treshold;
 
-    log_info("Building FFNet with %d layers, %d ff cells", num_layers, ffnet.num_cells);
+    log_info("Building FFNet with %d layers, %d ff cells", num_layers, ffnet->num_cells);
     char layers_str[256];
     layers_str[0] = '\0';
     for (int i = 0; i < num_layers; i++)
@@ -59,10 +60,10 @@ FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), 
     }
     log_info("Layers: %s", layers_str);
 
-    for (int i = 0; i < ffnet.num_cells; i++)
-        ffnet.layers[i] = new_ff_cell(layer_sizes[i], layer_sizes[i + 1], act, pdact, beta1, beta2);
-    
-    log_info("FFNet built with %d layers", ffnet.num_cells);
+    for (int i = 0; i < ffnet->num_cells; i++)
+        ffnet->layers[i] = new_ff_cell(layer_sizes[i], layer_sizes[i + 1], act, pdact, beta1, beta2);
+
+    log_info("FFNet built with %d layers", ffnet->num_cells);
     return ffnet;
 }
 
@@ -71,10 +72,11 @@ FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), 
  *
  * @param ffnet The FFNet to free.
  */
-void free_ff_net(FFNet ffnet)
+void free_ff_net(FFNet *ffnet)
 {
-    for (int i = 0; i < ffnet.num_cells; i++)
-        free_ff_cell(ffnet.layers[i]);
+    for (int i = 0; i < ffnet->num_cells; i++)
+        free_ff_cell(ffnet->layers[i]);
+    free(ffnet);
 }
 
 /**
@@ -87,12 +89,12 @@ void free_ff_net(FFNet ffnet)
  * @param learning_rate The learning rate for the training.
  * @return The training loss.
  */
-double train_ff_net(const FFNet ffnet, const FFBatch batch, const double learning_rate)
+double train_ff_net(FFNet *ffnet, const FFBatch batch, const double learning_rate)
 {
     double loss = 0.0;
-    loss += train_ff_cell(ffnet.layers[0], batch, learning_rate, ffnet.threshold, ffnet.loss_suite);
-    for (int i = 1; i < ffnet.num_cells; i++)
-        loss += train_ff_cell(ffnet.layers[i], batch, learning_rate, ffnet.threshold, ffnet.loss_suite);
+    loss += train_ff_cell(ffnet->layers[0], batch, learning_rate, ffnet->threshold, ffnet->loss_suite);
+    for (int i = 1; i < ffnet->num_cells; i++)
+        loss += train_ff_cell(ffnet->layers[i], batch, learning_rate, ffnet->threshold, ffnet->loss_suite);
     return loss;
 }
 
@@ -105,9 +107,9 @@ double train_ff_net(const FFNet ffnet, const FFBatch batch, const double learnin
  * @param input_size The size of the input data.
  * @return int The predicted class index.
  */
-int predict_ff_net(const FFNet ffnet, const double *input, const int num_classes, const int input_size)
+int predict_ff_net(const FFNet *ffnet, const double *input, const int num_classes, const int input_size)
 {
-    log_debug("Predicting sample on model with cells: %d", ffnet.num_cells);
+    log_debug("Predicting sample on model with cells: %d", ffnet->num_cells);
     double *netinput = (double *)malloc((input_size) * sizeof(double));
     double goodnesses[MAX_CLASSES];
     // For debugging.
@@ -118,11 +120,11 @@ int predict_ff_net(const FFNet ffnet, const double *input, const int num_classes
     for (int label = 0; label < num_classes; label++)
     {
         embed_label(netinput, input, label, input_size, num_classes);
-        for (int i = 0; i < ffnet.num_cells; i++)
+        for (int i = 0; i < ffnet->num_cells; i++)
         {
-            fprop_ff_cell(ffnet.layers[i], i == 0 ? netinput : ffnet.layers[i - 1].output);
-            goodnesses[label] += goodness(ffnet.layers[i].output, ffnet.layers[i].output_size);
-            normalize_vector(ffnet.layers[i].output, ffnet.layers[i].output_size);
+            fprop_ff_cell(ffnet->layers[i], i == 0 ? netinput : ffnet->layers[i - 1].output);
+            goodnesses[label] += goodness(ffnet->layers[i].output, ffnet->layers[i].output_size);
+            normalize_vector(ffnet->layers[i].output, ffnet->layers[i].output_size);
             log_debug("Forward propagated label %d to network cell %d with cumulative goodness: %f", label, i, goodnesses[label]);
         }
     }
@@ -144,7 +146,7 @@ int predict_ff_net(const FFNet ffnet, const double *input, const int num_classes
  * @param ffnet The FFNet to save.
  * @param filename The name of the file to save the FFNet.
  */
-void save_ff_net(const FFNet ffnet, const char *filename)
+void save_ff_net(const FFNet *ffnet, const char *filename)
 {
     // Create the checkpoint directory if it does not exist
     if (access(FFNET_CHECKPOINT_PATH, F_OK) == -1)
@@ -170,7 +172,6 @@ void save_ff_net(const FFNet ffnet, const char *filename)
         strftime(checkpoint_filename, sizeof(checkpoint_filename), "%Y-%m-%d_%H-%M-%S", tm_info);
 
         // Construct the full path
-        char full_path[256];
         snprintf(full_path, sizeof(full_path), "%s/checkpoint_%s.bin", FFNET_CHECKPOINT_PATH, checkpoint_filename);
 
         log_info("No filename provided, saving FFNet to file %s", full_path);
@@ -188,12 +189,12 @@ void save_ff_net(const FFNet ffnet, const char *filename)
         return;
     }
 
-    fwrite(&ffnet.num_cells, sizeof(ffnet.num_cells), 1, file);
-    fwrite(&ffnet.threshold, sizeof(ffnet.threshold), 1, file);
-    fwrite(&ffnet.loss_suite.type, sizeof(ffnet.loss_suite.type), 1, file);
+    fwrite(&ffnet->num_cells, sizeof(ffnet->num_cells), 1, file);
+    fwrite(&ffnet->threshold, sizeof(ffnet->threshold), 1, file);
+    fwrite(&ffnet->loss_suite.type, sizeof(ffnet->loss_suite.type), 1, file);
 
-    for (int i = 0; i < ffnet.num_cells; i++)
-        save_ff_cell(ffnet.layers[i], file);
+    for (int i = 0; i < ffnet->num_cells; i++)
+        save_ff_cell(ffnet->layers[i], file);
 
     fclose(file);
     log_info("Saved FFNet to file %s", filename);

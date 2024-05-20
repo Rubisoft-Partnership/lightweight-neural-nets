@@ -45,7 +45,7 @@ typedef struct
  * @param loss_suite The loss function suite for the FFNet.
  * @return FFNet The constructed FFNet.
  */
-FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double threshold, double beta1, double beta2, Loss loss_suite);
+FFNet *new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double threshold, double beta1, double beta2, Loss loss_suite);
 
 /**
  * @brief Frees the memory allocated for a FFNet.
@@ -54,7 +54,7 @@ FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), 
  *
  * @param ffnet The FFNet to free.
  */
-void free_ff_net(FFNet ffnet);
+void free_ff_net(FFNet *ffnet);
 
 /**
  * @brief Trains a FFNet by training each cell.
@@ -66,7 +66,7 @@ void free_ff_net(FFNet ffnet);
  * @param learning_rate The learning rate for the training.
  * @return The training loss.
  */
-double train_ff_net(const FFNet ffnet, const FFBatch batch, const double learning_rate);
+double train_ff_net(FFNet *ffnet, const FFBatch batch, const double learning_rate);
 
 /**
  * @brief Performs inference with a FFNet.
@@ -79,7 +79,7 @@ double train_ff_net(const FFNet ffnet, const FFBatch batch, const double learnin
  * @param input_size The size of the input data.
  * @return The predicted class label.
  */
-int predict_ff_net(const FFNet ffnet, const double *input, const int num_classes, const int input_size);
+int predict_ff_net(const FFNet *ffnet, const double *input, const int num_classes, const int input_size);
 
 /**
  * @brief Saves a FFNet to a file.
@@ -89,7 +89,7 @@ int predict_ff_net(const FFNet ffnet, const double *input, const int num_classes
  * @param ffnet The FFNet to save.
  * @param filename The name of the file to save the FFNet.
  */
-void save_ff_net(const FFNet ffnet, const char *filename);
+void save_ff_net(const FFNet *ffnet, const char *filename);
 
 /**
  * @brief Loads a FFNet from a file.
