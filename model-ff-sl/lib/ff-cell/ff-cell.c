@@ -52,7 +52,7 @@ static void compute_gradient(const FFCell ffcell, const double *const in_pos, co
                              const double g_pos, const double g_neg, const double threshold, const Loss loss_suite);
 
 // Random number generation for weights.
-static void wbrand(FFCell ffcell);
+static void wbrand(FFCell *ffcell);
 static double frand(void);
 
 /**
@@ -84,7 +84,7 @@ FFCell new_ff_cell(const int input_size, const int output_size, double (*act)(do
     ffcell.act = act;
     ffcell.pdact = pdact;
     // Randomize weights and bias.
-    wbrand(ffcell);
+    wbrand(&ffcell);
     // Log the construction of the FF cell.
     increase_indent();
     log_debug("FFCell built with %d inputs, %d outputs, and %d weights", input_size, output_size, ffcell.num_weights);
@@ -331,11 +331,11 @@ double pdrelu(const double a)
 }
 
 // Randomizes weights and bias.
-static void wbrand(FFCell ffcell)
+static void wbrand(FFCell *ffcell)
 {
-    for (int i = 0; i < ffcell.num_weights; i++)
-        ffcell.weights[i] = frand() - 0.5;
-    ffcell.bias = frand() - 0.5;
+    for (int i = 0; i < ffcell->num_weights; i++)
+        ffcell->weights[i] = frand() - 0.5;
+    ffcell->bias = frand() - 0.5;
 }
 
 // Returns random double in [0.0 - 1.0]
