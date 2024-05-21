@@ -4,6 +4,7 @@
  */
 
 #include <losses/losses.h>
+#include <logging/logging.h>
 #include <math.h>
 
 // Static function declarations.
@@ -115,4 +116,28 @@ double symba_pdloss_pos(const double g_pos, const double g_neg, const double thr
 double symba_pdloss_neg(const double g_pos, const double g_neg, const double threshold)
 {
     return -threshold * stable_sigmoid(-threshold * (g_pos - g_neg));
+}
+
+/**
+ * Selects the loss function based on the given loss type.
+ *
+ * @param loss_type The type of loss function to select.
+ * @return The selected loss function.
+ */
+Loss select_loss(LossType loss_type)
+{
+    Loss loss;
+    switch (loss_type)
+    {
+    case LOSS_TYPE_FF:
+        loss = LOSS_FF;
+        break;
+    case LOSS_TYPE_SYMBA:
+        loss = LOSS_SYMBA;
+        break;
+    default:
+        log_error("Unknown loss function type %d. Setting default loss function.", loss_type);
+        loss = LOSS_FF;
+    }
+    return loss;
 }

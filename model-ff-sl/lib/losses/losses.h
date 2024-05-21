@@ -13,11 +13,11 @@
 /**
  * @brief Enum representing the type of loss function.
  */
-enum LossType
+typedef enum
 {
-    LOSS_FF_TYPE,
-    LOSS_SYMBA_TYPE
-};
+    LOSS_TYPE_FF,
+    LOSS_TYPE_SYMBA
+} LossType;
 
 /**
  * @brief Struct representing a Loss function and its partial derivatives.
@@ -25,7 +25,7 @@ enum LossType
 typedef struct
 {
     // Loss type.
-    enum LossType type;
+    LossType type;
     // Loss function handler.
     double (*loss)(const double, const double, const double);
     // Partial derivative of the loss function for the positive pass.
@@ -95,13 +95,21 @@ double symba_pdloss_pos(const double g_pos, const double g_neg, const double thr
 double symba_pdloss_neg(const double g_pos, const double g_neg, const double threshold);
 
 /**
+ * @brief Selects a loss function based on the given type.
+ *
+ * @param loss_type The type of loss function.
+ * @return The selected loss function.
+ */
+Loss select_loss(LossType loss_type);
+
+/**
  * @brief Original Forward Forward loss function.
  */
 #define LOSS_FF \
-    ((Loss){LOSS_FF_TYPE, ff_loss, ff_pdloss_pos, ff_pdloss_neg})
+    ((Loss){LOSS_TYPE_FF, ff_loss, ff_pdloss_pos, ff_pdloss_neg})
 
 /**
  * @brief SymBa loss function.
  */
 #define LOSS_SYMBA \
-    ((Loss){LOSS_SYMBA_TYPE, symba_loss, symba_pdloss_pos, symba_pdloss_neg})
+    ((Loss){LOSS_TYPE_SYMBA, symba_loss, symba_pdloss_pos, symba_pdloss_neg})

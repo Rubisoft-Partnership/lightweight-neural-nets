@@ -25,7 +25,7 @@ typedef struct
     FFCell layers[MAX_LAYERS_NUM]; ///< Array of FFCell blocks in the network.
     int num_cells;                 ///< Number of cells in the network.
     double threshold;              ///< Threshold value for the cells in the network.
-    Loss loss_suite;               ///< Loss function suite for the network.
+    LossType loss;                 ///< Loss function suite for the network.
 } FFNet;
 
 /**
@@ -45,7 +45,7 @@ typedef struct
  * @param loss_suite The loss function suite for the FFNet.
  * @return FFNet The constructed FFNet.
  */
-FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double threshold, double beta1, double beta2, Loss loss_suite);
+FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double threshold, double beta1, double beta2, LossType loss_suite);
 
 /**
  * @brief Frees the memory allocated for a FFNet.

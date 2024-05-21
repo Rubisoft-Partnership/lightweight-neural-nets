@@ -41,14 +41,15 @@ double o_buffer[H_BUFFER_SIZE]; // outputs buffer for positive pass
  * @param loss_suite The loss function suite for the FFNet.
  * @return FFNet The constructed FFNet.
  */
-FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double treshold, const double beta1, const double beta2, Loss loss_suite)
+FFNet new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double treshold, const double beta1, const double beta2, LossType loss)
 {
     FFNet ffnet;
-    ffnet.loss_suite = loss_suite;
+
+    ffnet.loss = loss;
     ffnet.num_cells = num_layers - 1;
     ffnet.threshold = treshold;
 
-    log_info("Building FFNet with %d layers, %d ff cells", num_layers, ffnet.num_cells);
+    log_info("Building FFNet with %d layers, %d ff cells and loss: %d", num_layers, ffnet.num_cells, loss);
     char layers_str[256];
     layers_str[0] = '\0';
     for (int i = 0; i < num_layers; i++)
@@ -90,9 +91,9 @@ void free_ff_net(FFNet ffnet)
 double train_ff_net(const FFNet ffnet, const FFBatch batch, const double learning_rate)
 {
     double loss = 0.0;
-    loss += train_ff_cell(ffnet.layers[0], batch, learning_rate, ffnet.threshold, ffnet.loss_suite);
+    loss += train_ff_cell(ffnet.layers[0], batch, learning_rate, ffnet.threshold, ffnet.loss);
     for (int i = 1; i < ffnet.num_cells; i++)
-        loss += train_ff_cell(ffnet.layers[i], batch, learning_rate, ffnet.threshold, ffnet.loss_suite);
+        loss += train_ff_cell(ffnet.layers[i], batch, learning_rate, ffnet.threshold, ffnet.loss);
     return loss;
 }
 
@@ -190,7 +191,7 @@ void save_ff_net(const FFNet ffnet, const char *filename)
 
     fwrite(&ffnet.num_cells, sizeof(ffnet.num_cells), 1, file);
     fwrite(&ffnet.threshold, sizeof(ffnet.threshold), 1, file);
-    fwrite(&ffnet.loss_suite.type, sizeof(ffnet.loss_suite.type), 1, file);
+    fwrite(&ffnet.loss, sizeof(ffnet.loss), 1, file);
 
     for (int i = 0; i < ffnet.num_cells; i++)
         save_ff_cell(ffnet.layers[i], file);
@@ -226,23 +227,9 @@ void load_ff_net(FFNet *ffnet, const char *filename, double (*act)(double), doub
     // Read the FFNet number of cells, threshold and loss function type.
     fread(&ffnet->num_cells, sizeof(ffnet->num_cells), 1, file);
     fread(&ffnet->threshold, sizeof(ffnet->threshold), 1, file);
-    enum LossType loss_type;
-    fread(&loss_type, sizeof(loss_type), 1, file);
+    fread(&ffnet->loss, sizeof(ffnet->loss), 1, file);
 
-    log_debug("FFNet has %d cells, threshold %f and loss function type %d", ffnet->num_cells, ffnet->threshold, loss_type);
-
-    switch (loss_type) // set the loss function
-    {
-    case LOSS_FF_TYPE:
-        ffnet->loss_suite = LOSS_FF;
-        break;
-    case LOSS_SYMBA_TYPE:
-        ffnet->loss_suite = LOSS_SYMBA;
-        break;
-    default:
-        log_error("Unknown loss function type %d", ffnet->loss_suite.type);
-        return;
-    }
+    log_debug("FFNet has %d cells, threshold %f and loss function type %d", ffnet->num_cells, ffnet->threshold, ffnet->loss);
 
     for (int i = 0; i < ffnet->num_cells; i++)
         ffnet->layers[i] = load_ff_cell(file, act, pdact, beta1, beta2);
