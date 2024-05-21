@@ -25,7 +25,7 @@ typedef struct
 /**
  * @brief Initializes the predictions structure by setting the number of predictions to 0.
  */
-void init_predictions();
+void init_predictions(void);
 
 /**
  * @brief Resets the predictions.
@@ -34,7 +34,7 @@ void init_predictions();
  * After calling this function, the predictions will be cleared and ready
  * for new predictions.
  */
-void reset_predictions();
+void reset_predictions(void);
 
 /**
  * @brief Adds a prediction to the predictions structure.

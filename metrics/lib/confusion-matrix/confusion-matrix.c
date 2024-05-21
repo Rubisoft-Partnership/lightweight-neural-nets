@@ -27,7 +27,7 @@ extern Predictions predictions;
  * @param None
  * @return The newly created confusion matrix.
  */
-int **new_confusion_matrix()
+int **new_confusion_matrix(void)
 {
     int **confusionMatrix = (int **)calloc(NUM_CLASSES, sizeof(int *));
     for (Label i = 0; i < NUM_CLASSES; i++)
@@ -121,7 +121,7 @@ float **get_normalized_confusion_matrix(void)
  *
  * @param None
  */
-void print_confusion_matrix()
+void print_confusion_matrix(void)
 {
     int **confusionMatrix = new_confusion_matrix();
     const int width = 7; // Adjust the cell width as needed
@@ -178,7 +178,7 @@ void print_confusion_matrix()
  *
  * @param None
  */
-void print_normalized_confusion_matrix()
+void print_normalized_confusion_matrix(void)
 {
     int **confusionMatrix = new_confusion_matrix();
     const int width = 7; // Width of each cell in the table

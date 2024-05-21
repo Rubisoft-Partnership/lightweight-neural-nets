@@ -110,8 +110,10 @@ void free_ff_cell(const FFCell ffcell)
  * @param loss_suite The loss function suite.
  * @return The loss value after training.
  */
-double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_rate, const double threshold, const Loss loss_suite)
+double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_rate, const double threshold, const LossType loss)
 {
+    Loss loss_suite = select_loss(loss);
+
     // Increase the indent level for logging
     increase_indent();
     double g_pos = 0.0;
@@ -197,7 +199,7 @@ static void compute_gradient(const FFCell ffcell, const double *const in_pos, co
     log_debug("Computing gradient for FFCell with %d inputs and %d outputs", ffcell.input_size, ffcell.output_size);
     // Calculate the partial derivative of the loss with respect to the goodness of the positive and negative pass.
     const double pdloss_pos = loss_suite.pdloss_pos(g_pos, g_neg, threshold);
-    const double pdloss_neg = loss_suite.pdloss_neg(g_pos, g_neg, threshold);
+    const double pdloss_neg = loss_suite.pdloss_neg(g_neg, g_neg, threshold);
     log_debug("G_pos: %f, G_neg: %f", g_pos, g_neg);
     log_debug("Loss: %.17g", loss_suite.loss(g_pos, g_neg, threshold));
     log_debug("Partial derivative of the loss with resect to the goodness pos: %.17g, neg: %.17g", pdloss_pos, pdloss_neg);

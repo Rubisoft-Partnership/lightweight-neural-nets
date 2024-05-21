@@ -64,13 +64,11 @@ static void setup(void)
     input_size = data.train->feature_len;
     layers_sizes[0] = input_size;
 
-    const Loss loss_suite = LOSS_FF;
-
     // Load the model from checkpoint file.
     // load_ff_net(&ffnet, "ffnet.bin", relu, pdrelu, beta1, beta2);
 
     // Build the model from scratch.
-    ffnet = new_ff_net(layers_sizes, layers_number, relu, pdrelu, threshold, beta1, beta2, loss_suite);
+    ffnet = new_ff_net(layers_sizes, layers_number, relu, pdrelu, threshold, beta1, beta2, LOSS_TYPE_FF);
 
     printf("Running with the following parameters:\n");
     printf("\tDataset path: %s\n", dataset_path);

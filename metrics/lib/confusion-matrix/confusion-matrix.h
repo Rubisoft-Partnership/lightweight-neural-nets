@@ -13,7 +13,7 @@
  *
  * @param None
  */
-void print_confusion_matrix();
+void print_confusion_matrix(void);
 
 /**
  * @brief Prints the normalized confusion matrix.
@@ -24,7 +24,7 @@ void print_confusion_matrix();
  *
  * @param None
  */
-void print_normalized_confusion_matrix();
+void print_normalized_confusion_matrix(void);
 
 /**
  * Calculates and returns the normalized confusion matrix.
