@@ -213,6 +213,7 @@ void save_ff_net(const FFNet *ffnet, const char *filename)
 void load_ff_net(FFNet *ffnet, const char *filename, double (*act)(double), double (*pdact)(double),
                  const double beta1, const double beta2)
 {
+    size_t res;
     char full_path[256];
     snprintf(full_path, sizeof(full_path), "%s/%s", FFNET_CHECKPOINT_PATH, filename);
 
@@ -225,10 +226,25 @@ void load_ff_net(FFNet *ffnet, const char *filename, double (*act)(double), doub
     }
 
     // Read the FFNet number of cells, threshold and loss function type.
-    fread(&ffnet->num_cells, sizeof(ffnet->num_cells), 1, file);
-    fread(&ffnet->threshold, sizeof(ffnet->threshold), 1, file);
+    res = fread(&ffnet->num_cells, sizeof(ffnet->num_cells), 1, file);
+    if (res != 1)
+    {
+        log_error("Could not read FFNet number of cells from file %s", filename);
+        return;
+    }
+    res = fread(&ffnet->threshold, sizeof(ffnet->threshold), 1, file);
+    if (res != 1)
+    {
+        log_error("Could not read FFNet threshold from file %s", filename);
+        return;
+    }
     enum LossType loss_type;
-    fread(&loss_type, sizeof(loss_type), 1, file);
+    res = fread(&loss_type, sizeof(loss_type), 1, file);
+    if (res != 1)
+    {
+        log_error("Could not read FFNet loss function type from file %s", filename);
+        return;
+    }
 
     log_debug("FFNet has %d cells, threshold %f and loss function type %d", ffnet->num_cells, ffnet->threshold, loss_type);
 
