@@ -7,6 +7,11 @@
 #include <stdio.h>
 
 /**
+ * @brief The width of the progress bar.
+ */
+#define PROGRESS_BAR_WIDTH 50
+
+/**
  * Finds the maximum integer value in an array.
  *
  * @param array The array of integers.
@@ -53,3 +58,28 @@ int get_random(void);
  * @return The number of lines in the file.
  */
 int file_lines(FILE *const file);
+
+/**
+ * @brief Initializes the progress bar.
+ */
+void init_progress_bar();
+
+/**
+ * @brief Updates the progress bar with the current batch index and size.
+ *
+ * @param batch_index The current batch index.
+ * @param batch_size The total number of batches.
+ */
+void update_progress_bar(const int batch_index, const int batch_size);
+
+/**
+ * @brief Finishes the progress bar.
+ */
+void finish_progress_bar();
+
+/**
+ * @brief Prints the elapsed time in a human-readable format.
+ *
+ * @param seconds_elapsed The number of seconds elapsed.
+ */
+void print_elapsed_time(const int seconds_elapsed);

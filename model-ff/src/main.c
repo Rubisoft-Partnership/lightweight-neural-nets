@@ -29,9 +29,6 @@
 
 #include <metrics.h>
 
-#define PROGRESS_BAR_WIDTH 50
-int progress_bar_step = 0;
-
 // Default dataset parameters and model architecture.
 char *dataset_path = "../dataset/digits/";
 int num_classes = 10;
@@ -50,14 +47,9 @@ double threshold = 4.0;
 Dataset data;
 FFNet *ffnet;
 
-void init_progress_bar();
-void update_progress_bar(const int batch_index, const int batch_size);
-void finish_progress_bar();
 void evaluate(void);
-
 void parse_args(int argc, char **argv);
 
-void print_elapsed_time(const int seconds_elapsed);
 
 Metrics metrics;
 
@@ -181,30 +173,6 @@ int main(int argc, char **argv)
     return 0;
 }
 
-void init_progress_bar()
-{
-    progress_bar_step = 0;
-    printf("|");
-    for (int i = 0; i < PROGRESS_BAR_WIDTH; i++)
-        printf("-");
-    printf("|\n|");
-}
-
-void update_progress_bar(const int batch_index, const int batch_size)
-{
-    if (progress_bar_step <= (batch_index * PROGRESS_BAR_WIDTH) / batch_size)
-    {
-        printf("*");
-        fflush(stdout);
-        progress_bar_step++;
-    }
-}
-
-void finish_progress_bar()
-{
-    printf("|\n");
-}
-
 void parse_args(int argc, char **argv)
 {
     if (argc == 1)
@@ -269,11 +237,4 @@ void parse_args(int argc, char **argv)
             exit(1);
         }
     }
-}
-
-void print_elapsed_time(const int seconds_elapsed)
-{
-    const int hours = seconds_elapsed / 3600;
-    const int minutes = (seconds_elapsed % 3600) / 60;
-    printf("%02d:%02d:%02d", hours, minutes, seconds_elapsed % 60);
 }

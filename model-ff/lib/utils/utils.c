@@ -10,7 +10,6 @@
 
 #include <utils/utils.h>
 
-
 /**
  * Finds the maximum integer value in an array.
  *
@@ -18,10 +17,13 @@
  * @param size The size of the array.
  * @return The maximum integer value in the array.
  */
-int max_int(const int* array, const int size) {
+int max_int(const int *array, const int size)
+{
     int max = array[0];
-    for(int i = 1; i < size; i++) {
-        if(array[i] > max) {
+    for (int i = 1; i < size; i++)
+    {
+        if (array[i] > max)
+        {
             max = array[i];
         }
     }
@@ -77,7 +79,7 @@ char *read_line_from_file(FILE *const file)
     return line;
 }
 
-///TODO: enforce contiguous memory allocation.
+/// TODO: enforce contiguous memory allocation.
 /**
  * @brief Create a matrix of doubles.
  *
@@ -121,4 +123,56 @@ int get_random(void)
     srand(current_seed);
     current_seed = rand();
     return rand();
+}
+
+static int progress_bar_step = 0;
+
+/**
+ * Initializes the progress bar.
+ * The progress bar consists of a horizontal line with a fixed width,
+ * enclosed between two vertical bars.
+ */
+void init_progress_bar()
+{
+    progress_bar_step = 0;
+    printf("|");
+    for (int i = 0; i < PROGRESS_BAR_WIDTH; i++)
+        printf("-");
+    printf("|\n|");
+}
+
+/**
+ * Updates the progress bar based on the current batch index and batch size.
+ *
+ * @param batch_index The index of the current batch.
+ * @param batch_size The total number of batches.
+ */
+void update_progress_bar(const int batch_index, const int batch_size)
+{
+    if (progress_bar_step <= (batch_index * PROGRESS_BAR_WIDTH) / batch_size)
+    {
+        printf("*");
+        fflush(stdout);
+        progress_bar_step++;
+    }
+}
+
+/**
+ * Finishes the progress bar by printing the final bar.
+ */
+void finish_progress_bar()
+{
+    printf("|\n");
+}
+
+/**
+ * Prints the elapsed time in the format HH:MM:SS.
+ *
+ * @param seconds_elapsed The total number of seconds elapsed.
+ */
+void print_elapsed_time(const int seconds_elapsed)
+{
+    const int hours = seconds_elapsed / 3600;
+    const int minutes = (seconds_elapsed % 3600) / 60;
+    printf("%02d:%02d:%02d", hours, minutes, seconds_elapsed % 60);
 }
