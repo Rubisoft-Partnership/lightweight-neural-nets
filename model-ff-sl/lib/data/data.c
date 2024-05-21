@@ -10,16 +10,53 @@
 #include <logging/logging.h>
 
 /**
- * Splits the dataset into training, testing, and validation sets.
+ * @brief The feature length of the data.
  *
- * @return The dataset containing the split sets.
+ * @param file_path The path to the file containing the data.
+ * @param num_classes The number of classes in the dataset.
+ * 
+ * @return The length of the features in the data.
  */
-Dataset dataset_split(void)
+int get_feature_len(const char *file_path, const int num_classes)
 {
+    FILE *file = fopen(file_path, "r");
+    if (file == NULL)
+    {
+        log_error("Could not open %s for feature len calculation", file_path);
+        exit(EXIT_FAILURE);
+    }
+    char c = fgetc(file);
+    int line_len = 1;
+    while (c != '\n')
+    {
+        if (c == ' ')
+
+            line_len++;
+        c = fgetc(file);
+    }
+    return line_len - num_classes;
+}
+
+/**
+ * @brief Splits the dataset into training, testing, and optional validation data.
+ *
+ * @param dataset_basepath The base path of the dataset, containing the training, testing, and optional validation data.
+ * @param num_classes The number of classes in the dataset.
+ *
+ * @return The dataset structure containing the split data.
+ */
+Dataset dataset_split(const char *dataset_basepath, const int num_classes)
+{
+    // Buffer to store the full path of the dataset files.
+    char full_path[256];
     Dataset dataset;
-    dataset.train = data_build(DATA_TRAIN_PATH);
-    dataset.test = data_build(DATA_TEST_PATH);
-    dataset.validation = data_build(DATA_VALIDATION_PATH);
+    sprintf(full_path, "%s%s", dataset_basepath, DATA_TRAIN_SPLIT);
+    const int feature_size = get_feature_len(full_path, num_classes);
+    dataset.train = data_build(full_path, feature_size, num_classes);
+    sprintf(full_path, "%s%s", dataset_basepath, DATA_TEST_SPLIT);
+    dataset.test = data_build(full_path, feature_size, num_classes);
+    sprintf(full_path, "%s%s", dataset_basepath, DATA_VALIDATION_SPLIT);
+    dataset.validation = data_build(full_path, feature_size, num_classes),
 
     log_debug("Dataset train split: %d samples.", dataset.train->rows);
     log_debug("Dataset test split: %d samples.", dataset.test->rows);
@@ -209,22 +246,26 @@ void generate_batch(const Data *data, const int batch_index, FFBatch batch)
 }
 
 /**
- * @brief Builds a data object by parsing a file and extracting the inputs and outputs for the neural network.
+ * @brief Creates a new data object from a file.
  *
- * @return The built data object.
+ * @param file_path The path to the file containing the data.
+ * @param num_features The number of features in the dataset.
+ * @param num_classes The number of classes in the dataset.
+ *
+ * @return The data object created from the file.
  */
-Data *data_build(const char *file_path)
+Data *data_build(const char *file_path, const int num_features, const int num_classes)
 {
     log_debug("Building data from %s", file_path);
     FILE *file = fopen(file_path, "r");
     if (file == NULL)
     {
-        log_error("Could not open %s\n", file_path);
-        Data *empty_data = new_data(DATA_FEATURES, DATA_CLASSES, 0);
+        log_error("Could not open %s", file_path);
+        Data *empty_data = new_data(num_features, num_classes, 0);
         return empty_data;
     }
     const int rows = file_lines(file);
-    Data *data = new_data(DATA_FEATURES, DATA_CLASSES, rows);
+    Data *data = new_data(num_features, num_classes, rows);
     for (int row = 0; row < rows; row++)
     {
         char *line = read_line_from_file(file);
