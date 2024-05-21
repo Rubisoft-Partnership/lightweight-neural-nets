@@ -50,11 +50,12 @@ double threshold = 4.0;
 Dataset data;
 FFNet ffnet;
 
-void init_progress_bar();
+void init_progress_bar(void);
 void update_progress_bar(const int batch_index, const int batch_size);
-void finish_progress_bar();
+void finish_progress_bar(void);
 
 void parse_args(int argc, char **argv);
+void evaluate(void);
 
 void print_elapsed_time(const int seconds_elapsed);
 
@@ -121,7 +122,7 @@ static void train_loop(void)
         finish_progress_bar();
         printf("\tLoss %.12f\n", (double)loss / num_batches);
         int epoch_time = (clock() - epoch_start_time) / CLOCKS_PER_SEC;
-        printf("\tEpoch time: ", epoch_time);
+        printf("\tEpoch time: %d", epoch_time);
         print_elapsed_time(epoch_time);
         printf("\n\n");
         evaluate();
@@ -180,7 +181,7 @@ int main(int argc, char **argv)
     return 0;
 }
 
-void init_progress_bar()
+void init_progress_bar(void)
 {
     progress_bar_step = 0;
     printf("|");
@@ -199,7 +200,7 @@ void update_progress_bar(const int batch_index, const int batch_size)
     }
 }
 
-void finish_progress_bar()
+void finish_progress_bar(void)
 {
     printf("|\n");
 }
