@@ -74,36 +74,6 @@ namespace metrics
         return ss.str();
     }
 
-    float Metrics::getAccuracy() const
-    {
-        return accuracy;
-    }
-
-    float Metrics::getBalancedAccuracy() const
-    {
-        return balanced_accuracy;
-    }
-
-    float Metrics::getAveragePrecision() const
-    {
-        return average_precision;
-    }
-
-    float Metrics::getAverageRecall() const
-    {
-        return average_recall;
-    }
-
-    float Metrics::getAverageF1Score() const
-    {
-        return average_f1_score;
-    }
-
-    const std::vector<std::vector<float>> &Metrics::getNormalizedConfusionMatrix() const
-    {
-        return normalized_confusion_matrix;
-    }
-
     void Metrics::convertConfusionMatrix(float **c_matrix, int size)
     {
         normalized_confusion_matrix.resize(size);
@@ -115,6 +85,39 @@ namespace metrics
                 normalized_confusion_matrix[i][j] = c_matrix[i][j];
             }
         }
+    }
+
+    Metrics mean(const std::vector<Metrics> &metrics)
+    {
+        Metrics mean_metrics;
+        for (const auto &metric : metrics)
+        {
+            mean_metrics.accuracy += metric.accuracy;
+            mean_metrics.balanced_accuracy += metric.balanced_accuracy;
+            mean_metrics.average_precision += metric.average_precision;
+            mean_metrics.average_recall += metric.average_recall;
+            mean_metrics.average_f1_score += metric.average_f1_score;
+
+            // Accumulate the confusion matrix
+            const auto &confusion_matrix = metric.normalized_confusion_matrix;
+            if (mean_metrics.normalized_confusion_matrix.empty())
+                mean_metrics.normalized_confusion_matrix = confusion_matrix;
+            else
+                for (size_t i = 0; i < confusion_matrix.size(); ++i)
+                    for (size_t j = 0; j < confusion_matrix[i].size(); ++j)
+                        mean_metrics.normalized_confusion_matrix[i][j] += confusion_matrix[i][j];
+        }
+
+        // Divide by the number of metrics to get the mean
+        mean_metrics.accuracy /= metrics.size();
+        mean_metrics.balanced_accuracy /= metrics.size();
+        mean_metrics.average_precision /= metrics.size();
+        mean_metrics.average_recall /= metrics.size();
+        mean_metrics.average_f1_score /= metrics.size();
+        for (size_t i = 0; i < mean_metrics.normalized_confusion_matrix.size(); ++i)
+            for (size_t j = 0; j < mean_metrics.normalized_confusion_matrix[i].size(); ++j)
+                mean_metrics.normalized_confusion_matrix[i][j] /= metrics.size();
+        return mean_metrics;
     }
 
 } // namespace metrics

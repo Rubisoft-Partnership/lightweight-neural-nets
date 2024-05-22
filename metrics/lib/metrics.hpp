@@ -10,10 +10,16 @@ extern "C"
 
 namespace metrics
 {
-
     class Metrics
     {
     public:
+        float accuracy;
+        float balanced_accuracy;
+        float average_precision;
+        float average_recall;
+        float average_f1_score;
+        std::vector<std::vector<float>> normalized_confusion_matrix;
+
         Metrics();
         ~Metrics() = default;
 
@@ -28,25 +34,13 @@ namespace metrics
         // To string representation
         std::string toString() const;
 
-        // Getters for the metrics
-        float getAccuracy() const;
-        float getBalancedAccuracy() const;
-        float getAveragePrecision() const;
-        float getAverageRecall() const;
-        float getAverageF1Score() const;
-        const std::vector<std::vector<float>> &getNormalizedConfusionMatrix() const;
-
     private:
-        float accuracy;
-        float balanced_accuracy;
-        float average_precision;
-        float average_recall;
-        float average_f1_score;
-        std::vector<std::vector<float>> normalized_confusion_matrix;
-
         // Helper function to convert C matrix to C++ matrix
         void convertConfusionMatrix(float **c_matrix, int size);
     };
+
+    // Function to compute the mean of a vector of Metrics objects
+    Metrics mean(const std::vector<Metrics> &metrics);
 
 } // namespace metrics
 
