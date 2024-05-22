@@ -7,6 +7,7 @@ extern "C"
 }
 
 #include <vector>
+#include <string>
 
 namespace metrics
 {

@@ -8,12 +8,9 @@
 // TODO: move this to a configuration file.
 const std::vector<int> &units = {784, 100, 100, 100};
 
-Client::Client(int id, const std::string &data_path)
+Client::Client(int id, std::shared_ptr<Model> model, const std::string &data_path)
     : id(id), data_path(data_path)
 {
-    // Allocate space for the model and initialize it with given units and data path
-    model = std::make_shared<Model>();
-
     // Initialize model with given units and data path
     model->build(units, data_path);
 
@@ -27,7 +24,15 @@ Client::Client(int id, const std::string &data_path)
 
     // Log the initialization
     spdlog::info("Initialized client {}.", id);
-    spdlog::debug("Model units: {}.", units);
+    // Format units as a string
+    std::ostringstream oss;
+    for (size_t i = 0; i < units.size(); ++i)
+    {
+        if (i != 0)
+            oss << ", ";
+        oss << units[i];
+    }
+    spdlog::debug("Model units: {}.", oss.str());
     spdlog::debug("Model data path: {}.", data_path);
     spdlog::debug("Model dataset size: {} samples.", dataset_size);
 }

@@ -6,6 +6,7 @@
 
 #include <orchestration/orchestration.h>
 #include <spdlog/spdlog.h>
+#include <model-ff/model-ff.h>
 
 namespace fs = std::filesystem;
 
@@ -119,7 +120,7 @@ void Orchestrator::saveCheckpoint()
     }
 }
 
-std::vector<std::shared_ptr<Client>> initializeClients(const std::vector<std::string> datasets_path)
+std::vector<std::shared_ptr<Client>> initializeClients(const std::vector<std::string> &datasets_path)
 {
     spdlog::info("Initializing clients...");
     spdlog::debug("Number of clients: {}.", num_clients);
@@ -128,10 +129,13 @@ std::vector<std::shared_ptr<Client>> initializeClients(const std::vector<std::st
         spdlog::warn("Number of datasets is less than the number of clients. Some clients will share the same dataset. This should be avoided.");
 
     std::vector<std::shared_ptr<Client>> clients;
-    for (int i = 0; i < num_clients; ++i)
+    for (size_t i = 0; i < num_clients; ++i)
     {
         // Initialize each client with dataset
-        auto client = std::make_shared<Client>(i, datasets_path[i % datasets_path.size()]); // Use modulo to avoid out of bounds
+
+        // Allocate space for the model and initialize it with given units and data path
+        auto model = std::make_shared<ModelFF>();
+        auto client = std::make_shared<Client>(i, model, datasets_path[i % datasets_path.size()]); // Use modulo to avoid out of bounds
         clients.push_back(client);
     }
     return clients;

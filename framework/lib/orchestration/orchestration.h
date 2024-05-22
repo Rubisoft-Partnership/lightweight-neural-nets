@@ -9,7 +9,7 @@
 #include <spdlog/spdlog.h>
 
 // Function prototypes for helper functions
-std::vector<std::shared_ptr<Client>> initializeClients(const std::vector<int> &units, const std::string &datasets_path);
+std::vector<std::shared_ptr<Client>> initializeClients(const std::vector<std::string> &datasets_path);
 
 class Orchestrator
 {
