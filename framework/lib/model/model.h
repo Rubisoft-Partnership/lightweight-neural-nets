@@ -19,6 +19,18 @@ public:
     // Evaluate the model's performance with the given test data and labels
     virtual metrics::Metrics evaluate() = 0;
 
+    // Get the model's weights
+    virtual std::vector<double> get_weights() const = 0;
+
+    // Set the model's weights
+    virtual void set_weights(const std::vector<double> &weights) = 0;
+
+    // Save the model's weights to a file
+    virtual void save(const std::string filename) = 0;
+
+    // Load the model's weights from a file
+    virtual void load(const std::string filename) = 0;
+
 protected:
     std::vector<int> units;
 };

@@ -27,12 +27,21 @@ public:
     // Evaluate the model's performance with the given test data and labels
     metrics::Metrics evaluate() override;
 
+    // Get the model's weights
+    std::vector<double> get_weights() const override;
+
+    // Set the model's weights
+    void set_weights(const std::vector<double> &weights) override;
+
+    // Save the model's weights to a file
+    void save(const std::string filename) override;
+
+    // Load the model's weights from a file
+    void load(const std::string filename) override;
+
 private:
     FFNet *ffnet;
     Dataset data;
-    Metrics metrics;
-    std::vector<std::vector<double>> weights;
-    std::vector<double> biases;
 };
 
 #endif // MODEL_FF_H

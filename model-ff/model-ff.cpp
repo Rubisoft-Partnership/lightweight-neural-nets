@@ -138,3 +138,32 @@ metrics::Metrics ModelFF::evaluate()
 
     return metrics;
 }
+
+std::vector<double> ModelFF::get_weights() const
+{
+    std::vector<double> weights;
+    for (int i = 0; i < ffnet->num_cells; i++)                 // iterate over cells
+        for (int j = 0; j < ffnet->layers[i].num_weights; j++) // iteratet over weights
+            weights.push_back(ffnet->layers[i].weights[j]);    // add weight to vector
+    return weights;
+}
+
+void ModelFF::set_weights(const std::vector<double> &weights)
+{
+    int weight_index = 0;
+    for (int i = 0; i < ffnet->num_cells; i++)                 // iterate over cells
+        for (int j = 0; j < ffnet->layers[i].num_weights; j++) // iterate over weights
+            ffnet->layers[i].weights[j] = weights[weight_index++]; // set weight from vector
+}
+
+void ModelFF::save(const std::string filename)
+{
+    save_ff_net(ffnet, filename.c_str());
+    log_debug("FFNet saved to %s", filename.c_str());
+}
+
+void ModelFF::load(const std::string filename)
+{
+    load_ff_net(ffnet, filename.c_str(), relu, pdrelu, beta1, beta2);
+    log_debug("FFNet loaded from %s", filename.c_str());
+}
