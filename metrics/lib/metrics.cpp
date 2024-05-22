@@ -1,6 +1,7 @@
 #include "metrics.hpp"
 #include <iostream>
 #include <stdexcept>
+#include <sstream>
 
 namespace metrics
 {
@@ -51,6 +52,26 @@ namespace metrics
             }
             std::cout << std::endl;
         }
+    }
+
+    std::string Metrics::toString() const
+    {
+        std::stringstream ss;
+        ss << "Accuracy: " << accuracy << std::endl;
+        ss << "Average F1 Score: " << average_f1_score << std::endl;
+        ss << "Average Precision: " << average_precision << std::endl;
+        ss << "Average Recall: " << average_recall << std::endl;
+        ss << "Balanced Accuracy: " << balanced_accuracy << std::endl;
+        ss << "Normalized Confusion Matrix:" << std::endl;
+        for (const auto &row : normalized_confusion_matrix)
+        {
+            for (const auto &val : row)
+            {
+                ss << val << " ";
+            }
+            ss << std::endl;
+        }
+        return ss.str();
     }
 
     float Metrics::getAccuracy() const

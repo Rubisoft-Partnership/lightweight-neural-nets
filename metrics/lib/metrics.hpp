@@ -25,6 +25,8 @@ namespace metrics
 
         // Print the metrics
         void print() const;
+        // To string representation
+        std::string toString() const;
 
         // Getters for the metrics
         float getAccuracy() const;
