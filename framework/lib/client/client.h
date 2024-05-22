@@ -24,9 +24,9 @@ public:
     // Update the client with a new training round
     void update(int round_index, double learning_rate, size_t batch_size, size_t epochs);
 
-    void Client::logRounds() const;
+    void logRounds() const;
 
-    void Client::logMetrics() const;
+    void logMetrics() const;
 
 private:
     // Calculate the size of the dataset
