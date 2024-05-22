@@ -5,7 +5,10 @@
 #include <client/client.h>
 #include <spdlog/spdlog.h>
 
-Client::Client(int id, const std::vector<int> &units, const std::string &data_path)
+// TODO: move this to a configuration file.
+const std::vector<int> &units = {784, 100, 100, 100};
+
+Client::Client(int id, const std::string &data_path)
     : id(id), data_path(data_path)
 {
     // Allocate space for the model and initialize it with given units and data path
@@ -55,7 +58,8 @@ void Client::logRounds() const
     std::ostringstream oss;
     for (size_t i = 0; i < rounds.size(); ++i)
     {
-        if (i != 0) oss << ", ";
+        if (i != 0)
+            oss << ", ";
         oss << rounds[i];
     }
     spdlog::info("Client {} was updated in rounds: {}.", id, oss.str());
@@ -78,7 +82,7 @@ int Client::calculateDatasetSize()
         return -1;
     }
 
-    int lineCount = std::count(std::istreambuf_iterator<char>(file), 
+    int lineCount = std::count(std::istreambuf_iterator<char>(file),
                                std::istreambuf_iterator<char>(), '\n');
 
     spdlog::debug("Calculated dataset size: {}.", lineCount);
