@@ -79,7 +79,7 @@ $(DEPS_OBJ): $(DEPS)
 	echo "Compiled $<"
 
 # Linking all object files to create the executable
-$(BIN_PATH)/$(BIN_FILE): $(FRAMEWORK_OBJ) $(METRICS_OBJ) $(DEPS_OBJ) $(MODELFF_OBJ)
+$(BIN_PATH)/$(BIN_FILE): $(DEPS_OBJ) $(FRAMEWORK_OBJ) $(METRICS_OBJ) $(MODELFF_OBJ)
 	@echo "Linking all object files..."
 	@mkdir -p $(BIN_PATH) # Ensure the bin directory exists
 	$(GPP) -o $@ $^
