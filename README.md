@@ -2,12 +2,17 @@
 
 Neural network models for embedded devices
 
-
 ## Model-ff
 
 Model-ff uses Forward-Forward algorithm to train a neural network.
 
-### Definitions
+It is composed of one or more `FFCell` objects. Each cell is composed of an input layer and an output layer and can be trained independently.
+
+In a `FFNet` object, the cells are connected in a chain. The output of a cell is the input of the next cell.
+
+In the training phase, for every cell, the forward and backward passes are executed according to the following steps:
+
+### Definitionsr more `FFCell` objects. Each cell is a layer in the network
 
 $\theta \in \mathbb{R}: \text{threshold}$
 
@@ -35,15 +40,19 @@ $L(z, \bar{z}):\mathbb{R}^{o \times o}\rightarrow\mathbb{R}=\zeta\bigl(\theta - 
 
 ### Forward pass
 
-Input to output layer:
+Label embedding for the positie and negative samples:
 
 $x :=\eta(x',y)$
 
 $\bar x :=\eta(x,\bar{y}), \bar{y}\in\mathcal{L}|\bar{y}\neq y$
 
+Scalar product of the input and the weight vector:
+
 $h := Wx$
 
 $\bar{h} := W\bar x$
+
+Compute the activations:
 
 $z := a(h)$
 
@@ -62,7 +71,7 @@ $$
 Gradient of the positive pass:
 
 $$
-\frac{\delta L_{pos}}{\delta w_{i, j}} = 
+\frac{\delta L_{pos}}{\delta w_{i, j}} =
 \frac{\delta L_{pos}}{\delta G(z)}
 \frac{\delta G(z)}{\delta z_{j}} 
 \frac{\delta z_{i}}{\delta w_{i,j}}
