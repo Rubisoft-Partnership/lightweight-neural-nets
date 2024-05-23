@@ -1,7 +1,7 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
-#include <model/model.h>
+#include <model/model.hpp>
 #include <string>
 #include <vector>
 #include <memory>

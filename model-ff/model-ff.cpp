@@ -1,4 +1,4 @@
-#include "model-ff.h"
+#include "model-ff.hpp"
 #include <cmath>
 #include <algorithm>
 #include <numeric>

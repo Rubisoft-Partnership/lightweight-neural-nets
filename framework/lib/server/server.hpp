@@ -1,7 +1,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <client/client.h>
+#include <client/client.hpp>
 #include <vector>
 #include <memory>
 #include <random>

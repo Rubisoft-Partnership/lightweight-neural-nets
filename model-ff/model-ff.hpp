@@ -1,7 +1,7 @@
 #ifndef MODEL_FF_H
 #define MODEL_FF_H
 
-#include "../framework/lib/model/model.h"
+#include "../framework/lib/model/model.hpp"
 #include <vector>
 #include <random>
 #include <metrics.hpp>

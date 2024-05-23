@@ -62,7 +62,7 @@ int file_lines(FILE *const file);
 /**
  * @brief Initializes the progress bar.
  */
-void init_progress_bar();
+void init_progress_bar(void);
 
 /**
  * @brief Updates the progress bar with the current batch index and size.
@@ -75,7 +75,7 @@ void update_progress_bar(const int batch_index, const int batch_size);
 /**
  * @brief Finishes the progress bar.
  */
-void finish_progress_bar();
+void finish_progress_bar(void);
 
 /**
  * @brief Prints the elapsed time in a human-readable format.

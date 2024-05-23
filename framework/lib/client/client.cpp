@@ -2,7 +2,7 @@
 #include <string>
 #include <algorithm>
 
-#include <client/client.h>
+#include <client/client.hpp>
 #include <spdlog/spdlog.h>
 
 // TODO: move this to a configuration file.

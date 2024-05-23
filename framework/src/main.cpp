@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <spdlog/spdlog.h>
-#include <orchestration/orchestration.h>
+#include <orchestration/orchestration.hpp>
 
 const std::string datasets_path = "datasets";
 const std::string checkpoints_path = "checkpoints";

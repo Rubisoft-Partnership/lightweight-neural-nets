@@ -4,9 +4,9 @@
 #include <filesystem>
 #include <regex>
 
-#include <orchestration/orchestration.h>
+#include <orchestration/orchestration.hpp>
 #include <spdlog/spdlog.h>
-#include <model-ff/model-ff.h>
+#include <model-ff/model-ff.hpp>
 
 namespace fs = std::filesystem;
 

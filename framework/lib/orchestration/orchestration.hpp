@@ -3,8 +3,8 @@
 
 #include <vector>
 #include <memory>
-#include <client/client.h>
-#include <server/server.h>
+#include <client/client.hpp>
+#include <server/server.hpp>
 #include <metrics.hpp>
 #include <spdlog/spdlog.h>
 

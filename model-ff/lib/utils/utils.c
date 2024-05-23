@@ -132,7 +132,7 @@ static int progress_bar_step = 0;
  * The progress bar consists of a horizontal line with a fixed width,
  * enclosed between two vertical bars.
  */
-void init_progress_bar()
+void init_progress_bar(void)
 {
     progress_bar_step = 0;
     printf("|");
@@ -160,7 +160,7 @@ void update_progress_bar(const int batch_index, const int batch_size)
 /**
  * Finishes the progress bar by printing the final bar.
  */
-void finish_progress_bar()
+void finish_progress_bar(void)
 {
     printf("|\n");
 }

@@ -1,4 +1,4 @@
-#include <server/server.h>
+#include <server/server.hpp>
 #include <algorithm>
 #include <random>
 #include <numeric>
