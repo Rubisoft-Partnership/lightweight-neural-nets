@@ -6,8 +6,11 @@
 const std::string datasets_path = "datasets";
 const std::string checkpoints_path = "checkpoints";
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
+    (void)argc; // Unused parameter
+    (void)argv; // Unused parameter
+
     // Set up logger
     spdlog::set_level(spdlog::level::debug); // Set default logging level to info
     spdlog::info("Starting Federated Learning Orchestrator...");

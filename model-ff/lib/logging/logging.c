@@ -64,12 +64,22 @@ void open_log_file_with_timestamp(void)
     struct tm *tm_info = localtime(&now);
 
     // Create the log filename
-    char logFilename[256];
+    char logFilename[512];
     strftime(logFilename, sizeof(logFilename), "%Y-%m-%d_%H-%M-%S", tm_info);
 
+    // Calculate the required size for the full path
+    size_t path_len = snprintf(NULL, 0, "%s/log_%s.log", LOGGING_LOG_PATH, logFilename) + 1;
+    
+    // Allocate memory for the full path
+    char *fullPath = malloc(path_len);
+    if (!fullPath)
+    {
+        perror("Failed to allocate memory for full path");
+        exit(EXIT_FAILURE);
+    }
+
     // Construct the full path
-    char fullPath[256];
-    snprintf(fullPath, sizeof(fullPath), "%s/log_%s.log", LOGGING_LOG_PATH, logFilename);
+    snprintf(fullPath, path_len, "%s/log_%s.log", LOGGING_LOG_PATH, logFilename);
 
     // Create the log directory if it doesn't exist
     mkdir(LOGGING_LOG_PATH, 0777);
@@ -79,8 +89,12 @@ void open_log_file_with_timestamp(void)
     if (!globalLogFile)
     {
         perror("Failed to open log file");
+        free(fullPath);
         exit(EXIT_FAILURE);
     }
+
+    // Free the allocated memory
+    free(fullPath);
 }
 
 /**

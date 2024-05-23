@@ -159,7 +159,7 @@ void save_ff_net(const FFNet *ffnet, const char *filename)
     }
 
     FILE *file = NULL;
-    char full_path[256];
+    char full_path[512];
 
     if (filename == NULL) // no filename provided
     {

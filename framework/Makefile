@@ -38,7 +38,7 @@ FRAMEWORK_SRC = $(wildcard $(PROJECT_BASEPATH)/$(LIB_FOLDER)/*/*.cpp)
 FRAMEWORK_OBJ = $(addprefix $(BUILD_PATH)/, $(notdir $(patsubst %.cpp,%.o,$(FRAMEWORK_SRC))))
 
 # Object Files
-OBJ_FILES = $(FRAMEWORK_OBJ) $(METRICS_OBJ)
+OBJ_FILES = $(FRAMEWORK_OBJ) $(METRICS_OBJ) $(DEPS_OBJ) $(MODELFF_OBJ)
 
 # Default target
 all: $(BIN_PATH)/$(BIN_FILE)
@@ -46,18 +46,20 @@ all: $(BIN_PATH)/$(BIN_FILE)
 # Metrics C files Compilation
 $(METRICS_OBJ): $(METRICS_SRC)
 	@echo "Compiling Metrics C files..."
-	@for file in $(METRICS_SRC); do \
+	@for file in $(filter %.c,$(METRICS_SRC)); do \
     	obj_file=$$(basename $$file .c).o; \
     	$(GCC) -c $$file $(CFLAGS) $(METRICS_INCLUDE) -o $(BUILD_PATH)/$$obj_file; \
+		echo "Compiled $$file"; \
 	done
 	$(GPP) -c $(METRICS_BASEPATH)/$(LIB_FOLDER)/metrics.cpp $(CPPFLAGS) $(METRICS_INCLUDE) -o $(BUILD_PATH)/cmetrics.o
 
 # ModelFF C files Compilation
 $(MODELFF_OBJ): $(MODELFF_SRC)
 	@echo "Compiling Model C/C++ files..."
-	@for file in $(MODELFF_SRC); do \
+	@for file in $(filter %.c,$(MODELFF_SRC)); do \
     	obj_file=$$(basename $$file .c).o; \
     	$(GCC) -c $$file $(CFLAGS) $(MODELFF_INCLUDE) $(METRICS_INCLUDE) -o $(BUILD_PATH)/$$obj_file; \
+		echo "Compiled $$file"; \
 	done
 	$(GPP) -c $(PROJECT_BASEPATH)/../model-ff/model-ff.cpp $(CPPFLAGS) $(MODELFF_INCLUDE) $(METRICS_INCLUDE) -o $(BUILD_PATH)/model-ff.o;
 
@@ -67,12 +69,14 @@ $(FRAMEWORK_OBJ): $(FRAMEWORK_SRC)
 	@for file in $(FRAMEWORK_SRC); do \
     	obj_file=$$(basename $$file .cpp).o; \
     	$(GPP) -c $$file $(CPPFLAGS) $(FRAMEWORK_INCLUDE) $(BASE_INCLUDE) $(MODELFF_INCLUDE) $(SPDLOG_INCLUDE) $(METRICS_INCLUDE) -o $(BUILD_PATH)/$$obj_file; \
+		echo "Compiled $$file"; \
 	done
 
 # Tiny-DNN C++ files Compilation
 $(DEPS_OBJ): $(DEPS)
 	@mkdir -p $(BUILD_PATH) # Ensure the build directory exists
 	$(GPP) -c $< -o $@ $(CPPFLAGS) $(FRAMEWORK_INCLUDE) $(BASE_INCLUDE) $(MODELFF_INCLUDE) $(METRICS_INCLUDE) $(SPDLOG_INCLUDE)
+	echo "Compiled $<"
 
 # Linking all object files to create the executable
 $(BIN_PATH)/$(BIN_FILE): $(FRAMEWORK_OBJ) $(METRICS_OBJ) $(DEPS_OBJ) $(MODELFF_OBJ)

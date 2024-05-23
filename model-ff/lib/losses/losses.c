@@ -34,6 +34,7 @@ double ff_loss(const double g_pos, const double g_neg, const double threshold)
  */
 double ff_pdloss_pos(const double g_pos, const double g_neg, const double threshold)
 {
+    (void)g_neg; // Unused parameter
     return -stable_sigmoid(threshold - g_pos);
 }
 
@@ -47,6 +48,7 @@ double ff_pdloss_pos(const double g_pos, const double g_neg, const double thresh
  */
 double ff_pdloss_neg(const double g_pos, const double g_neg, const double threshold)
 {
+    (void)g_pos; // Unused parameter
     return stable_sigmoid(g_neg - threshold);
 }
 
