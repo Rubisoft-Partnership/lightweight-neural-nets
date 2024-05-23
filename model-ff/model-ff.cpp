@@ -88,7 +88,7 @@ void ModelFF::train(const int &epochs, const int &batch_size, const double &lear
         finish_progress_bar();
         printf("\tLoss %.12f\n", (double)loss / num_batches);
         int epoch_time = (clock() - epoch_start_time) / CLOCKS_PER_SEC;
-        printf("\tEpoch time: %d", epoch_time);
+        printf("\tEpoch time: ");
         print_elapsed_time(epoch_time);
         printf("\n\n");
         // evaluate();
