@@ -150,7 +150,7 @@ void evaluate(void)
     print_metrics(metrics);
 
     // Save the model to a checkpoint file.
-    save_ff_net(ffnet, "ffnet.bin");
+    save_ff_net(ffnet, "ffnet.bin", true);
     log_debug("FFNet saved to ffnet.bin");
 }
 

@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <stdbool.h>
+
 #include <ff-cell/ff-cell.h>
 #include <losses/losses.h>
 
@@ -89,7 +91,7 @@ int predict_ff_net(const FFNet *ffnet, const double *input, const int num_classe
  * @param ffnet The FFNet to save.
  * @param filename The name of the file to save the FFNet.
  */
-void save_ff_net(const FFNet *ffnet, const char *filename);
+void save_ff_net(const FFNet *ffnet, const char *filename, bool default_path);
 
 /**
  * @brief Loads a FFNet from a file.

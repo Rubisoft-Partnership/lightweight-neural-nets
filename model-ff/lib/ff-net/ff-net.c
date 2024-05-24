@@ -146,46 +146,50 @@ int predict_ff_net(const FFNet *ffnet, const double *input, const int num_classe
  * @param ffnet The FFNet to save.
  * @param filename The name of the file to save the FFNet.
  */
-void save_ff_net(const FFNet *ffnet, const char *filename)
+void save_ff_net(const FFNet *ffnet, const char *filename, bool default_path)
 {
-    // Create the checkpoint directory if it does not exist
-    if (access(FFNET_CHECKPOINT_PATH, F_OK) == -1)
-    {
-        if (mkdir(FFNET_CHECKPOINT_PATH, 0777) == -1)
-        {
-            log_error("Could not create checkpoint directory %s", FFNET_CHECKPOINT_PATH);
-            return;
-        }
-    }
-
     FILE *file = NULL;
     char full_path[512];
 
-    if (filename == NULL) // no filename provided
+    if (default_path)
     {
-        // Get the current time
-        time_t now = time(NULL);
-        struct tm *tm_info = localtime(&now);
+        // Create the checkpoint directory if it does not exist
+        if (access(FFNET_CHECKPOINT_PATH, F_OK) == -1)
+        {
+            if (mkdir(FFNET_CHECKPOINT_PATH, 0777) == -1)
+            {
+                log_error("Could not create checkpoint directory %s", FFNET_CHECKPOINT_PATH);
+                return;
+            }
+        }
 
-        // Create checkpoint filename
-        char checkpoint_filename[256];
-        strftime(checkpoint_filename, sizeof(checkpoint_filename), "%Y-%m-%d_%H-%M-%S", tm_info);
+        if (filename == NULL) // no filename provided
+        {
+            // Get the current time
+            time_t now = time(NULL);
+            struct tm *tm_info = localtime(&now);
 
-        // Construct the full path
-        snprintf(full_path, sizeof(full_path), "%s/checkpoint_%s.bin", FFNET_CHECKPOINT_PATH, checkpoint_filename);
+            // Create checkpoint filename
+            char checkpoint_filename[256];
+            strftime(checkpoint_filename, sizeof(checkpoint_filename), "%Y-%m-%d_%H-%M-%S", tm_info);
 
-        log_info("No filename provided, saving FFNet to file %s", full_path);
+            // Construct the full path
+            snprintf(full_path, sizeof(full_path), "%s/checkpoint_%s.bin", FFNET_CHECKPOINT_PATH, checkpoint_filename);
+
+            log_info("No filename provided, saving FFNet to file %s", full_path);
+        }
+        else
+        {
+            snprintf(full_path, sizeof(full_path), "%s/%s", FFNET_CHECKPOINT_PATH, filename);
+            log_info("Saving FFNet to file %s", full_path);
+        }
+
     }
-    else
-    {
-        snprintf(full_path, sizeof(full_path), "%s/%s", FFNET_CHECKPOINT_PATH, filename);
-        log_info("Saving FFNet to file %s", full_path);
-    }
 
-    file = fopen(full_path, "wb");
+    file = fopen(default_path ? full_path : filename, "wb");
     if (file == NULL)
     {
-        log_error("Could not open file %s for writing", full_path);
+        log_error("Could not open file %s for writing", default_path ? full_path : filename);
         return;
     }
 
@@ -197,7 +201,7 @@ void save_ff_net(const FFNet *ffnet, const char *filename)
         save_ff_cell(ffnet->layers[i], file);
 
     fclose(file);
-    log_info("Saved FFNet to file %s", filename);
+    log_info("Saved FFNet to file %s", default_path ? full_path : filename);
 }
 
 /**
@@ -246,7 +250,6 @@ void load_ff_net(FFNet *ffnet, const char *filename, double (*act)(double), doub
     }
 
     log_debug("FFNet has %d cells, threshold %f and loss function type %d", ffnet->num_cells, ffnet->threshold, ffnet->loss);
-
 
     for (int i = 0; i < ffnet->num_cells; i++)
         ffnet->layers[i] = load_ff_cell(file, act, pdact, beta1, beta2);

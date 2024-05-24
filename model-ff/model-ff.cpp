@@ -131,11 +131,6 @@ metrics::Metrics ModelFF::evaluate()
 
     // Print the metrics
     metrics.print();
-
-    // Save the model to a checkpoint file.
-    save_ff_net(ffnet, "ffnet.bin");
-    log_debug("FFNet saved to ffnet.bin");
-
     return metrics;
 }
 
@@ -158,7 +153,7 @@ void ModelFF::set_weights(const std::vector<double> &weights)
 
 void ModelFF::save(const std::string filename)
 {
-    save_ff_net(ffnet, filename.c_str());
+    save_ff_net(ffnet, filename.c_str(), false); // set checkpoint default path to false
     log_debug("FFNet saved to %s", filename.c_str());
 }
 
