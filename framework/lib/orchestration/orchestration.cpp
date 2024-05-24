@@ -16,13 +16,13 @@ const size_t num_rounds = 3;
 const float c_rate = 0.1;
 const float checkpoint_rate = 0.2;
 
-std::vector<std::string> listFiles(const std::string &folder, const std::string &match);
+static std::vector<std::string> listFolders(const std::string &folder, const std::string &match);
 
 Orchestrator::Orchestrator(const std::string &datasets_path, const std::string &checkpoints_path) : datasets_path(datasets_path),
                                                                                                     checkpoints_path(checkpoints_path)
 {
-    // Search datasets files
-    std::vector<std::string> data = listFiles(datasets_path, "client_dataset-.*\\.txt");
+    // Search datasets folders
+    std::vector<std::string> data = listFolders(datasets_path, "^client-\\d+$");
     if (data.empty())
     {
         spdlog::error("No datasets found in folder: {}.", datasets_path);
@@ -86,12 +86,10 @@ void Orchestrator::logParams()
 
 void Orchestrator::saveCheckpoint()
 {
-    std::string path = checkpoints_path;
-    if (path.back() != '/')
-        path += '/';
-
+    const std::string &path = checkpoints_path;
     spdlog::info("Saving checkpoint at round: {}.", round_index);
 
+    // Create the checkpoints folder if it does not exist
     if (!fs::exists(path))
     {
         spdlog::info("Creating checkpoints folder: {}.", path);
@@ -103,20 +101,21 @@ void Orchestrator::saveCheckpoint()
         exit(EXIT_FAILURE);
     }
 
-    std::string checkpoint_folder = path + "checkpoint-round-" + std::to_string(round_index);
-    if (fs::exists(checkpoint_folder))
+    // Create the checkpoint folder for the current round
+    std::string round_folder = path + "/checkpoint-round-" + std::to_string(round_index);
+    if (fs::exists(round_folder))
     {
-        spdlog::warn("Saving checkpoint to an already existing folder: {}.", checkpoint_folder);
+        spdlog::warn("Saving checkpoint to an already existing folder: {}.", round_folder);
     }
     else
     {
-        spdlog::info("Creating checkpoint folder: {}.", checkpoint_folder);
-        fs::create_directory(checkpoint_folder);
+        spdlog::info("Creating checkpoint folder: {}.", round_folder);
+        fs::create_directory(round_folder);
     }
 
     for (auto &client : clients)
     {
-        client->model->save(checkpoint_folder + "/model-client-" + std::to_string(client->id) + ".bin");
+        client->model->save(round_folder + "/model-client-" + std::to_string(client->id) + ".bin");
     }
 }
 
@@ -131,10 +130,9 @@ std::vector<std::shared_ptr<Client>> initializeClients(const std::vector<std::st
     std::vector<std::shared_ptr<Client>> clients;
     for (size_t i = 0; i < num_clients; ++i)
     {
-        // Initialize each client with dataset
-
         // Allocate space for the model and initialize it with given units and data path
         auto model = std::make_shared<ModelFF>();
+        // Initialize each client with dataset
         auto client = std::make_shared<Client>(i, model, datasets_path[i % datasets_path.size()]); // Use modulo to avoid out of bounds
         clients.push_back(client);
     }
@@ -163,22 +161,22 @@ metrics::Metrics Orchestrator::evaluateClients(std::vector<std::shared_ptr<Clien
     return metrics::mean(round_metrics);
 }
 
-std::vector<std::string> listFiles(const std::string &folder, const std::string &match)
+static std::vector<std::string> listFolders(const std::string &folder, const std::string &match)
 {
-    spdlog::info("Listing files in folder: {}.", folder);
-    std::vector<std::string> files;
+    spdlog::info("Listing folders in folder: {}.", folder);
+    std::vector<std::string> folders;
     std::regex pattern(match);
 
     try
     {
         for (const auto &entry : fs::directory_iterator(folder))
         {
-            if (entry.is_regular_file())
+            if (entry.is_directory())
             {
-                std::string filename = entry.path().filename().string();
-                if (std::regex_match(filename, pattern))
+                std::string foldername = entry.path().filename().string();
+                if (std::regex_match(foldername, pattern))
                 {
-                    files.push_back(filename);
+                    folders.push_back(foldername);
                 }
             }
         }
@@ -191,7 +189,7 @@ std::vector<std::string> listFiles(const std::string &folder, const std::string 
     {
         spdlog::error("Regex error: {}.", err.what());
     }
-    return files;
+    return folders;
 }
 
 std::string findNextFolder(const std::string &parent_folder)
