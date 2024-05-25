@@ -36,7 +36,7 @@ Orchestrator::Orchestrator(const std::string &datasets_path, const std::string &
     server = std::make_shared<Server>(clients);
 }
 
-std::vector<std::shared_ptr<Client>> Orchestrator::sampleClients(int num_clients)
+std::vector<std::shared_ptr<Client>> Orchestrator::sampleClients()
 {
     spdlog::info("Sampling {} clients...", num_clients);
     // Randomly select a subset of clients
@@ -57,7 +57,7 @@ void Orchestrator::run()
     for (round_index = 0; round_index < num_rounds; ++round_index)
     {
         spdlog::info("Running communication round: {}.", round_index);
-        std::vector<std::shared_ptr<Client>> round_clients = sampleClients(num_clients);
+        std::vector<std::shared_ptr<Client>> round_clients = sampleClients();
 
         spdlog::info("Starting round clients evaluation.");
         metrics::Metrics round_avg_metrics = evaluateClients(round_clients);
@@ -66,7 +66,7 @@ void Orchestrator::run()
         metrics::Metrics new_model_metrics = server->executeRound(round_index, round_clients);
         spdlog::info("Updated model metrics: {}", new_model_metrics.toString());
 
-        spdlog::info("Starting global evaluation.");
+        spdlog::info("Starting global evaluation."); 
         metrics::Metrics global_avg_metrics = evaluateClients(clients);
         spdlog::info("Blobal average metrics: {}", global_avg_metrics.toString());
 

@@ -30,7 +30,7 @@ void config::init_config()
 
     datasets_path = basepath + datasets_folder;
 
-    std::string folder_num = std::to_string(find_first_available_folder(simulations_folder));
+    std::string folder_num = std::to_string(find_first_available_folder(basepath + simulations_folder));
     simulation_path = basepath + simulations_folder + folder_num + "/";
 
     checkpoints_path = simulation_path + checkpoints_folder;
