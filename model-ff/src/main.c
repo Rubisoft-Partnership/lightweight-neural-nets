@@ -29,31 +29,27 @@
 
 #include <metrics.h>
 
-#define PROGRESS_BAR_WIDTH 50
-int progress_bar_step = 0;
-
-const int input_size = DATA_FEATURES;
-const int num_classes = DATA_CLASSES;
-const int layers_sizes[] = {DATA_FEATURES, 500, 500, 500};
-
-const int layers_number = sizeof(layers_sizes) / sizeof(layers_sizes[0]);
+// Default dataset parameters and model architecture.
+char *dataset_path = "../dataset/digits/";
+int num_classes = 10;
+int input_size = 74;
+int layers_sizes[20] = {74, 500, 500, 500};
+int layers_number = 4;
 
 // Hyper Parameters.
 double learning_rate = 0.005;
 const double beta1 = 0.9;
 const double beta2 = 0.999;
-const int epochs = 5;
-const int batch_size = 10;
-const double threshold = 4.0;
+int epochs = 5;
+int batch_size = 10;
+double threshold = 4.0;
 
 Dataset data;
-FFNet ffnet;
+FFNet *ffnet;
 
-void init_progress_bar();
-void update_progress_bar(const int batch_index, const int batch_size);
-void finish_progress_bar();
+void evaluate(void);
+void parse_args(int argc, char **argv);
 
-void print_elapsed_time(const int seconds_elapsed);
 
 Metrics metrics;
 
@@ -63,14 +59,29 @@ static void setup(void)
     set_log_level(LOG_DEBUG);
     open_log_file_with_timestamp();
 
-    data = dataset_split();
-    const Loss loss_suite = LOSS_FF;
+    data = dataset_split(dataset_path, num_classes);
+    // Read the input size from the dataset and set the first layer size.
+    input_size = data.train->feature_len;
+    layers_sizes[0] = input_size;
 
     // Load the model from checkpoint file.
     // load_ff_net(&ffnet, "ffnet.bin", relu, pdrelu, beta1, beta2);
 
     // Build the model from scratch.
-    ffnet = new_ff_net(layers_sizes, layers_number, relu, pdrelu, threshold, beta1, beta2, loss_suite);
+    ffnet = new_ff_net(layers_sizes, layers_number, relu, pdrelu, threshold, beta1, beta2, LOSS_TYPE_FF);
+
+    printf("Running with the following parameters:\n");
+    printf("\tDataset path: %s\n", dataset_path);
+    printf("\tLearning rate: %.4f\n", learning_rate);
+    printf("\tEpochs: %d\n", epochs);
+    printf("\tBatch size: %d\n", batch_size);
+    printf("\tThreshold: %.2f\n", threshold);
+    printf("\tLayer units: ");
+    for (int i = 0; i < layers_number; i++)
+    {
+        printf("%d ", layers_sizes[i]);
+    }
+    printf("\n\n");
 }
 
 static void train_loop(void)
@@ -101,7 +112,7 @@ static void train_loop(void)
         finish_progress_bar();
         printf("\tLoss %.12f\n", (double)loss / num_batches);
         int epoch_time = (clock() - epoch_start_time) / CLOCKS_PER_SEC;
-        printf("\tEpoch time: ", epoch_time);
+        printf("\tEpoch time: ");
         print_elapsed_time(epoch_time);
         printf("\n\n");
         evaluate();
@@ -140,10 +151,12 @@ void evaluate(void)
 
     // Save the model to a checkpoint file.
     save_ff_net(ffnet, "ffnet.bin");
+    log_debug("FFNet saved to ffnet.bin");
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
+    parse_args(argc, argv);
     setup();
 
     train_loop();
@@ -158,33 +171,68 @@ int main(void)
     return 0;
 }
 
-void init_progress_bar()
+void parse_args(int argc, char **argv)
 {
-    progress_bar_step = 0;
-    printf("|");
-    for (int i = 0; i < PROGRESS_BAR_WIDTH; i++)
-        printf("-");
-    printf("|\n|");
-}
-
-void update_progress_bar(const int batch_index, const int batch_size)
-{
-    if (progress_bar_step <= (batch_index * PROGRESS_BAR_WIDTH) / batch_size)
+    if (argc == 1)
+        return;
+    if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)
     {
-        printf("*");
-        fflush(stdout);
-        progress_bar_step++;
+        printf("Usage: %s [OPTIONS]\n", argv[0]);
+        printf("Options:\n");
+        printf("  -lr, --learning_rate\tLearning rate for the optimizer (default: %.4f)\n", learning_rate);
+        printf("  -e,  --epochs\t\tNumber of epochs for training (default: %d)\n", epochs);
+        printf("  -bs, --batch_size\tBatch size for training (default: %d)\n", batch_size);
+        printf("  -t,  --threshold\tThreshold for the activation function (default: %.2f)\n", threshold);
+        printf("  -lu, --layer_units\tWidth of each layer (default: ");
+        for (int i = 0; i < layers_number; i++)
+        {
+            printf("%d ", layers_sizes[i]);
+        }
+        printf(")\n");
+        printf("  -dp, --dataset_path\tPath to the dataset (default: %s)\n", dataset_path);
+        exit(0);
     }
-}
-
-void finish_progress_bar()
-{
-    printf("|\n");
-}
-
-void print_elapsed_time(const int seconds_elapsed)
-{
-    const int hours = seconds_elapsed / 3600;
-    const int minutes = (seconds_elapsed % 3600) / 60;
-    printf("%02d:%02d:%02d", hours, minutes, seconds_elapsed % 60);
+    for (int i = 1; i < argc; i++)
+    {
+        if (strcmp(argv[i], "-lr") == 0 || strcmp(argv[i], "--learning_rate") == 0)
+        {
+            learning_rate = atof(argv[i + 1]);
+            i++;
+        }
+        else if (strcmp(argv[i], "-e") == 0 || strcmp(argv[i], "--epochs") == 0)
+        {
+            epochs = atoi(argv[i + 1]);
+            i++;
+        }
+        else if (strcmp(argv[i], "-bs") == 0 || strcmp(argv[i], "--batch_size") == 0)
+        {
+            batch_size = atoi(argv[i + 1]);
+            i++;
+        }
+        else if (strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--threshold") == 0)
+        {
+            threshold = atof(argv[i + 1]);
+            i++;
+        }
+        else if (strcmp(argv[i], "-lu") == 0 || strcmp(argv[i], "--layer_units") == 0)
+        {
+            layers_number = 0;
+            while (i + 1 < argc && argv[i + 1][0] != '-')
+            {
+                layers_sizes[layers_number] = atoi(argv[i + 1]);
+                layers_number++;
+                i++;
+            }
+        }
+        else if (strcmp(argv[i], "-dp") == 0 || strcmp(argv[i], "--dataset_path") == 0)
+        {
+            dataset_path = argv[i + 1];
+            i++;
+        }
+        else
+        {
+            log_error("Unknown option: %s", argv[i]);
+            exit(1);
+        }
+    }
 }

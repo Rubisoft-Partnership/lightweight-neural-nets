@@ -4,3 +4,6 @@
 [submodule "tiny-dnn"]
 	path = tiny-dnn
 	url = https://github.com/tiny-dnn/tiny-dnn
+[submodule "framework/lib/logging"]
+	path = framework/lib/logging
+	url = https://github.com/gabime/spdlog.git

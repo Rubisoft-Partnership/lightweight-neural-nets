@@ -52,7 +52,7 @@ static void compute_gradient(const FFCell ffcell, const double *const in_pos, co
                              const double g_pos, const double g_neg, const double threshold, const Loss loss_suite);
 
 // Random number generation for weights.
-static void wbrand(FFCell ffcell);
+static void wbrand(FFCell *ffcell);
 static double frand(void);
 
 /**
@@ -84,7 +84,7 @@ FFCell new_ff_cell(const int input_size, const int output_size, double (*act)(do
     ffcell.act = act;
     ffcell.pdact = pdact;
     // Randomize weights and bias.
-    wbrand(ffcell);
+    wbrand(&ffcell);
     // Log the construction of the FF cell.
     increase_indent();
     log_debug("FFCell built with %d inputs, %d outputs, and %d weights", input_size, output_size, ffcell.num_weights);
@@ -110,8 +110,10 @@ void free_ff_cell(const FFCell ffcell)
  * @param loss_suite The loss function suite.
  * @return The loss value after training.
  */
-double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_rate, const double threshold, const Loss loss_suite)
+double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_rate, const double threshold, const LossType loss)
 {
+    Loss loss_suite = select_loss(loss);
+
     // Increase the indent level for logging
     increase_indent();
     double g_pos = 0.0;
@@ -302,8 +304,19 @@ FFCell load_ff_cell(FILE *file, double (*act)(double), double (*pdact)(double), 
     // Read input and output size from file.
     int input_size = 0;
     int output_size = 0;
-    fread(&input_size, sizeof(input_size), 1, file);
-    fread(&output_size, sizeof(output_size), 1, file);
+    size_t res;
+    res = fread(&input_size, sizeof(input_size), 1, file);
+    if (res != 1)
+    {
+        log_error("Failed to read input size from file");
+        exit(1);
+    }
+    res = fread(&output_size, sizeof(output_size), 1, file);
+    if (res != 1)
+    {
+        log_error("Failed to read output size from file");
+        exit(1);
+    }
 
     log_debug("Loading FFCell with %d inputs and %d outputs", input_size, output_size);
 
@@ -311,8 +324,18 @@ FFCell load_ff_cell(FILE *file, double (*act)(double), double (*pdact)(double), 
     FFCell ffcell = new_ff_cell(input_size, output_size, act, pdact, beta1, beta2);
 
     // Load weights and bias from the file.
-    fread(ffcell.weights, sizeof(*ffcell.weights), ffcell.num_weights, file);
-    fread(&ffcell.bias, sizeof(ffcell.bias), 1, file);
+    res = fread(ffcell.weights, sizeof(*ffcell.weights), ffcell.num_weights, file);
+    if (res != (size_t)ffcell.num_weights)
+    {
+        log_error("Failed to read weights from file");
+        exit(1);
+    }
+    res = fread(&ffcell.bias, sizeof(ffcell.bias), 1, file);
+    if (res != 1)
+    {
+        log_error("Failed to read bias from file");
+        exit(1);
+    }
 
     log_debug("FFCell loaded with %d inputs, %d outputs, and %d weights", ffcell.input_size, ffcell.output_size, ffcell.num_weights);
     return ffcell;
@@ -331,11 +354,11 @@ double pdrelu(const double a)
 }
 
 // Randomizes weights and bias.
-static void wbrand(FFCell ffcell)
+static void wbrand(FFCell *ffcell)
 {
-    for (int i = 0; i < ffcell.num_weights; i++)
-        ffcell.weights[i] = frand() - 0.5;
-    ffcell.bias = frand() - 0.5;
+    for (int i = 0; i < ffcell->num_weights; i++)
+        ffcell->weights[i] = frand() - 0.5;
+    ffcell->bias = frand() - 0.5;
 }
 
 // Returns random double in [0.0 - 1.0]

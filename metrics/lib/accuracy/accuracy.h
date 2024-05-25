@@ -12,7 +12,7 @@
  *
  * @return The accuracy metric as a double value.
  */
-float get_accuracy();
+float get_accuracy(void);
 
 /**
  * Calculates the balanced accuracy of a set of predictions.

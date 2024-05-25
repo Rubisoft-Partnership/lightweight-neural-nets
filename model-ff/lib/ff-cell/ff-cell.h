@@ -70,7 +70,7 @@ void free_ff_cell(FFCell ffcell);
  * @param loss_suite The loss function suite.
  * @return The loss value after training.
  */
-double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_rate, const double threshold, const Loss loss_suite);
+double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_rate, const double threshold, const LossType loss_suite);
 
 /**
  * @brief Performs the forward pass for a FFCell.
