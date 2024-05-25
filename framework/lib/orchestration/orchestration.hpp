@@ -20,7 +20,7 @@ public:
 private:
     void logParams();
     void saveCheckpoint();
-    std::vector<std::shared_ptr<Client>> sampleClients(int num_clients);
+    std::vector<std::shared_ptr<Client>> sampleClients();
     metrics::Metrics evaluateClients(std::vector<std::shared_ptr<Client>> clients);
 
     size_t round_index = 0;
