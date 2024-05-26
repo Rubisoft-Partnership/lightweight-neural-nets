@@ -7,6 +7,7 @@
 #include <orchestration/orchestration.hpp>
 #include <spdlog/spdlog.h>
 #include <model-ff/model-ff.hpp>
+#include <model-bp/model-bp.hpp>
 
 namespace fs = std::filesystem;
 
@@ -131,7 +132,7 @@ std::vector<std::shared_ptr<Client>> initializeClients(const std::vector<std::st
     for (size_t i = 0; i < num_clients; ++i)
     {
         // Allocate space for the model and initialize it with given units and data path
-        auto model = std::make_shared<ModelFF>();
+        auto model = std::make_shared<ModelBP>();
         // Initialize each client with dataset
         auto client = std::make_shared<Client>(i, model, datasets_path[i % datasets_path.size()]); // Use modulo to avoid out of bounds
         clients.push_back(client);

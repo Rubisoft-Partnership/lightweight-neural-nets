@@ -85,7 +85,7 @@ $(FRAMEWORK_OBJ): $(FRAMEWORK_SRC)
 	@echo "Compiling Framework C++ files..."
 	@for file in $(FRAMEWORK_SRC); do \
     	obj_file=$$(basename $$file .cpp).o; \
-    	$(GPP) -c $$file $(CPPFLAGS) $(FRAMEWORK_INCLUDE) $(BASE_INCLUDE) $(MODELFF_INCLUDE) $(SPDLOG_INCLUDE) $(METRICS_INCLUDE) -o $(BUILD_PATH)/$$obj_file; \
+    	$(GPP) -c $$file $(CPPFLAGS) $(FRAMEWORK_INCLUDE) $(BASE_INCLUDE) $(MODELFF_INCLUDE) $(SPDLOG_INCLUDE) $(METRICS_INCLUDE) $(TDNN_INCLUDE) -o $(BUILD_PATH)/$$obj_file; \
 		echo "Compiled $$file"; \
 	done
 
