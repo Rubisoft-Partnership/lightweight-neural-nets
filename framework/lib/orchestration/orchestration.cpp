@@ -177,7 +177,7 @@ static std::vector<std::string> listFolders(const std::string &folder, const std
                 std::string foldername = entry.path().filename().string();
                 if (std::regex_match(foldername, pattern))
                 {
-                    folders.push_back(foldername);
+                    folders.push_back(folder + foldername);
                 }
             }
         }

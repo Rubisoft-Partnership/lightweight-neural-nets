@@ -11,8 +11,8 @@ GPP = g++
 
 # Compiler Flags
 CFLAGS = -Wall -Wextra -pedantic -std=c99 -Ilib
-CPPFLAGS = -Wall -Wextra -pedantic -std=c++17 -Ilib
-CPPFLAGS_NO_WARNINGS = -std=c++17 -Ilib
+CPPFLAGS = -Wall -Wextra -pedantic -std=c++17 -Ilib -DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE
+CPPFLAGS_NO_WARNINGS = -std=c++17 -Ilib -DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE
 
 METRICS_BASEPATH = $(PROJECT_BASEPATH)/../metrics
 MODELFF_BASEPATH = $(PROJECT_BASEPATH)/../model-ff
@@ -76,7 +76,7 @@ $(MODELBP_OBJ): $(MODELBP_SRC)
 	@echo "Compiling Model C++ files..."
 	@for file in $(MODELBP_SRC); do \
 		obj_file=$$(basename $$file .cpp).o; \
-		$(GPP) -c $$file $(CPPFLAGS_NO_WARNINGS) $(METRICS_INCLUDE) $(TDNN_INCLUDE) -o $(BUILD_PATH)/$$obj_file; \
+		$(GPP) -c $$file $(CPPFLAGS_NO_WARNINGS) $(METRICS_INCLUDE) $(TDNN_INCLUDE) $(SPDLOG_INCLUDE) -o $(BUILD_PATH)/$$obj_file; \
 		echo "Compiled $$file"; \
 	done
 

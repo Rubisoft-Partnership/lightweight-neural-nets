@@ -1,4 +1,5 @@
 #include "model-bp.hpp"
+#include <spdlog/spdlog.h>
 
 void ModelBP::build(const std::vector<int> &units, const std::string &data_path)
 {
@@ -16,6 +17,9 @@ void ModelBP::build(const std::vector<int> &units, const std::string &data_path)
     tiny_dnn::parse_mnist_images(data_path + "/train-images.idx3-ubyte", &train_images, min_scale, max_scale, x_padding, y_padding);
     tiny_dnn::parse_mnist_labels(data_path + "/t10k-labels.idx1-ubyte", &test_labels);
     tiny_dnn::parse_mnist_images(data_path + "/t10k-images.idx3-ubyte", &test_images, min_scale, max_scale, x_padding, y_padding);
+
+    // Compute the size of the train dataset
+    dataset_size = train_images.size();
 }
 
 void ModelBP::train(const int &epochs, const int &batch_size, const double &learning_rate)
@@ -48,8 +52,10 @@ void ModelBP::train(const int &epochs, const int &batch_size, const double &lear
 
 metrics::Metrics ModelBP::evaluate()
 {
+    spdlog::debug("Evaluating model-bp..");
     tiny_dnn::result results = bpnet.test(test_images, test_labels);
 
+    spdlog::debug("Generating metrics..");
     init_predictions();
     // iterate over confusion matrix
     for (int i = 0; i < results.confusion_matrix.size(); i++)
@@ -58,6 +64,7 @@ metrics::Metrics ModelBP::evaluate()
         {
             for (int k = 0; k < results.confusion_matrix[i][j]; k++)
             {
+                spdlog::debug("Adding prediction..");
                 add_prediction(i, j);
             }
         }

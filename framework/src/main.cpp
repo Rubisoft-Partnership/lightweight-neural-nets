@@ -23,6 +23,8 @@ void init_logger()
         // Register the logger to make it globally accessible and set it as default
         spdlog::register_logger(logger);
         spdlog::set_default_logger(logger);
+        // Set the logger's pattern
+        logger->set_pattern("[%X] [%^%L%$] [%@:%#%&%!] %v");
     }
     catch (const spdlog::spdlog_ex &ex)
     {
@@ -59,7 +61,7 @@ int main(int argc, char *argv[])
     {
         spdlog::info("Starting Federated Learning Orchestrator...");
         // Initialize the orchestrator
-        Orchestrator orchestrator(config::datasets_path + config::dataset_digits, config::checkpoints_path);
+        Orchestrator orchestrator(config::datasets_path + config::dataset_mnist, config::checkpoints_path);
 
         // Run the orchestrator
         orchestrator.run();

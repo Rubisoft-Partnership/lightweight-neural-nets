@@ -4,6 +4,7 @@
 
 #include <client/client.hpp>
 #include <spdlog/spdlog.h>
+#include <filesystem>
 
 // TODO: move this to a configuration file.
 const std::vector<int> &units = {784, 100, 100, 100};
@@ -15,10 +16,10 @@ Client::Client(int id, std::shared_ptr<Model> model, const std::string &data_pat
     model->build(units, data_path);
 
     // Calculate and store the dataset size
-    dataset_size = calculateDatasetSize();
+    dataset_size = model->dataset_size;
     if (dataset_size == -1)
     {
-        spdlog::error("Failed to calculate dataset size for client {}.", id);
+        spdlog::error("Invalid dataset size for client {}.", id);
         exit(EXIT_FAILURE);
     }
 
@@ -76,21 +77,4 @@ void Client::logMetrics() const
     {
         spdlog::info("Client {} metrics for round {}: {}.", id, rounds[i], history[i].toString());
     }
-}
-
-int Client::calculateDatasetSize()
-{
-    std::ifstream file(data_path);
-    if (!file.is_open())
-    {
-        spdlog::error("Failed to open data file: {}.", data_path);
-        return -1;
-    }
-
-    int lineCount = std::count(std::istreambuf_iterator<char>(file),
-                               std::istreambuf_iterator<char>(), '\n');
-
-    spdlog::debug("Calculated dataset size: {}.", lineCount);
-
-    return lineCount;
 }

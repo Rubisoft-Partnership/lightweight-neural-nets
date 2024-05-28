@@ -52,6 +52,8 @@ void ModelFF::build(const std::vector<int> &units, const std::string &data_path)
         log_error("Input size mismatch: %d != %d\n", units[0], input_size);
         exit(EXIT_FAILURE);
     }
+    // Compute dataset size.
+    dataset_size = data.train->rows;
 
     // Copy units to class attribute.
     this->units = units;
