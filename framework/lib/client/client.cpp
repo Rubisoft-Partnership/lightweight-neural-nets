@@ -10,7 +10,7 @@
 const std::vector<int> &units = {784, 100, 100, 100};
 
 Client::Client(int id, std::shared_ptr<Model> model, const std::string &data_path)
-    : id(id), data_path(data_path)
+    : id(id), model(model), data_path(data_path)
 {
     // Initialize model with given units and data path
     model->build(units, data_path);
