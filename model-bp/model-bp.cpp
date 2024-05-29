@@ -64,7 +64,6 @@ metrics::Metrics ModelBP::evaluate()
         {
             for (int k = 0; k < results.confusion_matrix[i][j]; k++)
             {
-                spdlog::debug("Adding prediction..");
                 add_prediction(i, j);
             }
         }

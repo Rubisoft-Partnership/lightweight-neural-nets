@@ -2,6 +2,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
+#include <iomanip>
 
 namespace metrics
 {
@@ -21,7 +22,7 @@ namespace metrics
         average_recall = c_metrics.average_recall;
         average_f1_score = c_metrics.average_f1_score;
         // Assuming size is known or provided, replace 'size' with actual size
-        convertConfusionMatrix(c_metrics.normalized_confusion_matrix, NUM_CLASSES * NUM_CLASSES);
+        convertConfusionMatrix(c_metrics.normalized_confusion_matrix, NUM_CLASSES);
         // Free the C matrix as it's no longer needed
         free(c_metrics.normalized_confusion_matrix);
     }
@@ -48,7 +49,7 @@ namespace metrics
         {
             for (const auto &val : row)
             {
-                std::cout << val << " ";
+            std::cout << std::setw(6) << std::fixed << std::setprecision(2) << val << " ";
             }
             std::cout << std::endl;
         }
@@ -67,7 +68,7 @@ namespace metrics
         {
             for (const auto &val : row)
             {
-                ss << val << " ";
+            ss << std::setw(6) << std::fixed << std::setprecision(2) << val << " ";
             }
             ss << std::endl;
         }
