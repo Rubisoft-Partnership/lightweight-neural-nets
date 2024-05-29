@@ -7,7 +7,7 @@
 #include <filesystem>
 
 // TODO: move this to a configuration file.
-const std::vector<int> &units = {784, 100, 100, 100};
+const std::vector<int> &units = {784, 100, 100, 10};
 
 Client::Client(int id, std::shared_ptr<Model> model, const std::string &data_path)
     : id(id), model(model), data_path(data_path)
