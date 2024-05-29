@@ -69,7 +69,7 @@ void Orchestrator::run()
 
         spdlog::info("Starting global evaluation."); 
         metrics::Metrics global_avg_metrics = evaluateClients(clients);
-        spdlog::info("Blobal average metrics: {}", global_avg_metrics.toString());
+        spdlog::info("Global average metrics: {}", global_avg_metrics.toString());
 
         if (round_index % std::max(static_cast<int>(num_rounds * checkpoint_rate), 1) == 0 && round_index > 0)
             saveCheckpoint();
