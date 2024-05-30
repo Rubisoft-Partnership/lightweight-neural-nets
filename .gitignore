@@ -13,6 +13,7 @@ build
 *.yml
 *.DS_Store
 *.bin
+*.idx*-ubyte
 
 # Python venv files
 **/venv/**

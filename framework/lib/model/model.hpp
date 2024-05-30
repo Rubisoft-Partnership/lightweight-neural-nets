@@ -7,6 +7,8 @@
 class Model
 {
 public:
+    size_t dataset_size;
+
     // Virtual destructor to ensure proper cleanup of derived classes
     virtual ~Model() {}
 

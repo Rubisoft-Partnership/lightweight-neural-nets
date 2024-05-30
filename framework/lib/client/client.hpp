@@ -14,7 +14,7 @@ class Client
 public:
     int id;
     std::shared_ptr<Model> model;
-    int dataset_size;
+    size_t dataset_size;
     const std::string data_path;
     std::vector<metrics::Metrics> history;
     std::vector<int> rounds; // list of rounds in which the client was updated
@@ -29,8 +29,6 @@ public:
     void logMetrics() const;
 
 private:
-    // Calculate the size of the dataset
-    int calculateDatasetSize();
 };
 
 #endif // CLIENT_HPP

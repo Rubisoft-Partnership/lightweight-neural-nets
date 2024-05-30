@@ -7,6 +7,7 @@
 #include <orchestration/orchestration.hpp>
 #include <spdlog/spdlog.h>
 #include <model-ff/model-ff.hpp>
+#include <model-bp/model-bp.hpp>
 
 namespace fs = std::filesystem;
 
@@ -61,14 +62,14 @@ void Orchestrator::run()
 
         spdlog::info("Starting round clients evaluation.");
         metrics::Metrics round_avg_metrics = evaluateClients(round_clients);
-        spdlog::info("Round average metrics: {}", round_avg_metrics.toString());
+        spdlog::info("Round average metrics:\n{}", round_avg_metrics.toString());
 
         metrics::Metrics new_model_metrics = server->executeRound(round_index, round_clients);
-        spdlog::info("Updated model metrics: {}", new_model_metrics.toString());
+        spdlog::info("Updated model metrics:\n{}", new_model_metrics.toString());
 
         spdlog::info("Starting global evaluation."); 
         metrics::Metrics global_avg_metrics = evaluateClients(clients);
-        spdlog::info("Blobal average metrics: {}", global_avg_metrics.toString());
+        spdlog::info("Global average metrics:\n{}", global_avg_metrics.toString());
 
         if (round_index % std::max(static_cast<int>(num_rounds * checkpoint_rate), 1) == 0 && round_index > 0)
             saveCheckpoint();
@@ -131,7 +132,7 @@ std::vector<std::shared_ptr<Client>> initializeClients(const std::vector<std::st
     for (size_t i = 0; i < num_clients; ++i)
     {
         // Allocate space for the model and initialize it with given units and data path
-        auto model = std::make_shared<ModelFF>();
+        auto model = std::make_shared<ModelBP>();
         // Initialize each client with dataset
         auto client = std::make_shared<Client>(i, model, datasets_path[i % datasets_path.size()]); // Use modulo to avoid out of bounds
         clients.push_back(client);
@@ -155,8 +156,10 @@ metrics::Metrics Orchestrator::evaluateClients(std::vector<std::shared_ptr<Clien
                  }());
 
     std::vector<metrics::Metrics> round_metrics;
-    for (const auto &client : clients)
+    for (const auto &client : clients){
         round_metrics.push_back(client->model->evaluate());
+        spdlog::debug("Client {} accuracy: {}.", client->id, round_metrics.back().accuracy);
+    }
 
     return metrics::mean(round_metrics);
 }
@@ -176,7 +179,7 @@ static std::vector<std::string> listFolders(const std::string &folder, const std
                 std::string foldername = entry.path().filename().string();
                 if (std::regex_match(foldername, pattern))
                 {
-                    folders.push_back(foldername);
+                    folders.push_back(folder + foldername);
                 }
             }
         }
