@@ -7,7 +7,7 @@
 #include <filesystem>
 
 // TODO: move this to a configuration file.
-const std::vector<int> &units = {784, 100, 100, 10};
+const std::vector<int> &units = {784, 10};
 
 Client::Client(int id, std::shared_ptr<Model> model, const std::string &data_path)
     : id(id), model(model), data_path(data_path)
@@ -56,7 +56,7 @@ void Client::update(int round_index, double learning_rate, size_t batch_size, si
     rounds.push_back(round_index);
 
     spdlog::info("Done updating client: {}.", id);
-    spdlog::debug("Metrics: {}.", metrics.toString());
+    spdlog::debug("Client {} accuracy: {}.", id, metrics.accuracy);
 }
 
 void Client::logRounds() const

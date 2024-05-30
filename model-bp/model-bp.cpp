@@ -73,8 +73,6 @@ metrics::Metrics ModelBP::evaluate()
     metrics::Metrics metrics;
     metrics.generate();
 
-    // Print the metrics
-    metrics.print();
     return metrics;
 }
 

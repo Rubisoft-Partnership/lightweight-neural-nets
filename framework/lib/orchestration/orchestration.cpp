@@ -62,14 +62,14 @@ void Orchestrator::run()
 
         spdlog::info("Starting round clients evaluation.");
         metrics::Metrics round_avg_metrics = evaluateClients(round_clients);
-        spdlog::info("Round average metrics: {}", round_avg_metrics.toString());
+        spdlog::info("Round average metrics:\n{}", round_avg_metrics.toString());
 
         metrics::Metrics new_model_metrics = server->executeRound(round_index, round_clients);
-        spdlog::info("Updated model metrics: {}", new_model_metrics.toString());
+        spdlog::info("Updated model metrics:\n{}", new_model_metrics.toString());
 
         spdlog::info("Starting global evaluation."); 
         metrics::Metrics global_avg_metrics = evaluateClients(clients);
-        spdlog::info("Global average metrics: {}", global_avg_metrics.toString());
+        spdlog::info("Global average metrics:\n{}", global_avg_metrics.toString());
 
         if (round_index % std::max(static_cast<int>(num_rounds * checkpoint_rate), 1) == 0 && round_index > 0)
             saveCheckpoint();
@@ -156,8 +156,10 @@ metrics::Metrics Orchestrator::evaluateClients(std::vector<std::shared_ptr<Clien
                  }());
 
     std::vector<metrics::Metrics> round_metrics;
-    for (const auto &client : clients)
+    for (const auto &client : clients){
         round_metrics.push_back(client->model->evaluate());
+        spdlog::debug("Client {} accuracy: {}.", client->id, round_metrics.back().accuracy);
+    }
 
     return metrics::mean(round_metrics);
 }
