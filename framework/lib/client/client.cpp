@@ -6,6 +6,8 @@
 #include <spdlog/spdlog.h>
 #include <filesystem>
 #include <config/config.hpp>
+#include <model-bp.hpp>
+#include <model-ff.hpp>
 
 namespace config
 {

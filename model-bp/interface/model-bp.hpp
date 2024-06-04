@@ -1,16 +1,12 @@
 #ifndef MODEL_BP_H
 #define MODEL_BP_H
 
-#include "../framework/lib/model/model.hpp"
+#include "../../framework/lib/model/model.hpp"
 #include <vector>
 #include <random>
 #include <metrics.hpp>
 #include <tiny_dnn/tiny_dnn.h>
-
-struct ModelBPParameters
-{
-    std::vector<int> units;
-};
+#include "model-bp-parameters.hpp"
     
 
 class ModelBP : public Model

@@ -1,7 +1,7 @@
 #ifndef MODEL_FF_H
 #define MODEL_FF_H
 
-#include "../framework/lib/model/model.hpp"
+#include "../../framework/lib/model/model.hpp"
 #include <vector>
 #include <random>
 #include <metrics.hpp>
@@ -12,13 +12,8 @@ extern "C"
 #include <data/data.h>
 }
 
-struct ModelFFParameters
-{
-    std::vector<int> units;
-    float threshold;
-    float beta1, beta2;
-    LossType loss;
-};
+#include "model-ff-parameters.hpp"
+
 
 class ModelFF : public Model
 {

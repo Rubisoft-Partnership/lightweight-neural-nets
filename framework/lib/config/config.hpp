@@ -2,8 +2,8 @@
 #define CONFIG_H
 
 #include <string>
-#include <model-bp/model-bp.hpp>
-#include <model-ff/model-ff.hpp>
+#include <model-bp-parameters.hpp>
+#include <model-ff-parameters.hpp>
 
 
 namespace config

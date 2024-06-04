@@ -6,8 +6,8 @@
 
 #include <orchestration/orchestration.hpp>
 #include <spdlog/spdlog.h>
-#include <model-ff/model-ff.hpp>
-#include <model-bp/model-bp.hpp>
+#include <model-ff.hpp>
+#include <model-bp.hpp>
 
 namespace fs = std::filesystem;
 
