@@ -1,7 +1,7 @@
 #include "model-bp.hpp"
 #include <spdlog/spdlog.h>
 
-void ModelBP::build(const std::vector<int> &units, const std::string &data_path)
+void ModelBP::build(const std::string &data_path)
 {
     if (units.back() != 10)
         spdlog::warn("The last layer should have 10 units for MNIST dataset.");
@@ -111,4 +111,9 @@ void ModelBP::save(const std::string filename)
 void ModelBP::load(const std::string filename)
 {
     bpnet.load(filename);
+}
+
+void ModelBP::set_parametersBP(const ModelBPParameters &parameters)
+{
+    units = parameters.units;
 }

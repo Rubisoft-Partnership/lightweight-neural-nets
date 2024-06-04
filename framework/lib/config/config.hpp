@@ -2,6 +2,9 @@
 #define CONFIG_H
 
 #include <string>
+#include <model-bp/model-bp.hpp>
+#include <model-ff/model-ff.hpp>
+
 
 namespace config
 {
@@ -21,6 +24,9 @@ namespace config
     extern std::string checkpoints_path;     // absolute path to the current simulation checkpoints
     extern std::string log_path;             // absolute path to the current simulation log file
     extern std::string simulation_timestamp; // current simulation timestamp
+
+    extern ModelBPParameters model_bp_parameters;
+    extern ModelFFParameters model_ff_parameters;
 }
 
 #endif // CONFIG_H

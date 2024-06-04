@@ -7,6 +7,12 @@
 #include <metrics.hpp>
 #include <tiny_dnn/tiny_dnn.h>
 
+struct ModelBPParameters
+{
+    std::vector<int> units;
+};
+    
+
 class ModelBP : public Model
 {
 public:
@@ -14,7 +20,7 @@ public:
     virtual ~ModelBP() {}
 
     // Initialize the model with necessary parameters or configurations
-    void build(const std::vector<int> &units, const std::string & data_path) override;
+    void build(const std::string & data_path) override;
 
     // Train the model for a given number of epochs
     void train(const int &epochs, const int &batch_size, const double &learning_rate) override;
@@ -33,6 +39,9 @@ public:
 
     // Load the model's weights from a file
     void load(const std::string filename) override;
+
+    // Set model's parameters
+    void set_parametersBP(const ModelBPParameters &parameters);
 
 private:
     tiny_dnn::network<tiny_dnn::sequential> bpnet;

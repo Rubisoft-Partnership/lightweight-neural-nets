@@ -9,6 +9,12 @@
 #include <sstream>
 #include <spdlog/spdlog.h>
 
+enum ModelType
+{
+    BP,
+    FF
+};
+
 class Client
 {
 public:
@@ -29,6 +35,7 @@ public:
     void logMetrics() const;
 
 private:
+    ModelType getModelType() const;
 };
 
 #endif // CLIENT_HPP

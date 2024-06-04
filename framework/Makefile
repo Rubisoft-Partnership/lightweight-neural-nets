@@ -92,7 +92,7 @@ $(FRAMEWORK_OBJ): $(FRAMEWORK_SRC)
 # Main script Compilation
 $(DEPS_OBJ): $(DEPS)
 	@mkdir -p $(BUILD_PATH) # Ensure the build directory exists
-	$(GPP) -c $< -o $@ $(CPPFLAGS) $(FRAMEWORK_INCLUDE) $(BASE_INCLUDE) $(MODELFF_INCLUDE) $(METRICS_INCLUDE) $(SPDLOG_INCLUDE)
+	$(GPP) -c $< -o $@ $(CPPFLAGS) $(FRAMEWORK_INCLUDE) $(BASE_INCLUDE) $(MODELFF_INCLUDE) $(TDNN_INCLUDE) $(METRICS_INCLUDE) $(SPDLOG_INCLUDE)
 	echo "Compiled $<"
 
 # Linking all object files to create the executable

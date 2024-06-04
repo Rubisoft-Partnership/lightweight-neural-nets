@@ -10,17 +10,12 @@ extern "C"
 #include <utils/utils.h>
 }
 
-// TODO: change parameter passing method using classes.
-// Default initialization values.
-const LossType loss = LOSS_TYPE_FF;
-const double beta1 = 0.9;
-const double beta2 = 0.999;
-const double threshold = 4.0;
+
 // TODO: move class number setting to a proper place.
 const int num_classes = NUM_CLASSES;
 // TODO: add parameter layer_epochs.
 
-void ModelFF::build(const std::vector<int> &units, const std::string &data_path)
+void ModelFF::build(const std::string &data_path)
 {
     // Initialize the model with the given parameters.
     // Convert int vector to int array.
@@ -163,4 +158,14 @@ void ModelFF::load(const std::string filename)
 {
     load_ff_net(ffnet, filename.c_str(), relu, pdrelu, beta1, beta2);
     log_debug("FFNet loaded from %s", filename.c_str());
+}
+
+void ModelFF::set_parametersFF(const ModelFFParameters &parameters)
+{
+    // Set the model's parameters.
+    units = parameters.units;
+    threshold = parameters.threshold;
+    loss = parameters.loss;
+    beta1 = parameters.beta1;
+    beta2 = parameters.beta2;
 }

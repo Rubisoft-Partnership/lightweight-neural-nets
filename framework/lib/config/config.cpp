@@ -37,6 +37,9 @@ void config::init_config()
 
     simulation_timestamp = get_timestamp();
     log_path = basepath + logs_folder + folder_num + "_" + simulation_timestamp + ".log";
+
+
+    model_bp_parameters.units = {784, 100, 10};
 }
 
 static std::string get_timestamp()
