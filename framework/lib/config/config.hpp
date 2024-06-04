@@ -27,6 +27,8 @@ namespace config
 
     extern ModelBPParameters model_bp_parameters;
     extern ModelFFParameters model_ff_parameters;
+
+    extern int num_classes; // number of classes in the dataset
 }
 
 #endif // CONFIG_H

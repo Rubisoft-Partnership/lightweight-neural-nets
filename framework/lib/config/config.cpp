@@ -21,6 +21,8 @@ namespace config
     std::string checkpoints_path;
     std::string log_path;
     std::string simulation_timestamp;
+
+    int num_classes = 10;
 }
 
 void config::init_config()

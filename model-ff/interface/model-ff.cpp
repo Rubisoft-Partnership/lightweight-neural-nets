@@ -10,13 +10,13 @@ extern "C"
 #include <utils/utils.h>
 }
 
+#include <config/config.hpp>
 
-// TODO: move class number setting to a proper place.
-const int num_classes = NUM_CLASSES;
 // TODO: add parameter layer_epochs.
 
 void ModelFF::build(const std::string &data_path)
 {
+    num_classes = config::num_classes;
     // Initialize the model with the given parameters.
     // Convert int vector to int array.
     int layers_num = units.size();

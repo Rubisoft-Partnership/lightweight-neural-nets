@@ -34,6 +34,7 @@ public:
     virtual void load(const std::string filename) = 0;
 
 protected:
+    int num_classes;
     std::vector<int> units;
     float learning_rate;
     int training_epochs;
