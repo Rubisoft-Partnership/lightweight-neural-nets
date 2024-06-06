@@ -21,6 +21,7 @@ namespace config
     std::string checkpoints_path;
     std::string log_path;
     std::string simulation_timestamp;
+    std::string selected_dataset = dataset_mnist;
 
     int num_classes = 10;
     ModelType model_type = ModelType::BP;

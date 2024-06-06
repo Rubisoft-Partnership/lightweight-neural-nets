@@ -195,6 +195,24 @@ void parse_args(const int argc, const char *argv[])
             spdlog::debug("Checkpoint rate: {}", argv[i]);
             config::orchestrator::checkpoint_rate = std::stof(argv[i]);
         }
+        if (args[i] == "--dataset" || args[i] == "-d")
+        {
+            i++;
+            std::string dataset = string_to_lower(args[i]);
+            if (dataset == "digits")
+            {
+                config::selected_dataset = config::dataset_digits;
+            }
+            else if (dataset == "mnist")
+            {
+                config::selected_dataset = config::dataset_mnist;
+            }
+            else
+            {
+                spdlog::error("Invalid dataset.");
+                exit(EXIT_FAILURE);
+            }
+        }
     }
 }
 
@@ -220,7 +238,8 @@ void print_help(std::string name)
               << "--num-clients, -ncl: Number of clients in the simulation. Default: " << config::orchestrator::num_clients << "." << std::endl
               << "--num-rounds, -nr: Number of rounds in the simulation. Default: " << config::orchestrator::num_rounds << "." << std::endl
               << "--client-rate, -cr: Client rate for the simulation. Default: " << config::orchestrator::c_rate << "." << std::endl
-              << "--checkpoint-rate, -chr: Checkpoint rate for the simulation. Default: " << config::orchestrator::checkpoint_rate << "." << std::endl;
+              << "--checkpoint-rate, -chr: Checkpoint rate for the simulation. Default: " << config::orchestrator::checkpoint_rate << "." << std::endl
+              << "--dataset, -d: Dataset to use (digits, mnist). Default: << " << config::selected_dataset << "." << std::endl;
 }
 
 config::ModelType get_model_type(std::vector<std::string> args)
