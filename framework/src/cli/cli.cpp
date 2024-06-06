@@ -28,6 +28,7 @@ void parse_args(const int argc, const char *argv[])
 
     for (int i = 1; i < argc - 1; i++)
     {
+        // Common model parameters
         if (args[i] == "--num-classes" || args[i] == "-nc")
         {
             i++;
@@ -60,6 +61,62 @@ void parse_args(const int argc, const char *argv[])
             }
             spdlog::debug("Layer units: {}", units_str);
         }
+
+        // Model FF specific parameters
+        if (args[i] == "--threshold" || args[i] == "-t")
+        {
+            i++;
+            if (args[i][0] == '-')
+            {
+                spdlog::error("Invalid threshold.");
+                exit(EXIT_FAILURE);
+            }
+            spdlog::debug("Threshold: {}", argv[i]);
+            config::model_ff_parameters.threshold = std::stof(argv[i]);
+        }
+        if (args[i] == "--loss-function" || args[i] == "-lf")
+        {
+            i++;
+            std::string loss_function = string_to_lower(args[i]);
+            if (loss_function == "ff")
+            {
+                config::model_ff_parameters.loss = LossType::LOSS_TYPE_FF;
+            }
+            else if (loss_function == "symba")
+            {
+                config::model_ff_parameters.loss = LossType::LOSS_TYPE_SYMBA;
+            }
+            else
+            {
+                spdlog::error("Invalid loss function.");
+                exit(EXIT_FAILURE);
+            }
+        }
+        if (args[i] == "--beta1" || args[i] == "-b1")
+        {
+            i++;
+            if (args[i][0] == '-')
+            {
+                spdlog::error("Invalid beta1.");
+                exit(EXIT_FAILURE);
+            }
+            spdlog::debug("Beta1: {}", argv[i]);
+            config::model_ff_parameters.beta1 = std::stof(argv[i]);
+        }
+        if (args[i] == "--beta2" || args[i] == "-b2")
+        {
+            i++;
+            if (args[i][0] == '-')
+            {
+                spdlog::error("Invalid beta2.");
+                exit(EXIT_FAILURE);
+            }
+            spdlog::debug("Beta2: {}", argv[i]);
+            config::model_ff_parameters.beta2 = std::stof(argv[i]);
+        }
+            
+
+        // Training parameters
         if (args[i] == "--learning-rate" || args[i] == "-lr")
         {
             i++;
