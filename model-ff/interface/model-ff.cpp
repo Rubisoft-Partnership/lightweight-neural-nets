@@ -4,6 +4,7 @@
 #include <numeric>
 #include <filesystem>
 #include <spdlog/spdlog.h>
+#include <unordered_map>
 
 extern "C"
 {
@@ -27,7 +28,8 @@ void ModelFF::build(const std::string &data_path)
     int *units_array = new int[layers_num];
     std::copy(units.begin(), units.end(), units_array);
 
-    // set_seed(time(NULL)); // comment for reproducibility
+    auto seed = std::hash<std::string>{}(data_path);
+    set_seed(seed); // comment for reproducibility
     set_log_level(LOG_DEBUG);
     // Check if the log directory exists, if not create it.
     if (!std::filesystem::exists(FF_LOG_DIR))
