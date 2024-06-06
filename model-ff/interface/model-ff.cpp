@@ -2,6 +2,8 @@
 #include <cmath>
 #include <algorithm>
 #include <numeric>
+#include <filesystem>
+#include <spdlog/spdlog.h>
 
 extern "C"
 {
@@ -9,6 +11,8 @@ extern "C"
 #include <logging/logging.h>
 #include <utils/utils.h>
 }
+
+#define FF_LOG_DIR "logs/model-ff-logs"
 
 #include <config/config.hpp>
 
@@ -25,7 +29,16 @@ void ModelFF::build(const std::string &data_path)
 
     // set_seed(time(NULL)); // comment for reproducibility
     set_log_level(LOG_DEBUG);
-    open_log_file_with_timestamp();
+    // Check if the log directory exists, if not create it.
+    if (!std::filesystem::exists(FF_LOG_DIR))
+    {
+        if (!std::filesystem::create_directories(FF_LOG_DIR))
+        {
+            spdlog::error("Failed to create log directory: {}", FF_LOG_DIR);
+            exit(EXIT_FAILURE);
+        }
+    }
+    open_log_file_with_timestamp(FF_LOG_DIR);
 
     // Build the model.
     ffnet = new_ff_net(units_array, layers_num, relu, pdrelu, threshold, beta1, beta2, loss);
@@ -39,6 +52,7 @@ void ModelFF::build(const std::string &data_path)
     log_info("\n");
 
     // Initialize model data structure.
+    spdlog::debug("Reading dataset from: {}", data_path);
     data = dataset_split(data_path.c_str(), num_classes);
     // Read the input size from the dataset compare to the selected input layer size.
     const int input_size = data.train->feature_len;

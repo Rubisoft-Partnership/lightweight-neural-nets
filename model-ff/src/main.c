@@ -57,7 +57,7 @@ static void setup(void)
 {
     // set_seed(time(NULL)); // comment for reproducibility
     set_log_level(LOG_DEBUG);
-    open_log_file_with_timestamp();
+    open_log_file_with_timestamp("logs");
 
     data = dataset_split(dataset_path, num_classes);
     // Read the input size from the dataset and set the first layer size.
@@ -150,7 +150,7 @@ void evaluate(void)
     print_metrics(metrics);
 
     // Save the model to a checkpoint file.
-    save_ff_net(ffnet, "ffnet.bin");
+    save_ff_net(ffnet, "ffnet.bin", true);
     log_debug("FFNet saved to ffnet.bin");
 }
 
