@@ -213,6 +213,32 @@ void parse_args(const int argc, const char *argv[])
                 exit(EXIT_FAILURE);
             }
         }
+        if (args[i] == "--log-level" || args[i] == "-ll")
+        {
+            i++;
+            std::string log_level = string_to_lower(args[i]);
+            if (log_level == "debug")
+            {
+                spdlog::set_level(spdlog::level::debug);
+            }
+            else if (log_level == "info")
+            {
+                spdlog::set_level(spdlog::level::info);
+            }
+            else if (log_level == "warn")
+            {
+                spdlog::set_level(spdlog::level::warn);
+            }
+            else if (log_level == "error")
+            {
+                spdlog::set_level(spdlog::level::err);
+            }
+            else
+            {
+                spdlog::error("Invalid log level.");
+                exit(EXIT_FAILURE);
+            }
+        }
     }
 }
 
@@ -239,7 +265,8 @@ void print_help(std::string name)
               << "--num-rounds, -nr: Number of rounds in the simulation. Default: " << config::orchestrator::num_rounds << "." << std::endl
               << "--client-rate, -cr: Client rate for the simulation. Default: " << config::orchestrator::c_rate << "." << std::endl
               << "--checkpoint-rate, -chr: Checkpoint rate for the simulation. Default: " << config::orchestrator::checkpoint_rate << "." << std::endl
-              << "--dataset, -d: Dataset to use (digits, mnist). Default: << " << config::selected_dataset << "." << std::endl;
+              << "--dataset, -d: Dataset to use (digits, mnist). Default: << " << config::selected_dataset << "." << std::endl
+              << "--log-level, -ll: Log level (debug, info, warn, error). Default: info." << std::endl;
 }
 
 config::ModelType get_model_type(std::vector<std::string> args)
