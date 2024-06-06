@@ -127,11 +127,44 @@ std::vector<std::shared_ptr<Client>> initializeClients(const std::vector<std::st
     std::vector<std::shared_ptr<Client>> clients;
     for (size_t i = 0; i < num_clients; ++i)
     {
-        // Allocate space for the model and initialize it with given units and data path
-        auto model = std::make_shared<ModelBP>();
-        // Initialize each client with dataset
-        auto client = std::make_shared<Client>(i, model, datasets_path[i % datasets_path.size()]); // Use modulo to avoid out of bounds
+        std::shared_ptr<ModelFF> modelff;
+        std::shared_ptr<ModelBP> modelbp;
+        std::shared_ptr<Client> client;
+        switch (config::model_type)
+        {
+            case config::ModelType::FF:
+                modelff = std::make_shared<ModelFF>();
+                client = std::make_shared<Client>(i, modelff, datasets_path[i % datasets_path.size()]);
+                break;
+            case config::ModelType::BP:
+                modelbp = std::make_shared<ModelBP>();
+                client = std::make_shared<Client>(i, modelbp, datasets_path[i % datasets_path.size()]);
+                break;
+            default:
+                spdlog::error("Invalid model type.");
+                exit(EXIT_FAILURE);
+        }
         clients.push_back(client);
+        // switch (config::model_type)
+        // {
+        // case config::ModelType::FF:
+        //     // Allocate space for the model and initialize it with given units and data path
+            // auto model = std::make_shared<ModelFF>();
+        //     // Initialize each client with dataset
+        //     auto client = std::make_shared<Client>(i, model, datasets_path[i % datasets_path.size()]); // Use modulo to avoid out of bounds
+        //     clients.push_back(client);
+        //     break;
+        // case config::ModelType::BP:
+        //     // Allocate space for the model and initialize it with given units and data path
+        //     auto model = std::make_shared<ModelBP>();
+        //     // Initialize each client with dataset
+        //     auto client = std::make_shared<Client>(i, model, datasets_path[i % datasets_path.size()]); // Use modulo to avoid out of bounds
+        //     clients.push_back(client);
+        //     break;
+        // default:
+        //     spdlog::error("Invalid model type.");
+        //     exit(EXIT_FAILURE);
+        // }
     }
     return clients;
 }

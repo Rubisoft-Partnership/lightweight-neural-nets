@@ -151,7 +151,7 @@ void parse_args(const int argc, const char *argv[])
         }
 
         // Orchestrator parameters
-        if (args[i] == "--num-clients" || args[i] == "-nc")
+        if (args[i] == "--num-clients" || args[i] == "-ncl")
         {
             i++;
             if (args[i][0] == '-')
@@ -195,13 +195,18 @@ void parse_args(const int argc, const char *argv[])
             spdlog::debug("Checkpoint rate: {}", argv[i]);
             config::orchestrator::checkpoint_rate = std::stof(argv[i]);
         }
+
+
     }
 }
 
 void print_help(std::string name)
 {
     std::cout << "Usage:" << std::endl
-              << name << " [OPTIONS]" << std::endl;
+              << name << " [OPTIONS]" << std::endl
+                << "Options:" << std::endl
+                << "--help, -h: Show this help message." << std::endl
+                << "--model-type, -mt: Model type (bp, ff)." << std::endl;
 }
 
 config::ModelType get_model_type(std::vector<std::string> args)
@@ -221,8 +226,7 @@ config::ModelType get_model_type(std::vector<std::string> args)
             }
             else
             {
-                std::cout << "Invalid model type." << std::endl;
-                print_help(args[0]);
+                spdlog::error("Invalid model type.");
                 exit(EXIT_FAILURE);
             }
         }
