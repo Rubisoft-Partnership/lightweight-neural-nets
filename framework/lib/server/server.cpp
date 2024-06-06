@@ -3,6 +3,13 @@
 #include <random>
 #include <numeric>
 #include <vector>
+#include <config/config.hpp>
+
+namespace config
+{
+    extern TrainingParameters training_parameters;
+}
+
 
 // TODO: implement threaded mode
 Server::Server(const std::vector<std::shared_ptr<Client>> &clients)
@@ -28,7 +35,7 @@ metrics::Metrics Server::executeRound(int round_index, std::vector<std::shared_p
     // Update clients
     for (auto &client : round_clients)
     {
-        client->update(round_index, /*learning_rate*/ 0.01, /*batch_size*/ 32, /*epochs*/ 10);
+        client->update(round_index, config::training_parameters.learning_rate, config::training_parameters.batch_size, config::training_parameters.epochs);
     }
     spdlog::info("Done updating clients.");
 

@@ -36,6 +36,15 @@ namespace config
     extern int num_classes; // number of classes in the dataset
 
     extern ModelType model_type;
+
+    struct TrainingParameters
+    {
+        float learning_rate;
+        int batch_size;
+        int epochs;
+    };
+
+    extern TrainingParameters training_parameters;
 }
 
 #endif // CONFIG_H

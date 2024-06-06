@@ -13,7 +13,7 @@ namespace config
     ModelBPParameters model_bp_parameters;
     ModelFFParameters model_ff_parameters;
 
-    extern ModelType model_type;
+    extern  ModelType model_type;
 }
 
 Client::Client(int id, std::shared_ptr<Model> model, const std::string &data_path)

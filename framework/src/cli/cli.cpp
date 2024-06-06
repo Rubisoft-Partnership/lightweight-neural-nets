@@ -60,6 +60,39 @@ void parse_args(const int argc, const char *argv[])
             }
             spdlog::debug("Layer units: {}", units_str);
         }
+        if (args[i] == "--learning-rate" || args[i] == "-lr")
+        {
+            i++;
+            if (args[i][0] == '-')
+            {
+                spdlog::error("Invalid learning rate.");
+                exit(EXIT_FAILURE);
+            }
+            spdlog::debug("Learning rate: {}", argv[i]);
+            config::training_parameters.learning_rate = std::stof(argv[i]);
+        }
+        if (args[i] == "--batch-size" || args[i] == "-bs")
+        {
+            i++;
+            if (args[i][0] == '-')
+            {
+                spdlog::error("Invalid batch size.");
+                exit(EXIT_FAILURE);
+            }
+            spdlog::debug("Batch size: {}", argv[i]);
+            config::training_parameters.batch_size = std::stoi(argv[i]);
+        }
+        if (args[i] == "--epochs" || args[i] == "-e")
+        {
+            i++;
+            if (args[i][0] == '-')
+            {
+                spdlog::error("Invalid number of epochs.");
+                exit(EXIT_FAILURE);
+            }
+            spdlog::debug("Number of epochs: {}", argv[i]);
+            config::training_parameters.epochs = std::stoi(argv[i]);
+        }
     }
 }
 
