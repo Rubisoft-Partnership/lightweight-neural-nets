@@ -114,7 +114,6 @@ void parse_args(const int argc, const char *argv[])
             spdlog::debug("Beta2: {}", argv[i]);
             config::model_ff_parameters.beta2 = std::stof(argv[i]);
         }
-            
 
         // Training parameters
         if (args[i] == "--learning-rate" || args[i] == "-lr")
@@ -149,6 +148,52 @@ void parse_args(const int argc, const char *argv[])
             }
             spdlog::debug("Number of epochs: {}", argv[i]);
             config::training_parameters.epochs = std::stoi(argv[i]);
+        }
+
+        // Orchestrator parameters
+        if (args[i] == "--num-clients" || args[i] == "-nc")
+        {
+            i++;
+            if (args[i][0] == '-')
+            {
+                spdlog::error("Invalid number of clients.");
+                exit(EXIT_FAILURE);
+            }
+            spdlog::debug("Number of clients: {}", argv[i]);
+            config::orchestrator::num_clients = std::stoi(argv[i]);
+        }
+        if (args[i] == "--num-rounds" || args[i] == "-nr")
+        {
+            i++;
+            if (args[i][0] == '-')
+            {
+                spdlog::error("Invalid number of rounds.");
+                exit(EXIT_FAILURE);
+            }
+            spdlog::debug("Number of rounds: {}", argv[i]);
+            config::orchestrator::num_rounds = std::stoi(argv[i]);
+        }
+        if (args[i] == "--client-rate" || args[i] == "-cr")
+        {
+            i++;
+            if (args[i][0] == '-')
+            {
+                spdlog::error("Invalid c rate.");
+                exit(EXIT_FAILURE);
+            }
+            spdlog::debug("C rate: {}", argv[i]);
+            config::orchestrator::c_rate = std::stof(argv[i]);
+        }
+        if (args[i] == "--checkpoint-rate" || args[i] == "-chr")
+        {
+            i++;
+            if (args[i][0] == '-')
+            {
+                spdlog::error("Invalid checkpoint rate.");
+                exit(EXIT_FAILURE);
+            }
+            spdlog::debug("Checkpoint rate: {}", argv[i]);
+            config::orchestrator::checkpoint_rate = std::stof(argv[i]);
         }
     }
 }

@@ -44,6 +44,14 @@ namespace config
         int epochs;
     };
 
+    namespace orchestrator
+    {
+        extern size_t num_clients;
+        extern size_t num_rounds;
+        extern float c_rate;
+        extern float checkpoint_rate;
+    }
+
     extern TrainingParameters training_parameters;
 }
 

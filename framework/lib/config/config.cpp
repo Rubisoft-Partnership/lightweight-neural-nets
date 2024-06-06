@@ -26,6 +26,14 @@ namespace config
     ModelType model_type = ModelType::BP;
 
     TrainingParameters training_parameters = {0.01, 32, 5};
+
+    namespace orchestrator
+    {
+        size_t num_clients = 10;
+        size_t num_rounds = 3;
+        float c_rate = 0.1;
+        float checkpoint_rate = 0.2;
+    }
 }
 
 void config::init_config()

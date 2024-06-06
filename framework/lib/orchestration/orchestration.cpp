@@ -11,11 +11,7 @@
 
 namespace fs = std::filesystem;
 
-// TODO: move to configuration file.
-const size_t num_clients = 1;
-const size_t num_rounds = 3;
-const float c_rate = 0.1;
-const float checkpoint_rate = 0.2;
+using namespace config::orchestrator;
 
 static std::vector<std::string> listFolders(const std::string &folder, const std::string &match);
 
@@ -67,7 +63,7 @@ void Orchestrator::run()
         metrics::Metrics new_model_metrics = server->executeRound(round_index, round_clients);
         spdlog::info("Updated model metrics:\n{}", new_model_metrics.toString());
 
-        spdlog::info("Starting global evaluation."); 
+        spdlog::info("Starting global evaluation.");
         metrics::Metrics global_avg_metrics = evaluateClients(clients);
         spdlog::info("Global average metrics:\n{}", global_avg_metrics.toString());
 
@@ -156,7 +152,8 @@ metrics::Metrics Orchestrator::evaluateClients(std::vector<std::shared_ptr<Clien
                  }());
 
     std::vector<metrics::Metrics> round_metrics;
-    for (const auto &client : clients){
+    for (const auto &client : clients)
+    {
         round_metrics.push_back(client->model->evaluate());
         spdlog::debug("Client {} accuracy: {}.", client->id, round_metrics.back().accuracy);
     }
