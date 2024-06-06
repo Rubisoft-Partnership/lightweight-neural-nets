@@ -58,6 +58,7 @@ void config::init_config()
 
     // Default parameters
     model_bp_parameters.units = {784, 100, 10};
+    model_ff_parameters.units = {784, 100, 100};
 }
 
 static std::string get_timestamp()

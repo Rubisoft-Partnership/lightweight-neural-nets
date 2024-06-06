@@ -195,8 +195,6 @@ void parse_args(const int argc, const char *argv[])
             spdlog::debug("Checkpoint rate: {}", argv[i]);
             config::orchestrator::checkpoint_rate = std::stof(argv[i]);
         }
-
-
     }
 }
 
@@ -204,9 +202,25 @@ void print_help(std::string name)
 {
     std::cout << "Usage:" << std::endl
               << name << " [OPTIONS]" << std::endl
-                << "Options:" << std::endl
-                << "--help, -h: Show this help message." << std::endl
-                << "--model-type, -mt: Model type (bp, ff)." << std::endl;
+              << "Options:" << std::endl
+              << "--help, -h: Show this help message." << std::endl
+              << "--model-type, -mt: Model type (bp, ff). Default: bp." << std::endl
+              << "--num-classes, -nc: Number of classes in the dataset. Default: " << config::num_classes << "." << std::endl
+              << "--layer-units, -lu: Number of units in each layer. Default: [ ";
+    for (int unit : config::model_bp_parameters.units)
+        std::cout << unit << " ";
+    std::cout << "]" << std::endl
+              << "--threshold, -t: Threshold for the FF model. Default: " << config::model_ff_parameters.threshold << "." << std::endl
+              << "--loss-function, -lf: Loss function for the FF model (ff, symba). Default: ff." << std::endl
+              << "--beta1, -b1: Beta1 for the FF model. Default: " << config::model_ff_parameters.beta1 << "." << std::endl
+              << "--beta2, -b2: Beta2 for the FF model. Default: " << config::model_ff_parameters.beta2 << "." << std::endl
+              << "--learning-rate, -lr: Learning rate for the training. Default: " << config::training::learning_rate << "." << std::endl
+              << "--batch-size, -bs: Batch size for the training. Default: " << config::training::batch_size << "." << std::endl
+              << "--epochs, -e: Number of epochs for the training. Default: " << config::training::epochs << "." << std::endl
+              << "--num-clients, -ncl: Number of clients in the simulation. Default: " << config::orchestrator::num_clients << "." << std::endl
+              << "--num-rounds, -nr: Number of rounds in the simulation. Default: " << config::orchestrator::num_rounds << "." << std::endl
+              << "--client-rate, -cr: Client rate for the simulation. Default: " << config::orchestrator::c_rate << "." << std::endl
+              << "--checkpoint-rate, -chr: Checkpoint rate for the simulation. Default: " << config::orchestrator::checkpoint_rate << "." << std::endl;
 }
 
 config::ModelType get_model_type(std::vector<std::string> args)

@@ -11,9 +11,10 @@ extern "C"
 struct ModelFFParameters
 {
     std::vector<int> units;
-    float threshold;
-    float beta1, beta2;
-    LossType loss;
+    float threshold = 5.0;
+    float beta1 = 0.9;
+    float beta2 = 0.999;
+    LossType loss = LossType::LOSS_TYPE_FF;
 };
 
 #endif // MODEL_FF_PARAMETERS_HPP
