@@ -7,6 +7,8 @@
 #include <orchestration/orchestration.hpp>
 #include <config/config.hpp>
 
+#include "cli/cli.hpp"
+
 void init_logger()
 {
     try
@@ -33,7 +35,7 @@ void init_logger()
     }
 }
 
-int main(int argc, char *argv[])
+int main(const int argc, const char *argv[])
 {
     (void)argc; // Unused parameter
     (void)argv; // Unused parameter
@@ -43,6 +45,9 @@ int main(int argc, char *argv[])
 
     // Set up logger
     init_logger();
+
+    // Parse command line arguments
+    parse_args(argc, argv);
 
     // Create the simulation folder
     if (!std::filesystem::create_directories(config::simulation_path))

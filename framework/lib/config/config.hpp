@@ -5,7 +5,6 @@
 #include <model-bp-parameters.hpp>
 #include <model-ff-parameters.hpp>
 
-
 namespace config
 {
     void init_config();
@@ -28,7 +27,15 @@ namespace config
     extern ModelBPParameters model_bp_parameters;
     extern ModelFFParameters model_ff_parameters;
 
+    enum ModelType
+    {
+        BP,
+        FF,
+    };
+
     extern int num_classes; // number of classes in the dataset
+
+    extern ModelType model_type;
 }
 
 #endif // CONFIG_H

@@ -23,6 +23,7 @@ namespace config
     std::string simulation_timestamp;
 
     int num_classes = 10;
+    ModelType model_type = ModelType::BP;
 }
 
 void config::init_config()
@@ -40,7 +41,7 @@ void config::init_config()
     simulation_timestamp = get_timestamp();
     log_path = basepath + logs_folder + folder_num + "_" + simulation_timestamp + ".log";
 
-
+    // Default parameters
     model_bp_parameters.units = {784, 100, 10};
 }
 

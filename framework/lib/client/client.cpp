@@ -5,7 +5,6 @@
 #include <client/client.hpp>
 #include <spdlog/spdlog.h>
 #include <filesystem>
-#include <config/config.hpp>
 #include <model-bp.hpp>
 #include <model-ff.hpp>
 
@@ -13,6 +12,8 @@ namespace config
 {
     ModelBPParameters model_bp_parameters;
     ModelFFParameters model_ff_parameters;
+
+    extern ModelType model_type;
 }
 
 Client::Client(int id, std::shared_ptr<Model> model, const std::string &data_path)
@@ -20,13 +21,13 @@ Client::Client(int id, std::shared_ptr<Model> model, const std::string &data_pat
 {
     ModelBP *bp = NULL;
     ModelFF *ff = NULL;
-    switch (getModelType())
+    switch (config::model_type)
     {
-    case ModelType::BP:
+    case config::ModelType::BP:
         bp = dynamic_cast<ModelBP *>(model.get());
         bp->set_parametersBP(config::model_bp_parameters);
         break;
-    case ModelType::FF:
+    case config::ModelType::FF:
         ff = dynamic_cast<ModelFF *>(model.get());
         ff->set_parametersFF(config::model_ff_parameters);
         break;
@@ -86,22 +87,5 @@ void Client::logMetrics() const
     for (size_t i = 0; i < history.size(); ++i)
     {
         spdlog::info("Client {} metrics for round {}: {}.", id, rounds[i], history[i].toString());
-    }
-}
-
-ModelType Client::getModelType() const
-{
-    if (dynamic_cast<ModelBP *>(model.get()))
-    {
-        return BP;
-    }
-    else if (dynamic_cast<ModelFF *>(model.get()))
-    {
-        return FF;
-    }
-    else
-    {
-        spdlog::error("Unknown model type for client {}.", id);
-        exit(EXIT_FAILURE);
     }
 }

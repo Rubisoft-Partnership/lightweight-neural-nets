@@ -41,8 +41,8 @@ FF_INTERFACE_INCLUDE = -I $(MODELFF_BASEPATH)/interface
 BP_INTERFACE_INCLUDE = -I $(MODELBP_BASEPATH)/interface
 
 # Dependencies
-DEPS = src/main.cpp
-DEPS_OBJ = $(patsubst src/%.cpp,$(BUILD_PATH)/%.o,$(DEPS))
+DEPS = src/main.cpp src/cli/cli.cpp
+DEPS_OBJ = $(addprefix $(BUILD_PATH)/, $(notdir $(patsubst %.cpp,%.o,$(DEPS))))
 FRAMEWORK_SRC = $(wildcard $(PROJECT_BASEPATH)/$(LIB_FOLDER)/*/*.cpp)
 FRAMEWORK_OBJ = $(addprefix $(BUILD_PATH)/, $(notdir $(patsubst %.cpp,%.o,$(FRAMEWORK_SRC))))
 
@@ -64,7 +64,7 @@ $(METRICS_OBJ): $(METRICS_SRC)
 
 # ModelFF C files Compilation
 $(MODELFF_OBJ): $(MODELFF_SRC)
-	@echo "Compiling Model C/C++ files..."
+	@echo "Compiling Model FF C/C++ files..."
 	@for file in $(filter %.c,$(MODELFF_SRC)); do \
     	obj_file=$$(basename $$file .c).o; \
     	$(GCC) -c $$file $(CFLAGS) $(MODELFF_INCLUDE) $(METRICS_INCLUDE) -o $(BUILD_PATH)/$$obj_file; \
@@ -75,7 +75,7 @@ $(MODELFF_OBJ): $(MODELFF_SRC)
 # ModelBP C++ files Compilation
 $(MODELBP_OBJ): $(MODELBP_SRC)
 	@echo $(TDNN_INCLUDE)
-	@echo "Compiling Model C++ files..."
+	@echo "Compiling Model BP C++ files..."
 	@for file in $(MODELBP_SRC); do \
 		obj_file=$$(basename $$file .cpp).o; \
 		$(GPP) -c $$file $(CPPFLAGS_NO_WARNINGS) $(METRICS_INCLUDE) $(TDNN_INCLUDE) $(SPDLOG_INCLUDE) $(BP_INTERFACE_INCLUDE) $(FF_INTERFACE_INCLUDE) $(MODELFF_INCLUDE) -o $(BUILD_PATH)/$$obj_file; \
@@ -94,8 +94,11 @@ $(FRAMEWORK_OBJ): $(FRAMEWORK_SRC)
 # Main script Compilation
 $(DEPS_OBJ): $(DEPS)
 	@mkdir -p $(BUILD_PATH) # Ensure the build directory exists
-	$(GPP) -c $< -o $@ $(CPPFLAGS) $(FRAMEWORK_INCLUDE) $(MODELFF_INCLUDE) $(TDNN_INCLUDE) $(METRICS_INCLUDE) $(SPDLOG_INCLUDE) $(FF_INTERFACE_INCLUDE) $(BP_INTERFACE_INCLUDE)
-	echo "Compiled $<"
+	@for file in $(DEPS); do \
+		obj_file=$$(basename $$file .cpp).o; \
+		$(GPP) -c $$file $(CPPFLAGS) $(FRAMEWORK_INCLUDE) $(MODELFF_INCLUDE) $(TDNN_INCLUDE) $(METRICS_INCLUDE) $(SPDLOG_INCLUDE) $(FF_INTERFACE_INCLUDE) $(BP_INTERFACE_INCLUDE) -o $(BUILD_PATH)/$$obj_file; \
+		echo "Compiled $$file"; \
+	done
 
 # Linking all object files to create the executable
 $(BIN_PATH)/$(BIN_FILE): $(DEPS_OBJ) $(FRAMEWORK_OBJ) $(METRICS_OBJ) $(MODELFF_OBJ) $(MODELBP_OBJ)
