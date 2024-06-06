@@ -125,7 +125,7 @@ void parse_args(const int argc, const char *argv[])
                 exit(EXIT_FAILURE);
             }
             spdlog::debug("Learning rate: {}", argv[i]);
-            config::training_parameters.learning_rate = std::stof(argv[i]);
+            config::training::learning_rate = std::stof(argv[i]);
         }
         if (args[i] == "--batch-size" || args[i] == "-bs")
         {
@@ -136,7 +136,7 @@ void parse_args(const int argc, const char *argv[])
                 exit(EXIT_FAILURE);
             }
             spdlog::debug("Batch size: {}", argv[i]);
-            config::training_parameters.batch_size = std::stoi(argv[i]);
+            config::training::batch_size = std::stoi(argv[i]);
         }
         if (args[i] == "--epochs" || args[i] == "-e")
         {
@@ -147,7 +147,7 @@ void parse_args(const int argc, const char *argv[])
                 exit(EXIT_FAILURE);
             }
             spdlog::debug("Number of epochs: {}", argv[i]);
-            config::training_parameters.epochs = std::stoi(argv[i]);
+            config::training::epochs = std::stoi(argv[i]);
         }
 
         // Orchestrator parameters

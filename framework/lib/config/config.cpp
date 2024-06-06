@@ -25,7 +25,12 @@ namespace config
     int num_classes = 10;
     ModelType model_type = ModelType::BP;
 
-    TrainingParameters training_parameters = {0.01, 32, 5};
+    namespace training
+    {
+        float learning_rate = 0.01;
+        int batch_size = 32;
+        int epochs = 5;
+    }
 
     namespace orchestrator
     {

@@ -37,12 +37,12 @@ namespace config
 
     extern ModelType model_type;
 
-    struct TrainingParameters
+    namespace training
     {
-        float learning_rate;
-        int batch_size;
-        int epochs;
-    };
+        extern float learning_rate;
+        extern int batch_size;
+        extern int epochs;
+    }
 
     namespace orchestrator
     {
@@ -52,7 +52,6 @@ namespace config
         extern float checkpoint_rate;
     }
 
-    extern TrainingParameters training_parameters;
 }
 
 #endif // CONFIG_H
