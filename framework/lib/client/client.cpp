@@ -5,41 +5,19 @@
 #include <client/client.hpp>
 #include <spdlog/spdlog.h>
 #include <filesystem>
-#include <model-bp.hpp>
-#include <model-ff.hpp>
 
-namespace config
-{
-    ModelBPParameters model_bp_parameters;
-    ModelFFParameters model_ff_parameters;
-
-    extern  ModelType model_type;
-}
 
 Client::Client(int id, std::shared_ptr<Model> model, const std::string &data_path)
     : id(id), model(model), data_path(data_path)
 {
-    ModelBP *bp = NULL;
-    ModelFF *ff = NULL;
-    switch (config::model_type)
-    {
-    case config::ModelType::BP:
-        bp = dynamic_cast<ModelBP *>(model.get());
-        bp->set_parametersBP(config::model_bp_parameters);
-        break;
-    case config::ModelType::FF:
-        ff = dynamic_cast<ModelFF *>(model.get());
-        ff->set_parametersFF(config::model_ff_parameters);
-        break;
-    }
     // Initialize model with given units and data path
     model->build(data_path);
 
     // Calculate and store the dataset size
     dataset_size = model->dataset_size;
-    if (dataset_size == -1)
+    if (dataset_size == 0)
     {
-        spdlog::error("Invalid dataset size for client {}.", id);
+        spdlog::error("Empty dataset for client {}.", id);
         exit(EXIT_FAILURE);
     }
 

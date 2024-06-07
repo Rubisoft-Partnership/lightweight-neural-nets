@@ -21,7 +21,13 @@ extern "C"
 
 void ModelFF::build(const std::string &data_path)
 {
-    num_classes = config::num_classes;
+    using namespace config;
+    units = parameters::units;
+    num_classes = parameters::num_classes;
+    threshold = parameters::ff::threshold;
+    beta1 = parameters::ff::beta1;
+    beta2 = parameters::ff::beta2;
+    loss = parameters::ff::loss;
     // Initialize the model with the given parameters.
     // Convert int vector to int array.
     int layers_num = units.size();
@@ -65,9 +71,6 @@ void ModelFF::build(const std::string &data_path)
     }
     // Compute dataset size.
     dataset_size = data.train->rows;
-
-    // Copy units to class attribute.
-    this->units = units;
 }
 
 void ModelFF::train(const int &epochs, const int &batch_size, const double &learning_rate)
@@ -159,8 +162,8 @@ std::vector<double> ModelFF::get_weights() const
 void ModelFF::set_weights(const std::vector<double> &weights)
 {
     int weight_index = 0;
-    for (int i = 0; i < ffnet->num_cells; i++)                 // iterate over cells
-        for (int j = 0; j < ffnet->layers[i].num_weights; j++) // iterate over weights
+    for (int i = 0; i < ffnet->num_cells; i++)                     // iterate over cells
+        for (int j = 0; j < ffnet->layers[i].num_weights; j++)     // iterate over weights
             ffnet->layers[i].weights[j] = weights[weight_index++]; // set weight from vector
 }
 
@@ -174,14 +177,4 @@ void ModelFF::load(const std::string filename)
 {
     load_ff_net(ffnet, filename.c_str(), relu, pdrelu, beta1, beta2);
     log_debug("FFNet loaded from %s", filename.c_str());
-}
-
-void ModelFF::set_parametersFF(const ModelFFParameters &parameters)
-{
-    // Set the model's parameters.
-    units = parameters.units;
-    threshold = parameters.threshold;
-    loss = parameters.loss;
-    beta1 = parameters.beta1;
-    beta2 = parameters.beta2;
 }

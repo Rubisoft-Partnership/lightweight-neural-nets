@@ -12,8 +12,6 @@ extern "C"
 #include <data/data.h>
 }
 
-#include "model-ff-parameters.hpp"
-
 
 class ModelFF : public Model
 {
@@ -41,9 +39,6 @@ public:
 
     // Load the model's weights from a file
     void load(const std::string filename) override;
-
-    // Set the model's parameters
-    void set_parametersFF(const ModelFFParameters &parameters);
 
 private:
     FFNet *ffnet;

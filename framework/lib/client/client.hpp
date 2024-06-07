@@ -8,7 +8,6 @@
 #include <iostream>
 #include <sstream>
 #include <spdlog/spdlog.h>
-#include <config/config.hpp>
 
 
 class Client
