@@ -60,12 +60,12 @@ void Orchestrator::run()
         spdlog::info("Running communication round: {}.", round_index);
         std::vector<std::shared_ptr<Client>> round_clients = sampleClients();
 
+        metrics::Metrics new_model_metrics = server->executeRound(round_index, round_clients);
+        spdlog::info("Updated model metrics:\n{}", new_model_metrics.toString());
+
         spdlog::info("Starting round clients evaluation.");
         metrics::Metrics round_avg_metrics = evaluateClients(round_clients);
         spdlog::info("Round average metrics:\n{}", round_avg_metrics.toString());
-
-        metrics::Metrics new_model_metrics = server->executeRound(round_index, round_clients);
-        spdlog::info("Updated model metrics:\n{}", new_model_metrics.toString());
 
         spdlog::info("Starting global evaluation."); 
         metrics::Metrics global_avg_metrics = evaluateClients(clients);
