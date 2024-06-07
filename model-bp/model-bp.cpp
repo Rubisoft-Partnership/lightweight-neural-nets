@@ -28,7 +28,8 @@ void ModelBP::train(const int &epochs, const int &batch_size, const double &lear
 {
     // Specify loss-function and learning strategy
     tiny_dnn::progress_display disp(train_images.size());
-    tiny_dnn::timer t;
+    tiny_dnn::timer epoch_time;
+    tiny_dnn::timer total_train_time;
     optimizer.alpha *= std::min(tiny_dnn::float_t(4), static_cast<tiny_dnn::float_t>(sqrt(batch_size) * learning_rate));
 
     int epoch = 1;
@@ -36,12 +37,12 @@ void ModelBP::train(const int &epochs, const int &batch_size, const double &lear
     auto on_enumerate_epoch = [&]()
     {
         std::cout << "Epoch " << epoch << "/" << epochs << " finished. "
-                  << t.elapsed() << "s elapsed." << std::endl;
+                  << epoch_time.elapsed() << "s elapsed." << std::endl;
         ++epoch;
         tiny_dnn::result res = bpnet.test(test_images, test_labels);
 
         disp.restart(train_images.size());
-        t.restart();
+        epoch_time.restart();
     };
     auto on_enumerate_minibatch = [&]()
     { disp += batch_size; };
@@ -49,7 +50,7 @@ void ModelBP::train(const int &epochs, const int &batch_size, const double &lear
     // Training
     bpnet.train<tiny_dnn::cross_entropy>(optimizer, train_images, train_labels, batch_size, epochs, on_enumerate_minibatch, on_enumerate_epoch);
 
-    std::cout << "Training finished. It took " << t.elapsed() << " seconds." << std::endl;
+    std::cout << "Training finished. It took " << total_train_time.elapsed() << " seconds." << std::endl;
 }
 
 metrics::Metrics ModelBP::evaluate()

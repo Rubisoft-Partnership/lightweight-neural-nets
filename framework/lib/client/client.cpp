@@ -17,9 +17,9 @@ Client::Client(int id, std::shared_ptr<Model> model, const std::string &data_pat
 
     // Calculate and store the dataset size
     dataset_size = model->dataset_size;
-    if (dataset_size == -1)
+    if (dataset_size == 0)
     {
-        spdlog::error("Invalid dataset size for client {}.", id);
+        spdlog::error("Empty dataset for client {}.", id);
         exit(EXIT_FAILURE);
     }
 
