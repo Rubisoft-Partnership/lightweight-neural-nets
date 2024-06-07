@@ -9,6 +9,7 @@
 #include <sstream>
 #include <spdlog/spdlog.h>
 
+
 class Client
 {
 public:
@@ -28,7 +29,6 @@ public:
 
     void logMetrics() const;
 
-private:
 };
 
 #endif // CLIENT_HPP

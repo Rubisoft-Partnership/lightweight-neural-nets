@@ -6,14 +6,12 @@
 #include <spdlog/spdlog.h>
 #include <filesystem>
 
-// TODO: move this to a configuration file.
-const std::vector<int> &units = {784, 10};
 
 Client::Client(int id, std::shared_ptr<Model> model, const std::string &data_path)
     : id(id), model(model), data_path(data_path)
 {
     // Initialize model with given units and data path
-    model->build(units, data_path);
+    model->build(data_path);
 
     // Calculate and store the dataset size
     dataset_size = model->dataset_size;
@@ -25,15 +23,6 @@ Client::Client(int id, std::shared_ptr<Model> model, const std::string &data_pat
 
     // Log the initialization
     spdlog::info("Initialized client {}.", id);
-    // Format units as a string
-    std::ostringstream oss;
-    for (size_t i = 0; i < units.size(); ++i)
-    {
-        if (i != 0)
-            oss << ", ";
-        oss << units[i];
-    }
-    spdlog::debug("Model units: {}.", oss.str());
     spdlog::debug("Model data path: {}.", data_path);
     spdlog::debug("Model dataset size: {} samples.", dataset_size);
 }

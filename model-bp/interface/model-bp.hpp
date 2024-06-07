@@ -1,11 +1,12 @@
 #ifndef MODEL_BP_H
 #define MODEL_BP_H
 
-#include "../framework/lib/model/model.hpp"
+#include "../../framework/lib/model/model.hpp"
 #include <vector>
 #include <random>
 #include <metrics.hpp>
 #include <tiny_dnn/tiny_dnn.h>
+    
 
 class ModelBP : public Model
 {
@@ -14,7 +15,7 @@ public:
     virtual ~ModelBP() {}
 
     // Initialize the model with necessary parameters or configurations
-    void build(const std::vector<int> &units, const std::string & data_path) override;
+    void build(const std::string & data_path) override;
 
     // Train the model for a given number of epochs
     void train(const int &epochs, const int &batch_size, const double &learning_rate) override;

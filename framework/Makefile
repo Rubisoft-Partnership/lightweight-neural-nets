@@ -23,11 +23,11 @@ METRICS_SRC = $(wildcard $(METRICS_BASEPATH)/$(LIB_FOLDER)/*/*.c) $(METRICS_BASE
 METRICS_OBJ = $(addprefix $(BUILD_PATH)/, $(notdir $(patsubst %.c,%.o,$(filter %.c,$(METRICS_SRC))))) $(BUILD_PATH)/cmetrics.o
 
 # ModelFF Source Files
-MODELFF_SRC = $(wildcard $(MODELFF_BASEPATH)/$(LIB_FOLDER)/*/*.c) $(MODELFF_BASEPATH)/model-ff.cpp
+MODELFF_SRC = $(wildcard $(MODELFF_BASEPATH)/$(LIB_FOLDER)/*/*.c) $(MODELFF_BASEPATH)/interface/model-ff.cpp
 MODELFF_OBJ = $(addprefix $(BUILD_PATH)/, $(notdir $(patsubst %.c,%.o,$(filter %.c,$(MODELFF_SRC))))) $(BUILD_PATH)/model-ff.o
 
 # ModelBP Source Files
-MODELBP_SRC = $(MODELBP_BASEPATH)/model-bp.cpp
+MODELBP_SRC = $(MODELBP_BASEPATH)/interface/model-bp.cpp
 MODELBP_OBJ = $(addprefix $(BUILD_PATH)/, $(notdir $(patsubst %.cpp,%.o,$(MODELBP_SRC))))
 
 #Include Paths
@@ -37,10 +37,12 @@ SPDLOG_INCLUDE = -I $(PROJECT_BASEPATH)/$(LIB_FOLDER)/logging/include
 MODELFF_INCLUDE = -I $(MODELFF_BASEPATH)/$(LIB_FOLDER)
 BASE_INCLUDE = -I $(PROJECT_BASEPATH)/..
 TDNN_INCLUDE = -I $(PROJECT_BASEPATH)/../tiny-dnn
+FF_INTERFACE_INCLUDE = -I $(MODELFF_BASEPATH)/interface
+BP_INTERFACE_INCLUDE = -I $(MODELBP_BASEPATH)/interface
 
 # Dependencies
-DEPS = src/main.cpp
-DEPS_OBJ = $(patsubst src/%.cpp,$(BUILD_PATH)/%.o,$(DEPS))
+DEPS = src/main.cpp src/cli/cli.cpp
+DEPS_OBJ = $(addprefix $(BUILD_PATH)/, $(notdir $(patsubst %.cpp,%.o,$(DEPS))))
 FRAMEWORK_SRC = $(wildcard $(PROJECT_BASEPATH)/$(LIB_FOLDER)/*/*.cpp)
 FRAMEWORK_OBJ = $(addprefix $(BUILD_PATH)/, $(notdir $(patsubst %.cpp,%.o,$(FRAMEWORK_SRC))))
 
@@ -62,21 +64,21 @@ $(METRICS_OBJ): $(METRICS_SRC)
 
 # ModelFF C files Compilation
 $(MODELFF_OBJ): $(MODELFF_SRC)
-	@echo "Compiling Model C/C++ files..."
+	@echo "Compiling Model FF C/C++ files..."
 	@for file in $(filter %.c,$(MODELFF_SRC)); do \
     	obj_file=$$(basename $$file .c).o; \
     	$(GCC) -c $$file $(CFLAGS) $(MODELFF_INCLUDE) $(METRICS_INCLUDE) -o $(BUILD_PATH)/$$obj_file; \
 		echo "Compiled $$file"; \
 	done
-	$(GPP) -c $(PROJECT_BASEPATH)/../model-ff/model-ff.cpp $(CPPFLAGS) $(MODELFF_INCLUDE) $(METRICS_INCLUDE) -o $(BUILD_PATH)/model-ff.o;
+	$(GPP) -c $(PROJECT_BASEPATH)/../model-ff/interface/model-ff.cpp $(CPPFLAGS) $(MODELFF_INCLUDE) $(METRICS_INCLUDE) $(BP_INTERFACE_INCLUDE) $(FF_INTERFACE_INCLUDE) -o $(BUILD_PATH)/model-ff.o;
 
 # ModelBP C++ files Compilation
 $(MODELBP_OBJ): $(MODELBP_SRC)
 	@echo $(TDNN_INCLUDE)
-	@echo "Compiling Model C++ files..."
+	@echo "Compiling Model BP C++ files..."
 	@for file in $(MODELBP_SRC); do \
 		obj_file=$$(basename $$file .cpp).o; \
-		$(GPP) -c $$file $(CPPFLAGS_NO_WARNINGS) $(METRICS_INCLUDE) $(TDNN_INCLUDE) $(SPDLOG_INCLUDE) -o $(BUILD_PATH)/$$obj_file; \
+		$(GPP) -c $$file $(CPPFLAGS_NO_WARNINGS) $(METRICS_INCLUDE) $(TDNN_INCLUDE) $(SPDLOG_INCLUDE) $(BP_INTERFACE_INCLUDE) $(FF_INTERFACE_INCLUDE) $(MODELFF_INCLUDE) -o $(BUILD_PATH)/$$obj_file; \
 		echo "Compiled $$file"; \
 	done
 
@@ -85,15 +87,18 @@ $(FRAMEWORK_OBJ): $(FRAMEWORK_SRC)
 	@echo "Compiling Framework C++ files..."
 	@for file in $(FRAMEWORK_SRC); do \
     	obj_file=$$(basename $$file .cpp).o; \
-    	$(GPP) -c $$file $(CPPFLAGS) $(FRAMEWORK_INCLUDE) $(BASE_INCLUDE) $(MODELFF_INCLUDE) $(SPDLOG_INCLUDE) $(METRICS_INCLUDE) $(TDNN_INCLUDE) -o $(BUILD_PATH)/$$obj_file; \
+    	$(GPP) -c $$file $(CPPFLAGS) $(FRAMEWORK_INCLUDE) $(BASE_INCLUDE) $(MODELFF_INCLUDE) $(SPDLOG_INCLUDE) $(METRICS_INCLUDE) $(TDNN_INCLUDE) $(BP_INTERFACE_INCLUDE) $(FF_INTERFACE_INCLUDE) -o $(BUILD_PATH)/$$obj_file; \
 		echo "Compiled $$file"; \
 	done
 
 # Main script Compilation
 $(DEPS_OBJ): $(DEPS)
 	@mkdir -p $(BUILD_PATH) # Ensure the build directory exists
-	$(GPP) -c $< -o $@ $(CPPFLAGS) $(FRAMEWORK_INCLUDE) $(BASE_INCLUDE) $(MODELFF_INCLUDE) $(METRICS_INCLUDE) $(SPDLOG_INCLUDE)
-	echo "Compiled $<"
+	@for file in $(DEPS); do \
+		obj_file=$$(basename $$file .cpp).o; \
+		$(GPP) -c $$file $(CPPFLAGS) $(FRAMEWORK_INCLUDE) $(MODELFF_INCLUDE) $(TDNN_INCLUDE) $(METRICS_INCLUDE) $(SPDLOG_INCLUDE) $(FF_INTERFACE_INCLUDE) $(BP_INTERFACE_INCLUDE) -o $(BUILD_PATH)/$$obj_file; \
+		echo "Compiled $$file"; \
+	done
 
 # Linking all object files to create the executable
 $(BIN_PATH)/$(BIN_FILE): $(DEPS_OBJ) $(FRAMEWORK_OBJ) $(METRICS_OBJ) $(MODELFF_OBJ) $(MODELBP_OBJ)

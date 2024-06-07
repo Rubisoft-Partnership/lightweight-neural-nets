@@ -13,7 +13,7 @@ public:
     virtual ~Model() {}
 
     // Initialize the model with necessary parameters or configurations
-    virtual void build(const std::vector<int> &units, const std::string &data_path) = 0;
+    virtual void build(const std::string &data_path) = 0;
 
     // Train the model for a given number of epochs
     virtual void train(const int &epochs, const int &batch_size, const double &learning_rate) = 0;
@@ -34,7 +34,10 @@ public:
     virtual void load(const std::string filename) = 0;
 
 protected:
+    int num_classes;
     std::vector<int> units;
+    float learning_rate;
+    int training_epochs;
 };
 
 #endif // MODEL_H

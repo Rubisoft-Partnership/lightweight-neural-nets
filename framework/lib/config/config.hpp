@@ -2,6 +2,12 @@
 #define CONFIG_H
 
 #include <string>
+#include <vector>
+
+extern "C"
+{
+    #include <losses/losses.h>
+}
 
 namespace config
 {
@@ -21,6 +27,44 @@ namespace config
     extern std::string checkpoints_path;     // absolute path to the current simulation checkpoints
     extern std::string log_path;             // absolute path to the current simulation log file
     extern std::string simulation_timestamp; // current simulation timestamp
+    extern std::string selected_dataset;     // selected dataset
+
+    enum ModelType
+    {
+        BP,
+        FF,
+    };
+
+    extern ModelType model_type;
+
+    namespace training
+    {
+        extern float learning_rate;
+        extern int batch_size;
+        extern int epochs;
+    }
+
+    namespace orchestrator
+    {
+        extern size_t num_clients;
+        extern size_t num_rounds;
+        extern float c_rate;
+        extern float checkpoint_rate;
+    }
+
+    namespace parameters
+    {
+        extern int num_classes; // number of classes in the dataset
+        extern std::vector<int> units;
+        namespace ff
+        {
+            extern float threshold;
+            extern float beta1;
+            extern float beta2;
+            extern LossType loss;
+        }
+    }
+
 }
 
 #endif // CONFIG_H

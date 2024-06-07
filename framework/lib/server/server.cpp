@@ -3,11 +3,17 @@
 #include <random>
 #include <numeric>
 #include <vector>
+#include <config/config.hpp>
+
+using namespace config::training;
+
 
 // TODO: implement threaded mode
 Server::Server(const std::vector<std::shared_ptr<Client>> &clients)
     : clients(clients), max_clients(clients.size()), threaded(false)
 {
+    // Initialize server model weights with the first client model weights
+    model_weights = clients[0]->model->get_weights();
     spdlog::info("Initialized server with threaded mode: {}.", threaded ? "enabled" : "disabled");
 }
 
@@ -35,10 +41,7 @@ metrics::Metrics Server::executeRound(int round_index, std::vector<std::shared_p
     update_clients();
 
     // Aggregate models
-    std::vector<double> weights = aggregate_models();
-
-    // Set the new model weights to all clients
-    model->set_weights(weights);
+    std::vector<double> model_weights = aggregate_models();
 
     spdlog::info("Server model updated with the aggregated model.");
 
@@ -49,11 +52,9 @@ metrics::Metrics Server::executeRound(int round_index, std::vector<std::shared_p
 
 void Server::broadcast()
 {
-    std::vector<double> weights = model->get_weights();
-
     for (auto &client : round_clients)
     {
-        client->model->set_weights(weights);
+        client->model->set_weights(model_weights);
     }
     spdlog::info("Server model broadcast completed.");
 }
@@ -62,7 +63,7 @@ void Server::update_clients()
 {
     for (auto &client : round_clients)
     {
-        client->update(round_index, /*learning_rate*/ 0.01, /*batch_size*/ 32, /*epochs*/ 3);
+        client->update(round_index, learning_rate, batch_size, epochs);
     }
     spdlog::info("Done updating clients.");
 }

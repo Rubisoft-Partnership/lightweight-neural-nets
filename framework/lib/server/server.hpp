@@ -20,7 +20,7 @@ private:
     std::vector<std::shared_ptr<Client>> round_clients;
     int max_clients;
     int round_index;
-    std::shared_ptr<Model> model;
+    std::vector<double> model_weights;
     bool threaded;
 
     void broadcast();

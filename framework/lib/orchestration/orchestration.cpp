@@ -6,16 +6,13 @@
 
 #include <orchestration/orchestration.hpp>
 #include <spdlog/spdlog.h>
-#include <model-ff/model-ff.hpp>
-#include <model-bp/model-bp.hpp>
+#include <model-ff.hpp>
+#include <model-bp.hpp>
+#include <config/config.hpp>
 
 namespace fs = std::filesystem;
 
-// TODO: move to configuration file.
-const size_t num_clients = 1;
-const size_t num_rounds = 3;
-const float c_rate = 0.1;
-const float checkpoint_rate = 0.2;
+using namespace config::orchestrator;
 
 static std::vector<std::string> listFolders(const std::string &folder, const std::string &match);
 
@@ -67,7 +64,7 @@ void Orchestrator::run()
         metrics::Metrics round_avg_metrics = evaluateClients(round_clients);
         spdlog::info("Round average metrics:\n{}", round_avg_metrics.toString());
 
-        spdlog::info("Starting global evaluation."); 
+        spdlog::info("Starting global evaluation.");
         metrics::Metrics global_avg_metrics = evaluateClients(clients);
         spdlog::info("Global average metrics:\n{}", global_avg_metrics.toString());
 
@@ -131,10 +128,23 @@ std::vector<std::shared_ptr<Client>> initializeClients(const std::vector<std::st
     std::vector<std::shared_ptr<Client>> clients;
     for (size_t i = 0; i < num_clients; ++i)
     {
-        // Allocate space for the model and initialize it with given units and data path
-        auto model = std::make_shared<ModelBP>();
-        // Initialize each client with dataset
-        auto client = std::make_shared<Client>(i, model, datasets_path[i % datasets_path.size()]); // Use modulo to avoid out of bounds
+        std::shared_ptr<ModelFF> modelff;
+        std::shared_ptr<ModelBP> modelbp;
+        std::shared_ptr<Client> client;
+        switch (config::model_type)
+        {
+            case config::ModelType::FF:
+                modelff = std::make_shared<ModelFF>();
+                client = std::make_shared<Client>(i, modelff, datasets_path[i % datasets_path.size()]);
+                break;
+            case config::ModelType::BP:
+                modelbp = std::make_shared<ModelBP>();
+                client = std::make_shared<Client>(i, modelbp, datasets_path[i % datasets_path.size()]);
+                break;
+            default:
+                spdlog::error("Invalid model type.");
+                exit(EXIT_FAILURE);
+        }
         clients.push_back(client);
     }
     return clients;
@@ -156,7 +166,8 @@ metrics::Metrics Orchestrator::evaluateClients(std::vector<std::shared_ptr<Clien
                  }());
 
     std::vector<metrics::Metrics> round_metrics;
-    for (const auto &client : clients){
+    for (const auto &client : clients)
+    {
         round_metrics.push_back(client->model->evaluate());
         spdlog::debug("Client {} accuracy: {}.", client->id, round_metrics.back().accuracy);
     }

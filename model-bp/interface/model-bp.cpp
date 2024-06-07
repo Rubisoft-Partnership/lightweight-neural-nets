@@ -1,10 +1,16 @@
 #include "model-bp.hpp"
 #include <spdlog/spdlog.h>
+#include <config/config.hpp>
 
-void ModelBP::build(const std::vector<int> &units, const std::string &data_path)
+void ModelBP::build(const std::string &data_path)
 {
-    if (units.back() != 10)
-        spdlog::warn("The last layer should have 10 units for MNIST dataset.");
+    using namespace config;
+    num_classes = parameters::num_classes;   
+    units = parameters::units;
+    if (units.back() != num_classes){
+        spdlog::warn("The last layer should have the same number of units as the number of classes. The last layer will be set to {}.", num_classes);
+        units.back() = num_classes;
+    }
     // Initialize the model
     tiny_dnn::core::backend_t backend_type = tiny_dnn::core::default_engine();
     using fc = tiny_dnn::layers::fc;

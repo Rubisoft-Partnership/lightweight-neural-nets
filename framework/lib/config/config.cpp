@@ -21,6 +21,37 @@ namespace config
     std::string checkpoints_path;
     std::string log_path;
     std::string simulation_timestamp;
+    std::string selected_dataset = dataset_mnist;
+
+    ModelType model_type = ModelType::BP;
+
+    namespace training
+    {
+        float learning_rate = 0.01;
+        int batch_size = 32;
+        int epochs = 5;
+    }
+
+    namespace orchestrator
+    {
+        size_t num_clients = 10;
+        size_t num_rounds = 3;
+        float c_rate = 0.1;
+        float checkpoint_rate = 0.2;
+    }
+
+    namespace parameters
+    {
+        int num_classes = 10;
+        std::vector<int> units = {784, 100, 10};
+        namespace ff
+        {
+            float threshold = 5.0;
+            float beta1 = 0.9;
+            float beta2 = 0.999;
+            LossType loss = LossType::LOSS_TYPE_FF;
+        }
+    }
 }
 
 void config::init_config()

@@ -1,7 +1,7 @@
 #ifndef MODEL_FF_H
 #define MODEL_FF_H
 
-#include "../framework/lib/model/model.hpp"
+#include "../../framework/lib/model/model.hpp"
 #include <vector>
 #include <random>
 #include <metrics.hpp>
@@ -12,6 +12,7 @@ extern "C"
 #include <data/data.h>
 }
 
+
 class ModelFF : public Model
 {
 public:
@@ -19,7 +20,7 @@ public:
     virtual ~ModelFF() {}
 
     // Initialize the model with necessary parameters or configurations
-    void build(const std::vector<int> &units, const std::string & data_path) override;
+    void build(const std::string & data_path) override;
 
     // Train the model for a given number of epochs
     void train(const int &epochs, const int &batch_size, const double &learning_rate) override;
@@ -42,6 +43,10 @@ public:
 private:
     FFNet *ffnet;
     Dataset data;
+
+    float threshold;
+    float beta1, beta2;
+    LossType loss;
 };
 
 #endif // MODEL_FF_H
