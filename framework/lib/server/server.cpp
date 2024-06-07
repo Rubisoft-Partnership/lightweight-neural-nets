@@ -49,9 +49,11 @@ metrics::Metrics Server::executeRound(int round_index, std::vector<std::shared_p
 
 void Server::broadcast()
 {
+    std::vector<double> weights = model->get_weights();
+
     for (auto &client : round_clients)
     {
-        client->model = std::make_shared<Model>(*model);
+        client->model->set_weights(weights);
     }
     spdlog::info("Server model broadcast completed.");
 }
