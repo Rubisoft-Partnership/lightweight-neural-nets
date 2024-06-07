@@ -6,7 +6,6 @@
 #include <random>
 #include <metrics.hpp>
 #include <tiny_dnn/tiny_dnn.h>
-#include "model-bp-parameters.hpp"
     
 
 class ModelBP : public Model
@@ -35,9 +34,6 @@ public:
 
     // Load the model's weights from a file
     void load(const std::string filename) override;
-
-    // Set model's parameters
-    void set_parametersBP(const ModelBPParameters &parameters);
 
 private:
     tiny_dnn::network<tiny_dnn::sequential> bpnet;

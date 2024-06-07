@@ -16,7 +16,12 @@ extern "C"
 
 void ModelFF::build(const std::string &data_path)
 {
-    num_classes = config::num_classes;
+    using namespace config;
+    num_classes = parameters::num_classes;
+    threshold = parameters::ff::threshold;
+    beta1 = parameters::ff::beta1;
+    beta2 = parameters::ff::beta2;
+    loss = parameters::ff::loss;
     // Initialize the model with the given parameters.
     // Convert int vector to int array.
     int layers_num = units.size();
@@ -160,12 +165,3 @@ void ModelFF::load(const std::string filename)
     log_debug("FFNet loaded from %s", filename.c_str());
 }
 
-void ModelFF::set_parametersFF(const ModelFFParameters &parameters)
-{
-    // Set the model's parameters.
-    units = parameters.units;
-    threshold = parameters.threshold;
-    loss = parameters.loss;
-    beta1 = parameters.beta1;
-    beta2 = parameters.beta2;
-}

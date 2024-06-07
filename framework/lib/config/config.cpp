@@ -23,7 +23,6 @@ namespace config
     std::string simulation_timestamp;
     std::string selected_dataset = dataset_mnist;
 
-    int num_classes = 10;
     ModelType model_type = ModelType::BP;
 
     namespace training
@@ -39,6 +38,19 @@ namespace config
         size_t num_rounds = 3;
         float c_rate = 0.1;
         float checkpoint_rate = 0.2;
+    }
+
+    namespace parameters
+    {
+        int num_classes = 10;
+        std::vector<int> units = {784, 100, 10};
+        namespace ff
+        {
+            float threshold = 5.0;
+            float beta1 = 0.9;
+            float beta2 = 0.999;
+            LossType loss = LossType::LOSS_TYPE_FF;
+        }
     }
 }
 
@@ -56,10 +68,6 @@ void config::init_config()
 
     simulation_timestamp = get_timestamp();
     log_path = basepath + logs_folder + folder_num + "_" + simulation_timestamp + ".log";
-
-    // Default parameters
-    model_bp_parameters.units = {784, 100, 10};
-    model_ff_parameters.units = {784, 100, 100};
 }
 
 static std::string get_timestamp()

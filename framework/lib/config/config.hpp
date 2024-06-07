@@ -2,8 +2,12 @@
 #define CONFIG_H
 
 #include <string>
-#include <model-bp-parameters.hpp>
-#include <model-ff-parameters.hpp>
+#include <vector>
+
+extern "C"
+{
+    #include <losses/losses.h>
+}
 
 namespace config
 {
@@ -25,16 +29,11 @@ namespace config
     extern std::string simulation_timestamp; // current simulation timestamp
     extern std::string selected_dataset;     // selected dataset
 
-    extern ModelBPParameters model_bp_parameters;
-    extern ModelFFParameters model_ff_parameters;
-
     enum ModelType
     {
         BP,
         FF,
     };
-
-    extern int num_classes; // number of classes in the dataset
 
     extern ModelType model_type;
 
@@ -51,6 +50,19 @@ namespace config
         extern size_t num_rounds;
         extern float c_rate;
         extern float checkpoint_rate;
+    }
+
+    namespace parameters
+    {
+        extern int num_classes; // number of classes in the dataset
+        extern std::vector<int> units;
+        namespace ff
+        {
+            extern float threshold;
+            extern float beta1;
+            extern float beta2;
+            extern LossType loss;
+        }
     }
 
 }

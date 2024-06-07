@@ -8,6 +8,7 @@
 #include <spdlog/spdlog.h>
 #include <model-ff.hpp>
 #include <model-bp.hpp>
+#include <config/config.hpp>
 
 namespace fs = std::filesystem;
 
@@ -56,12 +57,12 @@ void Orchestrator::run()
         spdlog::info("Running communication round: {}.", round_index);
         std::vector<std::shared_ptr<Client>> round_clients = sampleClients();
 
+        metrics::Metrics new_model_metrics = server->executeRound(round_index, round_clients);
+        spdlog::info("Updated model metrics:\n{}", new_model_metrics.toString());
+
         spdlog::info("Starting round clients evaluation.");
         metrics::Metrics round_avg_metrics = evaluateClients(round_clients);
         spdlog::info("Round average metrics:\n{}", round_avg_metrics.toString());
-
-        metrics::Metrics new_model_metrics = server->executeRound(round_index, round_clients);
-        spdlog::info("Updated model metrics:\n{}", new_model_metrics.toString());
 
         spdlog::info("Starting global evaluation.");
         metrics::Metrics global_avg_metrics = evaluateClients(clients);
@@ -145,26 +146,6 @@ std::vector<std::shared_ptr<Client>> initializeClients(const std::vector<std::st
                 exit(EXIT_FAILURE);
         }
         clients.push_back(client);
-        // switch (config::model_type)
-        // {
-        // case config::ModelType::FF:
-        //     // Allocate space for the model and initialize it with given units and data path
-            // auto model = std::make_shared<ModelFF>();
-        //     // Initialize each client with dataset
-        //     auto client = std::make_shared<Client>(i, model, datasets_path[i % datasets_path.size()]); // Use modulo to avoid out of bounds
-        //     clients.push_back(client);
-        //     break;
-        // case config::ModelType::BP:
-        //     // Allocate space for the model and initialize it with given units and data path
-        //     auto model = std::make_shared<ModelBP>();
-        //     // Initialize each client with dataset
-        //     auto client = std::make_shared<Client>(i, model, datasets_path[i % datasets_path.size()]); // Use modulo to avoid out of bounds
-        //     clients.push_back(client);
-        //     break;
-        // default:
-        //     spdlog::error("Invalid model type.");
-        //     exit(EXIT_FAILURE);
-        // }
     }
     return clients;
 }
