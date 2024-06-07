@@ -70,7 +70,7 @@ $(MODELFF_OBJ): $(MODELFF_SRC)
     	$(GCC) -c $$file $(CFLAGS) $(MODELFF_INCLUDE) $(METRICS_INCLUDE) -o $(BUILD_PATH)/$$obj_file; \
 		echo "Compiled $$file"; \
 	done
-	$(GPP) -c $(PROJECT_BASEPATH)/../model-ff/interface/model-ff.cpp $(CPPFLAGS) $(MODELFF_INCLUDE) $(METRICS_INCLUDE) $(BP_INTERFACE_INCLUDE) $(FF_INTERFACE_INCLUDE) -o $(BUILD_PATH)/model-ff.o;
+	$(GPP) -c $(PROJECT_BASEPATH)/../model-ff/interface/model-ff.cpp $(CPPFLAGS) $(MODELFF_INCLUDE) $(METRICS_INCLUDE) $(BP_INTERFACE_INCLUDE) $(FF_INTERFACE_INCLUDE) $(SPDLOG_INCLUDE) -o $(BUILD_PATH)/model-ff.o;
 
 # ModelBP C++ files Compilation
 $(MODELBP_OBJ): $(MODELBP_SRC)

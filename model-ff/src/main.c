@@ -57,7 +57,7 @@ static void setup(void)
 {
     // set_seed(time(NULL)); // comment for reproducibility
     set_log_level(LOG_DEBUG);
-    open_log_file_with_timestamp();
+    open_log_file_with_timestamp("logs");
 
     data = dataset_split(dataset_path, num_classes);
     // Read the input size from the dataset and set the first layer size.

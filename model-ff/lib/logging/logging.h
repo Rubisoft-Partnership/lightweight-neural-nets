@@ -13,12 +13,11 @@
 #ifndef PROJECT_BASEPATH
 #define PROJECT_BASEPATH ""
 #endif
-#define LOGGING_LOG_PATH PROJECT_BASEPATH "/logs"
 
 /**
  * Opens the log file with a timestamp.
  */
-void open_log_file_with_timestamp(void);
+void open_log_file_with_timestamp(const char *basepath);
 
 /**
  * Closes the log file.

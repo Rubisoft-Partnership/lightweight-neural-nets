@@ -2,6 +2,9 @@
 #include <cmath>
 #include <algorithm>
 #include <numeric>
+#include <filesystem>
+#include <spdlog/spdlog.h>
+#include <unordered_map>
 
 extern "C"
 {
@@ -10,6 +13,8 @@ extern "C"
 #include <utils/utils.h>
 }
 
+#define FF_LOG_DIR "logs/model-ff-logs"
+
 #include <config/config.hpp>
 
 // TODO: add parameter layer_epochs.
@@ -17,6 +22,7 @@ extern "C"
 void ModelFF::build(const std::string &data_path)
 {
     using namespace config;
+    units = parameters::units;
     num_classes = parameters::num_classes;
     threshold = parameters::ff::threshold;
     beta1 = parameters::ff::beta1;
@@ -28,9 +34,19 @@ void ModelFF::build(const std::string &data_path)
     int *units_array = new int[layers_num];
     std::copy(units.begin(), units.end(), units_array);
 
-    // set_seed(time(NULL)); // comment for reproducibility
+    auto seed = std::hash<std::string>{}(data_path);
+    set_seed(seed); // comment for reproducibility
     set_log_level(LOG_DEBUG);
-    open_log_file_with_timestamp();
+    // Check if the log directory exists, if not create it.
+    if (!std::filesystem::exists(FF_LOG_DIR))
+    {
+        if (!std::filesystem::create_directories(FF_LOG_DIR))
+        {
+            spdlog::error("Failed to create log directory: {}", FF_LOG_DIR);
+            exit(EXIT_FAILURE);
+        }
+    }
+    open_log_file_with_timestamp(FF_LOG_DIR);
 
     // Build the model.
     ffnet = new_ff_net(units_array, layers_num, relu, pdrelu, threshold, beta1, beta2, loss);
@@ -44,6 +60,7 @@ void ModelFF::build(const std::string &data_path)
     log_info("\n");
 
     // Initialize model data structure.
+    spdlog::debug("Reading dataset from: {}", data_path);
     data = dataset_split(data_path.c_str(), num_classes);
     // Read the input size from the dataset compare to the selected input layer size.
     const int input_size = data.train->feature_len;
@@ -54,9 +71,6 @@ void ModelFF::build(const std::string &data_path)
     }
     // Compute dataset size.
     dataset_size = data.train->rows;
-
-    // Copy units to class attribute.
-    this->units = units;
 }
 
 void ModelFF::train(const int &epochs, const int &batch_size, const double &learning_rate)
@@ -148,8 +162,8 @@ std::vector<double> ModelFF::get_weights() const
 void ModelFF::set_weights(const std::vector<double> &weights)
 {
     int weight_index = 0;
-    for (int i = 0; i < ffnet->num_cells; i++)                 // iterate over cells
-        for (int j = 0; j < ffnet->layers[i].num_weights; j++) // iterate over weights
+    for (int i = 0; i < ffnet->num_cells; i++)                     // iterate over cells
+        for (int j = 0; j < ffnet->layers[i].num_weights; j++)     // iterate over weights
             ffnet->layers[i].weights[j] = weights[weight_index++]; // set weight from vector
 }
 
@@ -164,4 +178,3 @@ void ModelFF::load(const std::string filename)
     load_ff_net(ffnet, filename.c_str(), relu, pdrelu, beta1, beta2);
     log_debug("FFNet loaded from %s", filename.c_str());
 }
-

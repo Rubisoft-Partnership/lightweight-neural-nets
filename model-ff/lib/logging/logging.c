@@ -57,7 +57,7 @@ void set_log_level(LogLevel level)
  *
  * @param None
  */
-void open_log_file_with_timestamp(void)
+void open_log_file_with_timestamp(const char* basepath)
 {
     // Get the current time
     time_t now = time(NULL);
@@ -68,21 +68,21 @@ void open_log_file_with_timestamp(void)
     strftime(logFilename, sizeof(logFilename), "%Y-%m-%d_%H-%M-%S", tm_info);
 
     // Calculate the required size for the full path
-    size_t path_len = snprintf(NULL, 0, "%s/log_%s.log", LOGGING_LOG_PATH, logFilename) + 1;
+    size_t path_len = snprintf(NULL, 0, "%s/log_%s.log", basepath, logFilename) + 1;
     
     // Allocate memory for the full path
     char *fullPath = malloc(path_len);
     if (!fullPath)
     {
-        perror("Failed to allocate memory for full path");
+        perror("Failed to allocate memory for model ff logging file full path");
         exit(EXIT_FAILURE);
     }
 
     // Construct the full path
-    snprintf(fullPath, path_len, "%s/log_%s.log", LOGGING_LOG_PATH, logFilename);
+    snprintf(fullPath, path_len, "%s/log_%s.log", basepath, logFilename);
 
     // Create the log directory if it doesn't exist
-    mkdir(LOGGING_LOG_PATH, 0777);
+    mkdir(basepath, 0777);
 
     // Open the log file
     globalLogFile = fopen(fullPath, "w");

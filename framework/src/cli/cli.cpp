@@ -201,6 +201,7 @@ void parse_args(const int argc, const char *argv[])
             if (dataset == "digits")
             {
                 config::selected_dataset = config::dataset_digits;
+                config::parameters::units.front() = 74;
             }
             else if (dataset == "mnist")
             {
