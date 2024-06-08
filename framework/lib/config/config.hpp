@@ -16,6 +16,7 @@ namespace config
     const std::string datasets_folder = "/dataset/federated/";        // relative path for datasets
     const std::string dataset_digits = "/digits/";                    // digits dataset folder name
     const std::string dataset_mnist = "/mnist/";                      // mnist dataset folder name
+    const std::string global_dataset = "/global/";                    // global dataset folder name
     const std::string simulations_folder = "/framework/simulations/"; // relative simulations path
     const std::string checkpoints_folder = "/checkpoints/";           // checkpoints folder name
     const std::string logs_folder = "/framework/logs/";               // relative logs path
