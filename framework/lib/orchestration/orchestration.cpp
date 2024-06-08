@@ -31,7 +31,7 @@ Orchestrator::Orchestrator(const std::string &datasets_path, const std::string &
     clients = initializeClients(data);
 
     // Initialize server
-    server = std::make_shared<Server>(clients);
+    server = std::make_shared<Server>(clients, datasets_path + "/global/");
 }
 
 std::vector<std::shared_ptr<Client>> Orchestrator::sampleClients()

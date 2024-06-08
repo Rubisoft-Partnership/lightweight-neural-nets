@@ -4,16 +4,31 @@
 #include <numeric>
 #include <vector>
 #include <config/config.hpp>
+#include <model-ff.hpp>
+#include <model-bp.hpp>
 
 using namespace config::training;
 
 
 // TODO: implement threaded mode
-Server::Server(const std::vector<std::shared_ptr<Client>> &clients)
+Server::Server(const std::vector<std::shared_ptr<Client>> &clients, const std::string &global_dataset_path)
     : clients(clients), max_clients(clients.size()), threaded(false)
 {
     // Initialize server model weights with the first client model weights
-    model_weights = clients[0]->model->get_weights();
+    if (config::model_type == config::ModelType::FF)
+    {
+        model = std::make_shared<ModelFF>();
+    }
+    else if (config::model_type == config::ModelType::BP)
+    {
+        model = std::make_shared<ModelBP>();
+    }
+    else
+    {
+        spdlog::error("Model type not supported.");
+        exit(EXIT_FAILURE);
+    }
+    model->build(global_dataset_path);
     spdlog::info("Initialized server with threaded mode: {}.", threaded ? "enabled" : "disabled");
 }
 
@@ -41,7 +56,7 @@ metrics::Metrics Server::executeRound(int round_index, std::vector<std::shared_p
     update_clients();
 
     // Aggregate models
-    std::vector<double> model_weights = aggregate_models();
+    model->set_weights(aggregate_models());
 
     spdlog::info("Server model updated with the aggregated model.");
 
@@ -52,6 +67,7 @@ metrics::Metrics Server::executeRound(int round_index, std::vector<std::shared_p
 
 void Server::broadcast()
 {
+    std::vector<double> model_weights = model->get_weights();
     for (auto &client : round_clients)
     {
         client->model->set_weights(model_weights);

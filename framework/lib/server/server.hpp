@@ -11,7 +11,7 @@
 class Server
 {
 public:
-    Server(const std::vector<std::shared_ptr<Client>>& clients);
+    Server(const std::vector<std::shared_ptr<Client>>& clients, const std::string &global_dataset_path);
     // Execute a federated learning round
     metrics::Metrics executeRound(int round_index, std::vector<std::shared_ptr<Client>> round_clients);
 
@@ -20,7 +20,7 @@ private:
     std::vector<std::shared_ptr<Client>> round_clients;
     int max_clients;
     int round_index;
-    std::vector<double> model_weights;
+    std::shared_ptr<Model> model;
     bool threaded;
 
     void broadcast();
