@@ -4,6 +4,7 @@
 #include <numeric>
 #include <vector>
 #include <config/config.hpp>
+#include <metrics-logger/metrics-logger.hpp>
 
 using namespace config::training;
 
@@ -47,6 +48,7 @@ metrics::Metrics Server::executeRound(int round_index, std::vector<std::shared_p
 
     // Test new model
     metrics::Metrics new_model_metrics = clients[0]->model->evaluate();
+    log_metrics(round_index, -1, -1, DatasetType::GLOBAL, new_model_metrics);
     return new_model_metrics;
 }
 

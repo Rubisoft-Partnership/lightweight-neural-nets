@@ -6,12 +6,13 @@
 
 extern "C"
 {
-    #include <losses/losses.h>
+#include <losses/losses.h>
 }
 
 namespace config
 {
     void init_config();
+    void init_metrics_logger();
 
     const std::string datasets_folder = "/dataset/federated/";        // relative path for datasets
     const std::string dataset_digits = "/digits/";                    // digits dataset folder name

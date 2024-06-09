@@ -5,6 +5,7 @@
 #include <client/client.hpp>
 #include <spdlog/spdlog.h>
 #include <filesystem>
+#include <metrics-logger/metrics-logger.hpp>
 
 
 Client::Client(int id, std::shared_ptr<Model> model, const std::string &data_path)
@@ -39,6 +40,7 @@ void Client::update(int round_index, double learning_rate, size_t batch_size, si
 
     // Evaluate the model and store the metrics
     auto metrics = model->evaluate();
+    log_metrics(round_index, id, epochs, DatasetType::LOCAL, metrics);
     history.push_back(metrics);
 
     // Update round count and store the round index

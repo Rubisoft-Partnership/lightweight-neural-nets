@@ -1,5 +1,8 @@
 #include <config/config.hpp>
 
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+
 #include <chrono>
 #include <sstream>
 #include <iomanip>
@@ -12,6 +15,7 @@ static std::string get_timestamp();
 static int find_first_available_folder(const std::string &base_path);
 std::string getExecutableFullpath();
 std::string getExecutableBasepath();
+void init_metrics_logger();
 
 namespace config
 {
@@ -91,6 +95,18 @@ static int find_first_available_folder(const std::string &base_path)
         }
         ++folder_number;
     }
+}
+
+void config::init_metrics_logger()
+{
+    // Create a file sink
+    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(config::simulation_path + "/metrics.log", true);
+    // Create a console sink
+    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    // Combine the sinks into a multi-sink logger
+    std::vector<spdlog::sink_ptr> sinks{file_sink, console_sink};
+    auto logger = std::make_shared<spdlog::logger>("metrics_logger", sinks.begin(), sinks.end());
+    logger->info("Metrics logger initialized.");
 }
 
 #if defined(_WIN32)
