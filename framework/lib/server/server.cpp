@@ -61,7 +61,7 @@ metrics::Metrics Server::executeRound(int round_index, std::vector<std::shared_p
     spdlog::info("Server model updated with the aggregated model.");
 
     // Test new model
-    metrics::Metrics new_model_metrics = clients[0]->model->evaluate();
+    metrics::Metrics new_model_metrics = model->evaluate();
     return new_model_metrics;
 }
 
