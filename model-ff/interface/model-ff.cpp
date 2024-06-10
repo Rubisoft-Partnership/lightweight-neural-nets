@@ -73,7 +73,7 @@ void ModelFF::build(const std::string &data_path)
     dataset_size = data.train->rows;
 }
 
-void ModelFF::train(const int &epochs, const int &batch_size, const double &learning_rate)
+void ModelFF::train(const int &epochs, const int &batch_size, const double &learning_rate, std::function<void()> on_enumerate_epoch)
 {
     // Find max layer size.
     int max_units = *std::max_element(units.begin(), units.end());
@@ -82,6 +82,7 @@ void ModelFF::train(const int &epochs, const int &batch_size, const double &lear
     // Since batch is used for all layers, sample size is set to the maximum of the layers sizes.
     FFBatch batch = new_ff_batch(batch_size, max_units);
 
+    on_enumerate_epoch();
     for (int i = 0; i < epochs; i++) // iterate over model epochs
     {
         clock_t epoch_start_time = clock();
@@ -107,7 +108,7 @@ void ModelFF::train(const int &epochs, const int &batch_size, const double &lear
         printf("\tEpoch time: ");
         print_elapsed_time(epoch_time);
         printf("\n\n");
-        // evaluate();
+        on_enumerate_epoch();
     }
     int total_time = (clock() - start_time) / CLOCKS_PER_SEC;
     printf("Total training time: ");

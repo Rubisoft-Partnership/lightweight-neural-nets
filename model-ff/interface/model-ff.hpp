@@ -23,7 +23,7 @@ public:
     void build(const std::string & data_path) override;
 
     // Train the model for a given number of epochs
-    void train(const int &epochs, const int &batch_size, const double &learning_rate) override;
+    void train(const int &epochs, const int &batch_size, const double &learning_rate, std::function<void()> on_enumerate_epoch) override;
 
     // Evaluate the model's performance with the given test data and labels
     metrics::Metrics evaluate() override;

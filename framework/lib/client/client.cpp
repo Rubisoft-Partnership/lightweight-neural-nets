@@ -35,12 +35,17 @@ void Client::update(int round_index, double learning_rate, size_t batch_size, si
     spdlog::debug("Learning rate: {}.", learning_rate);
     spdlog::debug("Batch size: {}.", batch_size);
 
+    int epoch = 0;
+    auto on_enumerate_epoch = [&]()
+    {
+        metrics::Metrics metrics = model->evaluate();
+        log_metrics(round_index, id, epoch, DatasetType::LOCAL, metrics);
+    };
     // Train the model
-    model->train(epochs, batch_size, learning_rate);
+    model->train(epochs, batch_size, learning_rate, on_enumerate_epoch);
 
     // Evaluate the model and store the metrics
     auto metrics = model->evaluate();
-    log_metrics(round_index, id, epochs, DatasetType::LOCAL, metrics);
     history.push_back(metrics);
 
     // Update round count and store the round index
