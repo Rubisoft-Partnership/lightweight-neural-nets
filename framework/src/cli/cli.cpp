@@ -271,7 +271,7 @@ void print_help(std::string name)
 
 config::ModelType get_model_type(std::vector<std::string> args)
 {
-    for (int i = 1; i < args.size() - 1; i++)
+    for (size_t i = 1; i < args.size() - 1; i++)
     {
         if (args[i] == "--model-type" || args[i] == "-mt")
         {

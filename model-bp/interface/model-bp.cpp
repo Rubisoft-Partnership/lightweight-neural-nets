@@ -5,9 +5,10 @@
 void ModelBP::build(const std::string &data_path)
 {
     using namespace config;
-    num_classes = parameters::num_classes;   
+    num_classes = parameters::num_classes;
     units = parameters::units;
-    if (units.back() != num_classes){
+    if (units.back() != num_classes)
+    {
         spdlog::warn("The last layer should have the same number of units as the number of classes. The last layer will be set to {}.", num_classes);
         units.back() = num_classes;
     }
@@ -20,9 +21,19 @@ void ModelBP::build(const std::string &data_path)
     bpnet = tiny_dnn::make_mlp<relu>(units.begin(), units.end());
     bpnet << softmax();
 
+    spdlog::debug("Model-bp built with {} layers.", bpnet.layer_size());
+
     // Load MNIST dataset
-    tiny_dnn::parse_mnist_labels(data_path + "/train-labels.idx1-ubyte", &train_labels);
-    tiny_dnn::parse_mnist_images(data_path + "/train-images.idx3-ubyte", &train_images, min_scale, max_scale, x_padding, y_padding);
+    try
+    {
+
+        tiny_dnn::parse_mnist_labels(data_path + "/train-labels.idx1-ubyte", &train_labels);
+        tiny_dnn::parse_mnist_images(data_path + "/train-images.idx3-ubyte", &train_images, min_scale, max_scale, x_padding, y_padding);
+    }
+    catch (const std::exception &e)
+    {
+        spdlog::warn("Could not load training dataset.");
+    }
     tiny_dnn::parse_mnist_labels(data_path + "/t10k-labels.idx1-ubyte", &test_labels);
     tiny_dnn::parse_mnist_images(data_path + "/t10k-images.idx3-ubyte", &test_images, min_scale, max_scale, x_padding, y_padding);
 
@@ -94,7 +105,7 @@ std::vector<double> ModelBP::get_weights() const
     std::vector<double> weights;
     for (int i = 0; i < bpnet.layer_size(); i++)
     {
-        const std::vector<const tiny_dnn::vec_t *>& layer_weights = bpnet[i]->weights();
+        const std::vector<const tiny_dnn::vec_t *> &layer_weights = bpnet[i]->weights();
         for (int j = 0; j < layer_weights.size(); j++)
             for (int k = 0; k < layer_weights[j]->size(); k++)
                 weights.push_back(layer_weights[j]->at(k));
@@ -107,7 +118,7 @@ void ModelBP::set_weights(const std::vector<double> &weights)
     int weight_index = 0;
     for (int i = 0; i < bpnet.layer_size(); i++)
     {
-        const std::vector<tiny_dnn::vec_t *>& layer_weights = bpnet[i]->weights();
+        const std::vector<tiny_dnn::vec_t *> &layer_weights = bpnet[i]->weights();
         for (int j = 0; j < layer_weights.size(); j++)
             for (int k = 0; k < layer_weights[j]->size(); k++)
                 bpnet[i]->weights()[j]->at(k) = weights[weight_index++];

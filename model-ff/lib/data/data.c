@@ -50,11 +50,11 @@ Dataset dataset_split(const char *dataset_basepath, const int num_classes)
     // Buffer to store the full path of the dataset files.
     char full_path[256];
     Dataset dataset;
-    sprintf(full_path, "%s/%s", dataset_basepath, DATA_TRAIN_SPLIT);
-    const int feature_size = get_feature_len(full_path, num_classes);
-    dataset.train = data_build(full_path, feature_size, num_classes);
     sprintf(full_path, "%s/%s", dataset_basepath, DATA_TEST_SPLIT);
+    const int feature_size = get_feature_len(full_path, num_classes);
     dataset.test = data_build(full_path, feature_size, num_classes);
+    sprintf(full_path, "%s/%s", dataset_basepath, DATA_TRAIN_SPLIT);
+    dataset.train = data_build(full_path, feature_size, num_classes);
     sprintf(full_path, "%s/%s", dataset_basepath, DATA_VALIDATION_SPLIT);
     dataset.validation = data_build(full_path, feature_size, num_classes),
 
@@ -62,12 +62,11 @@ Dataset dataset_split(const char *dataset_basepath, const int num_classes)
     log_debug("Dataset test split: %d samples.", dataset.test->rows);
     log_debug("Dataset validation split: %d samples.", dataset.validation->rows);
 
-    if (dataset.train->rows == 0 || dataset.test->rows == 0)
-    {
-        log_error("Train and test splits cannot be empty. Exiting.");
-        free_dataset(dataset);
-        exit(EXIT_FAILURE);
-    }
+    if (dataset.train->rows == 0)
+        log_warn("Training dataset is empty.");
+    if (dataset.test->rows == 0)
+        log_warn("Testing dataset is empty.");
+
     return dataset;
 }
 

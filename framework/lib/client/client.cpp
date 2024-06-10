@@ -16,11 +16,6 @@ Client::Client(int id, std::shared_ptr<Model> model, const std::string &data_pat
 
     // Calculate and store the dataset size
     dataset_size = model->dataset_size;
-    if (dataset_size == 0)
-    {
-        spdlog::error("Empty dataset for client {}.", id);
-        exit(EXIT_FAILURE);
-    }
 
     // Log the initialization
     spdlog::info("Initialized client {}.", id);
@@ -34,6 +29,18 @@ void Client::update(int round_index, double learning_rate, size_t batch_size, si
     spdlog::debug("Round index: {}.", round_index);
     spdlog::debug("Learning rate: {}.", learning_rate);
     spdlog::debug("Batch size: {}.", batch_size);
+
+    if (dataset_size == 0)
+    {
+        spdlog::error("Empty dataset for client {}.", id);
+        exit(EXIT_FAILURE);
+    }
+
+    if (dataset_size == 0)
+    {
+        spdlog::error("Empty dataset for client {}.", id);
+        exit(EXIT_FAILURE);
+    }
 
     int epoch = 0;
     auto on_enumerate_epoch = [&]()
