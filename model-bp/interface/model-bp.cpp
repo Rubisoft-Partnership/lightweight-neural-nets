@@ -45,7 +45,6 @@ void ModelBP::train(const int &epochs, const int &batch_size, const double &lear
         std::cout << "Epoch " << epoch << "/" << epochs << " finished. "
                   << epoch_time.elapsed() << "s elapsed." << std::endl;
         ++epoch;
-        tiny_dnn::result res = bpnet.test(test_images, test_labels);
 
         disp.restart(train_images.size());
         epoch_time.restart();
