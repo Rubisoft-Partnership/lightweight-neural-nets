@@ -6,6 +6,7 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <orchestration/orchestration.hpp>
 #include <config/config.hpp>
+#include <metrics-logger/metrics-logger.hpp>
 
 #include "cli/cli.hpp"
 
@@ -61,6 +62,8 @@ int main(const int argc, const char *argv[])
         spdlog::error("Failed to create checkpoints directory at: {}", config::checkpoints_path);
         return EXIT_FAILURE;
     }
+
+    init_metrics_logger();
 
     try
     {

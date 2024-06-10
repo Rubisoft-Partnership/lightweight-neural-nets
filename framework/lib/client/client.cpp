@@ -5,6 +5,7 @@
 #include <client/client.hpp>
 #include <spdlog/spdlog.h>
 #include <filesystem>
+#include <metrics-logger/metrics-logger.hpp>
 
 
 Client::Client(int id, std::shared_ptr<Model> model, const std::string &data_path)
@@ -35,8 +36,20 @@ void Client::update(int round_index, double learning_rate, size_t batch_size, si
         exit(EXIT_FAILURE);
     }
 
+    if (dataset_size == 0)
+    {
+        spdlog::error("Empty dataset for client {}.", id);
+        exit(EXIT_FAILURE);
+    }
+
+    int epoch = 0;
+    auto on_enumerate_epoch = [&]()
+    {
+        metrics::Metrics metrics = model->evaluate();
+        log_metrics(round_index, id, epoch, DatasetType::LOCAL, metrics);
+    };
     // Train the model
-    model->train(epochs, batch_size, learning_rate);
+    model->train(epochs, batch_size, learning_rate, on_enumerate_epoch);
 
     // Evaluate the model and store the metrics
     auto metrics = model->evaluate();
