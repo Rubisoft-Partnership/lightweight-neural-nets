@@ -18,6 +18,7 @@ void init_metrics_logger()
     // Register the logger to make it globally accessible
     spdlog::register_logger(logger);
     spdlog::debug("Metrics logger initialized");
+    logger->info("round_num, client_id, epoch, dataset_type, accuracy, average_f1_score, average_precision, average_recall");
 }
 
 void log_metrics(const int round_num, const int client_id, const int epoch, const DatasetType dataset_type, const metrics::Metrics &metrics)
