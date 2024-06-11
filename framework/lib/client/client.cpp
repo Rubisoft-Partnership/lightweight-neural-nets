@@ -47,6 +47,7 @@ void Client::update(int round_index, double learning_rate, size_t batch_size, si
     {
         metrics::Metrics metrics = model->evaluate();
         log_metrics(round_index, id, epoch, DatasetType::LOCAL, metrics);
+        spdlog::info("Client {} epoch {} accuracy: {}.", id, epoch, metrics.accuracy);
     };
     // Train the model
     model->train(epochs, batch_size, learning_rate, on_enumerate_epoch);

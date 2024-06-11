@@ -62,11 +62,11 @@ void Orchestrator::run()
 
         spdlog::info("Starting round clients evaluation.");
         metrics::Metrics round_avg_metrics = evaluateClients(round_clients);
-        spdlog::info("Round average metrics:\n{}", round_avg_metrics.toString());
+        spdlog::info("Round average accuracy: {}.", round_avg_metrics.accuracy);
 
         spdlog::info("Starting global evaluation.");
         metrics::Metrics global_avg_metrics = evaluateClients(clients);
-        spdlog::info("Global average metrics:\n{}", global_avg_metrics.toString());
+        spdlog::info("Global average accuracy: {}.", global_avg_metrics.accuracy);
 
         if (round_index % std::max(static_cast<int>(num_rounds * checkpoint_rate), 1) == 0 && round_index > 0)
             saveCheckpoint();
