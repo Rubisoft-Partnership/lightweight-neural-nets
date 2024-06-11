@@ -1,7 +1,6 @@
 #include <config/config.hpp>
 
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
 
 #include <chrono>
 #include <sstream>
@@ -97,16 +96,55 @@ static int find_first_available_folder(const std::string &base_path)
     }
 }
 
-void config::init_metrics_logger()
+void config::log_simulation_params()
 {
-    // Create a file sink
-    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(config::simulation_path + "/metrics.log", true);
-    // Create a console sink
-    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    // Combine the sinks into a multi-sink logger
-    std::vector<spdlog::sink_ptr> sinks{file_sink, console_sink};
-    auto logger = std::make_shared<spdlog::logger>("metrics_logger", sinks.begin(), sinks.end());
-    logger->info("Metrics logger initialized.");
+    spdlog::info("Logging simulation parameters:");
+    spdlog::info("Orchestration parameters:");
+    spdlog::info("Number of clients: {}", orchestrator::num_clients);
+    spdlog::info("Number of rounds: {}", orchestrator::num_rounds);
+    spdlog::info("Client selection rate: {}", orchestrator::c_rate);
+    spdlog::info("Checkpoint rate: {}", orchestrator::checkpoint_rate);
+    spdlog::info("Training parameters:");
+    spdlog::info("Learning rate: {}", training::learning_rate);
+    spdlog::info("Batch size: {}", training::batch_size);
+    spdlog::info("Epochs: {}", training::epochs);
+    spdlog::info("Model parameters:");
+    switch (model_type)
+    {
+    case config::ModelType::FF:
+        spdlog::info("FF model");
+        spdlog::info("Threshold: {}", parameters::ff::threshold);
+        spdlog::info("Beta1: {}", parameters::ff::beta1);
+        spdlog::info("Beta2: {}", parameters::ff::beta2);
+        switch (parameters::ff::loss)
+        {
+        case LossType::LOSS_TYPE_FF:
+            spdlog::info("FF loss");
+            break;
+        case LossType::LOSS_TYPE_SYMBA:
+            spdlog::info("SymBa loss");
+            break;
+        default:
+            spdlog::error("Unknown loss type while logging simulation parameters");
+            break;
+        }
+        break;
+    case config::ModelType::BP:
+        spdlog::info("BP model");
+        break;
+    default:
+        spdlog::error("Unknown model type while logging simulation parameters");
+        break;
+    }
+    spdlog::info("Units per layer: {}", [&]()
+                 {
+        std::string units_str = "[ ";
+        for (int unit : parameters::units)
+            units_str += std::to_string(unit) + " ";
+        units_str += "]";
+        return units_str; }());
+    spdlog::info("Number of classes: {}", parameters::num_classes);
+    spdlog::info("Finished logging simulation parameters\n");
 }
 
 #if defined(_WIN32)

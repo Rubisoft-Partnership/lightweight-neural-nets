@@ -76,12 +76,6 @@ void Orchestrator::run()
         client->logRounds();
 }
 
-// TODO: implement function to log all simulation parameters
-void Orchestrator::logParams()
-{
-    spdlog::info("To be implemented...");
-}
-
 void Orchestrator::saveCheckpoint()
 {
     const std::string &path = checkpoints_path;
@@ -133,17 +127,17 @@ std::vector<std::shared_ptr<Client>> initializeClients(const std::vector<std::st
         std::shared_ptr<Client> client;
         switch (config::model_type)
         {
-            case config::ModelType::FF:
-                modelff = std::make_shared<ModelFF>();
-                client = std::make_shared<Client>(i, modelff, datasets_path[i % datasets_path.size()]);
-                break;
-            case config::ModelType::BP:
-                modelbp = std::make_shared<ModelBP>();
-                client = std::make_shared<Client>(i, modelbp, datasets_path[i % datasets_path.size()]);
-                break;
-            default:
-                spdlog::error("Invalid model type.");
-                exit(EXIT_FAILURE);
+        case config::ModelType::FF:
+            modelff = std::make_shared<ModelFF>();
+            client = std::make_shared<Client>(i, modelff, datasets_path[i % datasets_path.size()]);
+            break;
+        case config::ModelType::BP:
+            modelbp = std::make_shared<ModelBP>();
+            client = std::make_shared<Client>(i, modelbp, datasets_path[i % datasets_path.size()]);
+            break;
+        default:
+            spdlog::error("Invalid model type.");
+            exit(EXIT_FAILURE);
         }
         clients.push_back(client);
     }
