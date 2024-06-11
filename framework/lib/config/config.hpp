@@ -46,7 +46,7 @@ namespace config
         extern int epochs;
     }
 
-    namespace orchestrator
+    namespace orchestration
     {
         extern size_t num_clients;
         extern size_t num_rounds;

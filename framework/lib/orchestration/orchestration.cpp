@@ -12,7 +12,7 @@
 
 namespace fs = std::filesystem;
 
-using namespace config::orchestrator;
+using namespace config::orchestration;
 
 static std::vector<std::string> listFolders(const std::string &folder, const std::string &match);
 

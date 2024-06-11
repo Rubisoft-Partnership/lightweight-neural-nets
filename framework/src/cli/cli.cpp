@@ -150,7 +150,7 @@ void parse_args(const int argc, const char *argv[])
                 spdlog::error("Invalid number of clients.");
                 exit(EXIT_FAILURE);
             }
-            config::orchestrator::num_clients = std::stoi(argv[i]);
+            config::orchestration::num_clients = std::stoi(argv[i]);
         }
         else if (args[i] == "--num-rounds" || args[i] == "-nr")
         {
@@ -160,7 +160,7 @@ void parse_args(const int argc, const char *argv[])
                 spdlog::error("Invalid number of rounds.");
                 exit(EXIT_FAILURE);
             }
-            config::orchestrator::num_rounds = std::stoi(argv[i]);
+            config::orchestration::num_rounds = std::stoi(argv[i]);
         }
         else if (args[i] == "--client-rate" || args[i] == "-cr")
         {
@@ -170,7 +170,7 @@ void parse_args(const int argc, const char *argv[])
                 spdlog::error("Invalid c rate.");
                 exit(EXIT_FAILURE);
             }
-            config::orchestrator::c_rate = std::stof(argv[i]);
+            config::orchestration::c_rate = std::stof(argv[i]);
         }
         else if (args[i] == "--checkpoint-rate" || args[i] == "-chr")
         {
@@ -180,7 +180,7 @@ void parse_args(const int argc, const char *argv[])
                 spdlog::error("Invalid checkpoint rate.");
                 exit(EXIT_FAILURE);
             }
-            config::orchestrator::checkpoint_rate = std::stof(argv[i]);
+            config::orchestration::checkpoint_rate = std::stof(argv[i]);
         }
         else if (args[i] == "--dataset" || args[i] == "-d")
         {
@@ -249,10 +249,10 @@ void print_help(std::string name)
               << "--learning-rate, -lr: Learning rate for the training. Default: " << config::training::learning_rate << "." << std::endl
               << "--batch-size, -bs: Batch size for the training. Default: " << config::training::batch_size << "." << std::endl
               << "--epochs, -e: Number of epochs for the training. Default: " << config::training::epochs << "." << std::endl
-              << "--num-clients, -ncl: Number of clients in the simulation. Default: " << config::orchestrator::num_clients << "." << std::endl
-              << "--num-rounds, -nr: Number of rounds in the simulation. Default: " << config::orchestrator::num_rounds << "." << std::endl
-              << "--client-rate, -cr: Client rate for the simulation. Default: " << config::orchestrator::c_rate << "." << std::endl
-              << "--checkpoint-rate, -chr: Checkpoint rate for the simulation. Default: " << config::orchestrator::checkpoint_rate << "." << std::endl
+              << "--num-clients, -ncl: Number of clients in the simulation. Default: " << config::orchestration::num_clients << "." << std::endl
+              << "--num-rounds, -nr: Number of rounds in the simulation. Default: " << config::orchestration::num_rounds << "." << std::endl
+              << "--client-rate, -cr: Client rate for the simulation. Default: " << config::orchestration::c_rate << "." << std::endl
+              << "--checkpoint-rate, -chr: Checkpoint rate for the simulation. Default: " << config::orchestration::checkpoint_rate << "." << std::endl
               << "--dataset, -d: Dataset to use (digits, mnist). Default: << " << config::selected_dataset << "." << std::endl
               << "--log-level, -ll: Log level (debug, info, warn, error). Default: info." << std::endl;
 }

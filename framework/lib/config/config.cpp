@@ -35,7 +35,7 @@ namespace config
         int epochs = 5;
     }
 
-    namespace orchestrator
+    namespace orchestration
     {
         size_t num_clients = 10;
         size_t num_rounds = 3;
@@ -100,10 +100,10 @@ void config::log_simulation_params()
 {
     spdlog::info("Logging simulation parameters:");
     spdlog::info("Orchestration parameters:");
-    spdlog::info("Number of clients: {}", orchestrator::num_clients);
-    spdlog::info("Number of rounds: {}", orchestrator::num_rounds);
-    spdlog::info("Client selection rate: {}", orchestrator::c_rate);
-    spdlog::info("Checkpoint rate: {}", orchestrator::checkpoint_rate);
+    spdlog::info("Number of clients: {}", orchestration::num_clients);
+    spdlog::info("Number of rounds: {}", orchestration::num_rounds);
+    spdlog::info("Client selection rate: {}", orchestration::c_rate);
+    spdlog::info("Checkpoint rate: {}", orchestration::checkpoint_rate);
     spdlog::info("Training parameters:");
     spdlog::info("Learning rate: {}", training::learning_rate);
     spdlog::info("Batch size: {}", training::batch_size);
