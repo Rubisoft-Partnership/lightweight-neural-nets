@@ -11,7 +11,6 @@ std::string string_to_lower(const std::string &str);
 
 void parse_args(const int argc, const char *argv[])
 {
-    spdlog::debug("Parsing command line arguments.");
     std::vector<std::string> args(argv, argv + argc);
     if (argc < 2)
     {
@@ -40,7 +39,7 @@ void parse_args(const int argc, const char *argv[])
             config::parameters::num_classes = std::stoi(argv[i]);
             continue;
         }
-        if (args[i] == "--layer-units" || args[i] == "-lu")
+        else if (args[i] == "--layer-units" || args[i] == "-lu")
         {
             std::vector<int> units = {};
             while (i + 1 < argc && args[i + 1][0] != '-')
@@ -58,11 +57,10 @@ void parse_args(const int argc, const char *argv[])
             {
                 units_str += std::to_string(unit) + " ";
             }
-            spdlog::debug("Layer units: {}", units_str);
         }
 
         // Model FF specific parameters
-        if (args[i] == "--threshold" || args[i] == "-t")
+        else if (args[i] == "--threshold" || args[i] == "-t")
         {
             i++;
             if (args[i][0] == '-')
@@ -70,10 +68,9 @@ void parse_args(const int argc, const char *argv[])
                 spdlog::error("Invalid threshold.");
                 exit(EXIT_FAILURE);
             }
-            spdlog::debug("Threshold: {}", argv[i]);
             config::parameters::ff::threshold = std::stof(argv[i]);
         }
-        if (args[i] == "--loss-function" || args[i] == "-lf")
+        else if (args[i] == "--loss-function" || args[i] == "-lf")
         {
             i++;
             std::string loss_function = string_to_lower(args[i]);
@@ -91,7 +88,7 @@ void parse_args(const int argc, const char *argv[])
                 exit(EXIT_FAILURE);
             }
         }
-        if (args[i] == "--beta1" || args[i] == "-b1")
+        else if (args[i] == "--beta1" || args[i] == "-b1")
         {
             i++;
             if (args[i][0] == '-')
@@ -99,10 +96,9 @@ void parse_args(const int argc, const char *argv[])
                 spdlog::error("Invalid beta1.");
                 exit(EXIT_FAILURE);
             }
-            spdlog::debug("Beta1: {}", argv[i]);
             config::parameters::ff::beta1 = std::stof(argv[i]);
         }
-        if (args[i] == "--beta2" || args[i] == "-b2")
+        else if (args[i] == "--beta2" || args[i] == "-b2")
         {
             i++;
             if (args[i][0] == '-')
@@ -110,12 +106,11 @@ void parse_args(const int argc, const char *argv[])
                 spdlog::error("Invalid beta2.");
                 exit(EXIT_FAILURE);
             }
-            spdlog::debug("Beta2: {}", argv[i]);
             config::parameters::ff::beta2 = std::stof(argv[i]);
         }
 
         // Training parameters
-        if (args[i] == "--learning-rate" || args[i] == "-lr")
+        else if (args[i] == "--learning-rate" || args[i] == "-lr")
         {
             i++;
             if (args[i][0] == '-')
@@ -123,10 +118,9 @@ void parse_args(const int argc, const char *argv[])
                 spdlog::error("Invalid learning rate.");
                 exit(EXIT_FAILURE);
             }
-            spdlog::debug("Learning rate: {}", argv[i]);
             config::training::learning_rate = std::stof(argv[i]);
         }
-        if (args[i] == "--batch-size" || args[i] == "-bs")
+        else if (args[i] == "--batch-size" || args[i] == "-bs")
         {
             i++;
             if (args[i][0] == '-')
@@ -134,10 +128,9 @@ void parse_args(const int argc, const char *argv[])
                 spdlog::error("Invalid batch size.");
                 exit(EXIT_FAILURE);
             }
-            spdlog::debug("Batch size: {}", argv[i]);
             config::training::batch_size = std::stoi(argv[i]);
         }
-        if (args[i] == "--epochs" || args[i] == "-e")
+        else if (args[i] == "--epochs" || args[i] == "-e")
         {
             i++;
             if (args[i][0] == '-')
@@ -145,12 +138,11 @@ void parse_args(const int argc, const char *argv[])
                 spdlog::error("Invalid number of epochs.");
                 exit(EXIT_FAILURE);
             }
-            spdlog::debug("Number of epochs: {}", argv[i]);
             config::training::epochs = std::stoi(argv[i]);
         }
 
         // Orchestrator parameters
-        if (args[i] == "--num-clients" || args[i] == "-ncl")
+        else if (args[i] == "--num-clients" || args[i] == "-ncl")
         {
             i++;
             if (args[i][0] == '-')
@@ -158,10 +150,9 @@ void parse_args(const int argc, const char *argv[])
                 spdlog::error("Invalid number of clients.");
                 exit(EXIT_FAILURE);
             }
-            spdlog::debug("Number of clients: {}", argv[i]);
             config::orchestrator::num_clients = std::stoi(argv[i]);
         }
-        if (args[i] == "--num-rounds" || args[i] == "-nr")
+        else if (args[i] == "--num-rounds" || args[i] == "-nr")
         {
             i++;
             if (args[i][0] == '-')
@@ -169,10 +160,9 @@ void parse_args(const int argc, const char *argv[])
                 spdlog::error("Invalid number of rounds.");
                 exit(EXIT_FAILURE);
             }
-            spdlog::debug("Number of rounds: {}", argv[i]);
             config::orchestrator::num_rounds = std::stoi(argv[i]);
         }
-        if (args[i] == "--client-rate" || args[i] == "-cr")
+        else if (args[i] == "--client-rate" || args[i] == "-cr")
         {
             i++;
             if (args[i][0] == '-')
@@ -180,10 +170,9 @@ void parse_args(const int argc, const char *argv[])
                 spdlog::error("Invalid c rate.");
                 exit(EXIT_FAILURE);
             }
-            spdlog::debug("C rate: {}", argv[i]);
             config::orchestrator::c_rate = std::stof(argv[i]);
         }
-        if (args[i] == "--checkpoint-rate" || args[i] == "-chr")
+        else if (args[i] == "--checkpoint-rate" || args[i] == "-chr")
         {
             i++;
             if (args[i][0] == '-')
@@ -191,10 +180,9 @@ void parse_args(const int argc, const char *argv[])
                 spdlog::error("Invalid checkpoint rate.");
                 exit(EXIT_FAILURE);
             }
-            spdlog::debug("Checkpoint rate: {}", argv[i]);
             config::orchestrator::checkpoint_rate = std::stof(argv[i]);
         }
-        if (args[i] == "--dataset" || args[i] == "-d")
+        else if (args[i] == "--dataset" || args[i] == "-d")
         {
             i++;
             std::string dataset = string_to_lower(args[i]);
@@ -213,7 +201,7 @@ void parse_args(const int argc, const char *argv[])
                 exit(EXIT_FAILURE);
             }
         }
-        if (args[i] == "--log-level" || args[i] == "-ll")
+        else if (args[i] == "--log-level" || args[i] == "-ll")
         {
             i++;
             std::string log_level = string_to_lower(args[i]);
