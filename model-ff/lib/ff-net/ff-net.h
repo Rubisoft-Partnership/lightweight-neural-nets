@@ -90,6 +90,7 @@ int predict_ff_net(const FFNet *ffnet, const double *input, const int num_classe
  *
  * @param ffnet The FFNet to save.
  * @param filename The name of the file to save the FFNet.
+ * @param default_path The flag to use the default path for the FFNet file.
  */
 void save_ff_net(const FFNet *ffnet, const char *filename, bool default_path);
 
@@ -104,6 +105,7 @@ void save_ff_net(const FFNet *ffnet, const char *filename, bool default_path);
  * @param pdact The derivative of the activation function for the FFNet.
  * @param beta1 The beta1 value of the Adam optimizer.
  * @param beta2 The beta2 value of the Adam optimizer.
+ * @param default_path The flag to use the default path for the FFNet file.
  */
 void load_ff_net(FFNet *ffnet, const char *filename, double (*act)(double), double (*pdact)(double),
-                 const double beta1, const double beta2);
+                 const double beta1, const double beta2, bool default_path);
