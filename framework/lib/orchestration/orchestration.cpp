@@ -114,6 +114,7 @@ void Orchestrator::saveCheckpoint()
     for (auto &client : clients)
     {
         client->model->save(round_folder + "/model-client-" + std::to_string(client->id) + ".bin");
+        server->model->save(round_folder + "/model-server.bin");
     }
 }
 
