@@ -12,7 +12,7 @@
 
 namespace fs = std::filesystem;
 
-using namespace config::orchestrator;
+using namespace config::orchestration;
 
 static std::vector<std::string> listFolders(const std::string &folder, const std::string &match);
 
@@ -62,11 +62,11 @@ void Orchestrator::run()
 
         spdlog::info("Starting round clients evaluation.");
         metrics::Metrics round_avg_metrics = evaluateClients(round_clients);
-        spdlog::info("Round average metrics:\n{}", round_avg_metrics.toString());
+        spdlog::info("Round average accuracy: {}.", round_avg_metrics.accuracy);
 
         spdlog::info("Starting global evaluation.");
         metrics::Metrics global_avg_metrics = evaluateClients(clients);
-        spdlog::info("Global average metrics:\n{}", global_avg_metrics.toString());
+        spdlog::info("Global average accuracy: {}.", global_avg_metrics.accuracy);
 
         if (round_index % std::max(static_cast<int>(num_rounds * checkpoint_rate), 1) == 0 && round_index > 0)
             saveCheckpoint();
@@ -74,12 +74,6 @@ void Orchestrator::run()
 
     for (auto &client : clients)
         client->logRounds();
-}
-
-// TODO: implement function to log all simulation parameters
-void Orchestrator::logParams()
-{
-    spdlog::info("To be implemented...");
 }
 
 void Orchestrator::saveCheckpoint()
@@ -133,17 +127,17 @@ std::vector<std::shared_ptr<Client>> initializeClients(const std::vector<std::st
         std::shared_ptr<Client> client;
         switch (config::model_type)
         {
-            case config::ModelType::FF:
-                modelff = std::make_shared<ModelFF>();
-                client = std::make_shared<Client>(i, modelff, datasets_path[i % datasets_path.size()]);
-                break;
-            case config::ModelType::BP:
-                modelbp = std::make_shared<ModelBP>();
-                client = std::make_shared<Client>(i, modelbp, datasets_path[i % datasets_path.size()]);
-                break;
-            default:
-                spdlog::error("Invalid model type.");
-                exit(EXIT_FAILURE);
+        case config::ModelType::FF:
+            modelff = std::make_shared<ModelFF>();
+            client = std::make_shared<Client>(i, modelff, datasets_path[i % datasets_path.size()]);
+            break;
+        case config::ModelType::BP:
+            modelbp = std::make_shared<ModelBP>();
+            client = std::make_shared<Client>(i, modelbp, datasets_path[i % datasets_path.size()]);
+            break;
+        default:
+            spdlog::error("Invalid model type.");
+            exit(EXIT_FAILURE);
         }
         clients.push_back(client);
     }

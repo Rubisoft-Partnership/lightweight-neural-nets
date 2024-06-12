@@ -1,15 +1,18 @@
 #include <config/config.hpp>
 
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
+#include <nlohmann/json.hpp>
 
 #include <chrono>
 #include <sstream>
 #include <iomanip>
 #include <filesystem>
+#include <fstream>
 #include <unistd.h>
 #include <limits.h>
+
 using namespace config;
+using json = nlohmann::json;
 
 static std::string get_timestamp();
 static int find_first_available_folder(const std::string &base_path);
@@ -36,7 +39,7 @@ namespace config
         int epochs = 5;
     }
 
-    namespace orchestrator
+    namespace orchestration
     {
         size_t num_clients = 10;
         size_t num_rounds = 3;
@@ -74,6 +77,54 @@ void config::init_config()
     log_path = basepath + logs_folder + folder_num + "_" + simulation_timestamp + ".log";
 }
 
+void config::save_config_to_file() {
+    // Create a JSON object
+    json config_json = {
+        {"basepath", basepath},
+        {"datasets_path", datasets_path},
+        {"simulation_path", simulation_path},
+        {"checkpoints_path", checkpoints_path},
+        {"log_path", log_path},
+        {"simulation_timestamp", simulation_timestamp},
+        {"selected_dataset", selected_dataset},
+        {"model_type", model_type == ModelType::BP ? "BP" : "FF"},
+        {"orchestration", {
+            {"num_clients", orchestration::num_clients},
+            {"num_rounds", orchestration::num_rounds},
+            {"c_rate", orchestration::c_rate},
+            {"checkpoint_rate", orchestration::checkpoint_rate}
+        }},
+        {"training", {
+            {"learning_rate", training::learning_rate},
+            {"batch_size", training::batch_size},
+            {"epochs", training::epochs}
+        }},
+        {"parameters", {
+            {"num_classes", parameters::num_classes},
+            {"units", parameters::units},
+            {"ff", {
+                {"threshold", parameters::ff::threshold},
+                {"beta1", parameters::ff::beta1},
+                {"beta2", parameters::ff::beta2},
+                {"loss", parameters::ff::loss == LossType::LOSS_TYPE_FF ? "FF" : "SymBa"}
+            }}
+        }}
+    };
+
+    // Specify the file path (use the existing simulation path)
+    std::string file_path = simulation_path + "config.json";
+
+    // Write the JSON object to a file
+    std::ofstream file(file_path);
+    if (file.is_open()) {
+        file << config_json.dump(4); // dump with indentation for readability
+        file.close();
+        spdlog::info("Configuration saved to {}", file_path);
+    } else {
+        spdlog::error("Failed to open file to save configuration.");
+    }
+}
+
 static std::string get_timestamp()
 {
     auto now = std::chrono::system_clock::now();
@@ -97,16 +148,55 @@ static int find_first_available_folder(const std::string &base_path)
     }
 }
 
-void config::init_metrics_logger()
+void config::log_simulation_params()
 {
-    // Create a file sink
-    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(config::simulation_path + "/metrics.log", true);
-    // Create a console sink
-    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    // Combine the sinks into a multi-sink logger
-    std::vector<spdlog::sink_ptr> sinks{file_sink, console_sink};
-    auto logger = std::make_shared<spdlog::logger>("metrics_logger", sinks.begin(), sinks.end());
-    logger->info("Metrics logger initialized.");
+    spdlog::info("Logging simulation parameters:");
+    spdlog::info("Orchestration parameters:");
+    spdlog::info("Number of clients: {}", orchestration::num_clients);
+    spdlog::info("Number of rounds: {}", orchestration::num_rounds);
+    spdlog::info("Client selection rate: {}", orchestration::c_rate);
+    spdlog::info("Checkpoint rate: {}", orchestration::checkpoint_rate);
+    spdlog::info("Training parameters:");
+    spdlog::info("Learning rate: {}", training::learning_rate);
+    spdlog::info("Batch size: {}", training::batch_size);
+    spdlog::info("Epochs: {}", training::epochs);
+    spdlog::info("Model parameters:");
+    switch (model_type)
+    {
+    case config::ModelType::FF:
+        spdlog::info("FF model");
+        spdlog::info("Threshold: {}", parameters::ff::threshold);
+        spdlog::info("Beta1: {}", parameters::ff::beta1);
+        spdlog::info("Beta2: {}", parameters::ff::beta2);
+        switch (parameters::ff::loss)
+        {
+        case LossType::LOSS_TYPE_FF:
+            spdlog::info("FF loss");
+            break;
+        case LossType::LOSS_TYPE_SYMBA:
+            spdlog::info("SymBa loss");
+            break;
+        default:
+            spdlog::error("Unknown loss type while logging simulation parameters");
+            break;
+        }
+        break;
+    case config::ModelType::BP:
+        spdlog::info("BP model");
+        break;
+    default:
+        spdlog::error("Unknown model type while logging simulation parameters");
+        break;
+    }
+    spdlog::info("Units per layer: {}", [&]()
+                 {
+        std::string units_str = "[ ";
+        for (int unit : parameters::units)
+            units_str += std::to_string(unit) + " ";
+        units_str += "]";
+        return units_str; }());
+    spdlog::info("Number of classes: {}", parameters::num_classes);
+    spdlog::info("Finished logging simulation parameters\n");
 }
 
 #if defined(_WIN32)
