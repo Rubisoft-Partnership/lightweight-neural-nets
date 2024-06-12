@@ -37,7 +37,7 @@ int layers_sizes[20] = {74, 500, 500, 500};
 int layers_number = 4;
 
 // Hyper Parameters.
-double learning_rate = 0.005;
+double learning_rate = 0.01;
 const double beta1 = 0.9;
 const double beta2 = 0.999;
 int epochs = 5;

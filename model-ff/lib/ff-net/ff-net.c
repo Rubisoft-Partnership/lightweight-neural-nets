@@ -95,7 +95,7 @@ double train_ff_net(FFNet *ffnet, const FFBatch batch, const double learning_rat
     loss += train_ff_cell(ffnet->layers[0], batch, learning_rate, ffnet->threshold, ffnet->loss);
     for (int i = 1; i < ffnet->num_cells; i++)
         loss += train_ff_cell(ffnet->layers[i], batch, learning_rate, ffnet->threshold, ffnet->loss);
-    return loss;
+    return loss/(ffnet->num_cells);
 }
 
 /**
