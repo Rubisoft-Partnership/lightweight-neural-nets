@@ -111,11 +111,13 @@ void Orchestrator::saveCheckpoint()
         fs::create_directory(round_folder);
     }
 
+    // Save the models of all clients
     for (auto &client : clients)
     {
         client->model->save(round_folder + "/model-client-" + std::to_string(client->id) + ".bin");
-        server->model->save(round_folder + "/model-server.bin");
     }
+    // Save the model of the server
+    server->model->save(round_folder + "/model-server.bin");
 }
 
 std::vector<std::shared_ptr<Client>> initializeClients(const std::vector<std::string> &datasets_path)
