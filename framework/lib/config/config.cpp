@@ -1,14 +1,18 @@
 #include <config/config.hpp>
 
 #include <spdlog/spdlog.h>
+#include <nlohmann/json.hpp>
 
 #include <chrono>
 #include <sstream>
 #include <iomanip>
 #include <filesystem>
+#include <fstream>
 #include <unistd.h>
 #include <limits.h>
+
 using namespace config;
+using json = nlohmann::json;
 
 static std::string get_timestamp();
 static int find_first_available_folder(const std::string &base_path);
@@ -71,6 +75,54 @@ void config::init_config()
 
     simulation_timestamp = get_timestamp();
     log_path = basepath + logs_folder + folder_num + "_" + simulation_timestamp + ".log";
+}
+
+void config::save_config_to_file() {
+    // Create a JSON object
+    json config_json = {
+        {"basepath", basepath},
+        {"datasets_path", datasets_path},
+        {"simulation_path", simulation_path},
+        {"checkpoints_path", checkpoints_path},
+        {"log_path", log_path},
+        {"simulation_timestamp", simulation_timestamp},
+        {"selected_dataset", selected_dataset},
+        {"model_type", model_type == ModelType::BP ? "BP" : "FF"},
+        {"orchestration", {
+            {"num_clients", orchestration::num_clients},
+            {"num_rounds", orchestration::num_rounds},
+            {"c_rate", orchestration::c_rate},
+            {"checkpoint_rate", orchestration::checkpoint_rate}
+        }},
+        {"training", {
+            {"learning_rate", training::learning_rate},
+            {"batch_size", training::batch_size},
+            {"epochs", training::epochs}
+        }},
+        {"parameters", {
+            {"num_classes", parameters::num_classes},
+            {"units", parameters::units},
+            {"ff", {
+                {"threshold", parameters::ff::threshold},
+                {"beta1", parameters::ff::beta1},
+                {"beta2", parameters::ff::beta2},
+                {"loss", parameters::ff::loss == LossType::LOSS_TYPE_FF ? "FF" : "SymBa"}
+            }}
+        }}
+    };
+
+    // Specify the file path (use the existing simulation path)
+    std::string file_path = simulation_path + "config.json";
+
+    // Write the JSON object to a file
+    std::ofstream file(file_path);
+    if (file.is_open()) {
+        file << config_json.dump(4); // dump with indentation for readability
+        file.close();
+        spdlog::info("Configuration saved to {}", file_path);
+    } else {
+        spdlog::error("Failed to open file to save configuration.");
+    }
 }
 
 static std::string get_timestamp()

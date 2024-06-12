@@ -7,3 +7,6 @@
 [submodule "framework/lib/logging"]
 	path = framework/lib/logging
 	url = https://github.com/gabime/spdlog.git
+[submodule "framework/lib/json"]
+	path = framework/lib/json
+	url = https://github.com/nlohmann/json.git
