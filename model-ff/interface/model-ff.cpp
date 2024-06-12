@@ -174,6 +174,6 @@ void ModelFF::save(const std::string filename)
 
 void ModelFF::load(const std::string filename)
 {
-    load_ff_net(ffnet, filename.c_str(), relu, pdrelu, beta1, beta2);
+    load_ff_net(ffnet, filename.c_str(), relu, pdrelu, beta1, beta2, false); // set checkpoint default path to false
     log_debug("FFNet loaded from %s", filename.c_str());
 }
