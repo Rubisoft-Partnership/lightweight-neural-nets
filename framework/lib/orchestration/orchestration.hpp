@@ -18,7 +18,6 @@ public:
     void run();
 
 private:
-    void logParams();
     void saveCheckpoint();
     std::vector<std::shared_ptr<Client>> sampleClients();
     metrics::Metrics evaluateClients(std::vector<std::shared_ptr<Client>> clients);

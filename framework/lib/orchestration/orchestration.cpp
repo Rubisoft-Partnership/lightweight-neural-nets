@@ -76,12 +76,6 @@ void Orchestrator::run()
         client->logRounds();
 }
 
-// TODO: implement function to log all simulation parameters
-void Orchestrator::logParams()
-{
-    spdlog::info("To be implemented...");
-}
-
 void Orchestrator::saveCheckpoint()
 {
     const std::string &path = checkpoints_path;
