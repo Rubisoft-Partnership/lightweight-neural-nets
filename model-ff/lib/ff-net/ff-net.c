@@ -19,10 +19,14 @@
 #include <data/data.h>
 #include <ff-cell/ff-cell.h>
 #include <ff-utils/ff-utils.h>
+#include <metrics.h>
+#include <assert.h>
 
 // Buffer to store output activations.
 #define H_BUFFER_SIZE 1024
 double o_buffer[H_BUFFER_SIZE]; // outputs buffer for positive pass
+
+int parse_label(const double *target, const int num_classes);
 
 /**
  * @brief Builds a FFNet by creating multiple FFCell objects.
@@ -95,7 +99,94 @@ double train_ff_net(FFNet *ffnet, const FFBatch batch, const double learning_rat
     loss += train_ff_cell(ffnet->layers[0], batch, learning_rate, ffnet->threshold, ffnet->loss);
     for (int i = 1; i < ffnet->num_cells; i++)
         loss += train_ff_cell(ffnet->layers[i], batch, learning_rate, ffnet->threshold, ffnet->loss);
-    return loss/(ffnet->num_cells);
+    return loss / (ffnet->num_cells);
+}
+
+/**
+ * Calculates the loss on the given dataset and adds the predictions to the metrics.
+ *
+ * @param ffnet The FFNet model to test.
+ * @param data The dataset to test the model on.
+ * @return The average loss of the model on the dataset.
+ */
+double test_ff_net(FFNet *ffnet, Data *data, const int input_size)
+{
+    // initialize predictions for metrics generation
+    init_predictions();
+    // Buffer to store activations to feed the next layer.
+    double *netinput = (double *)malloc((input_size) * sizeof(double));
+    // History of goodnesses for the ground truth class.
+    double *gt_goodnesses = (double *)malloc((ffnet->num_cells) * sizeof(double));
+    // Goodnesses and losses for each class.
+    double goodnesses[MAX_CLASSES], losses[MAX_CLASSES];
+    Loss loss = select_loss(ffnet->loss);
+    double loss_sum = 0.0;
+    // For each sample in the dataset.
+    for (int i = 0; i < data->rows; i++)
+    {
+        // Initialize the goodnesses and losses.
+        for (Label j = 0; j < data->num_class; j++)
+        {
+            goodnesses[j] = 0.0;
+            losses[j] = 0.0;
+        }
+        // Find the ground truth class.
+        Label ground_truth = parse_label(data->target[i], data->num_class);
+        assert(ground_truth != -1);
+        // Perform forward propagation for the ground truth class and calculate its goodness for every cell.
+        embed_label(netinput, data->input[i], ground_truth, input_size, data->num_class);
+        for (int cell = 0; cell < ffnet->num_cells; cell++)
+        {
+            fprop_ff_cell(ffnet->layers[cell], cell == 0 ? netinput : ffnet->layers[cell - 1].output);
+            gt_goodnesses[cell] = goodness(ffnet->layers[cell].output, ffnet->layers[cell].output_size);
+            goodnesses[ground_truth] += gt_goodnesses[cell];
+            losses[ground_truth] += loss.loss(gt_goodnesses[cell], gt_goodnesses[cell], ffnet->threshold);
+        }
+        // For each class perform forward propagation and calculate the goodness and loss.
+        for (Label class = 0; class < data->num_class; class ++)
+        {
+            // Skip the ground truth class.
+            if (class == ground_truth)
+                continue;
+            // For each cell in the network perform forward propagation and calculate the goodness and loss.
+            embed_label(netinput, data->input[i], class, input_size, data->num_class);
+            for (int cell = 0; cell < ffnet->num_cells; cell++)
+            {
+                fprop_ff_cell(ffnet->layers[cell], cell == 0 ? netinput : ffnet->layers[cell - 1].output);
+                const double cell_goodness = goodness(ffnet->layers[cell].output, ffnet->layers[cell].output_size);
+                goodnesses[class] += cell_goodness;
+                losses[class] += loss.loss(gt_goodnesses[cell], cell_goodness, ffnet->threshold);
+            }
+        }
+
+        // Find the predicted class.
+        Label max_goodness_index = 0;
+        for (Label i = 1; i < data->num_class; i++)
+            if (goodnesses[i] > goodnesses[max_goodness_index])
+                max_goodness_index = i;
+
+        add_prediction(ground_truth, max_goodness_index);
+        double mean_loss = 0.0;
+        for (Label i = 0; i < data->num_class; i++)
+            mean_loss += losses[i];
+
+        mean_loss /= data->num_class * ffnet->num_cells;
+        loss_sum += mean_loss;
+    }
+    free(netinput);
+    free(gt_goodnesses);
+
+    return loss_sum / data->rows;
+}
+
+int parse_label(const double *target, const int num_classes)
+{
+    for (int i = 0; i < num_classes; i++)
+    {
+        if (target[i] == 1.0)
+            return i;
+    }
+    return -1;
 }
 
 /**
@@ -183,7 +274,6 @@ void save_ff_net(const FFNet *ffnet, const char *filename, bool default_path)
             snprintf(full_path, sizeof(full_path), "%s/%s", FFNET_CHECKPOINT_PATH, filename);
             log_info("Saving FFNet to file %s", full_path);
         }
-
     }
 
     file = fopen(default_path ? full_path : filename, "wb");

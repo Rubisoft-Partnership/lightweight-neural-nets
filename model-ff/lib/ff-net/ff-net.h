@@ -71,6 +71,15 @@ void free_ff_net(FFNet *ffnet);
 double train_ff_net(FFNet *ffnet, const FFBatch batch, const double learning_rate);
 
 /**
+ * Calculates the loss on the given dataset and adds the predictions to the metrics.
+ *
+ * @param ffnet The FFNet model to test.
+ * @param data The dataset to test the model on.
+ * @return The average loss of the model on the dataset.
+ */
+double test_ff_net(FFNet *ffnet, Data *data, const int input_size);
+
+/**
  * @brief Performs inference with a FFNet.
  *
  * This function performs inference with a FFNet by predicting the class label for the given input.
