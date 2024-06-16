@@ -35,6 +35,7 @@ namespace metrics
         // To string representation
         std::string toString() const;
 
+        double loss;
     private:
         // Helper function to convert C matrix to C++ matrix
         void convertConfusionMatrix(float **c_matrix, int size);
