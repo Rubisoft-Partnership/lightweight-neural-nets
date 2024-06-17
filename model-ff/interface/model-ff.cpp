@@ -76,7 +76,7 @@ void ModelFF::build(const std::string &data_path)
 void ModelFF::train(const int &epochs, const int &batch_size, const double &learning_rate, std::function<void()> on_enumerate_epoch)
 {
     // Find max layer size.
-    int max_units = *std::max_element(units.begin(), units.end());
+    const int max_units = *std::max_element(units.begin(), units.end());
 
     clock_t start_time = clock();
     // Since batch is used for all layers, sample size is set to the maximum of the layers sizes.
@@ -121,29 +121,11 @@ void ModelFF::train(const int &epochs, const int &batch_size, const double &lear
 metrics::Metrics ModelFF::evaluate()
 {
     log_info("Testing FFNet...");
-    init_predictions();
-
-    for (int i = 0; i < data.test->rows; i++)
-    {
-        double *const input = data.test->input[i];
-        double *const target = data.test->target[i];
-        int ground_truth = -1;
-
-        for (int j = 0; j < data.test->num_class; j++)
-        {
-            if (target[j] == 1.0f)
-            {
-                ground_truth = j;
-                break;
-            }
-        }
-
-        const int prediction = predict_ff_net(ffnet, input, num_classes, units[0]);
-        add_prediction(ground_truth, prediction);
-    }
-
     // Create a Metrics object and generate the metrics
     metrics::Metrics metrics;
+    init_predictions();
+    metrics.loss = test_ff_net(ffnet, data.test, units[0]);
+    spdlog::debug("Loss: {}", metrics.loss);
     metrics.generate();
 
     return metrics;

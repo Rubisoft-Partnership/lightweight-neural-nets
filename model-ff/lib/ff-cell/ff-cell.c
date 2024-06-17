@@ -116,8 +116,8 @@ double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_r
 
     // Increase the indent level for logging
     increase_indent();
-    double g_pos = 0.0;
-    double g_neg = 0.0;
+    double g_pos = 0.0, g_neg = 0.0;
+    double loss_value = 0.0;
 
     for (int i = 0; i < batch.size; i++)
     {
@@ -148,6 +148,7 @@ double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_r
         // Note that pos and neg available size is the maximum of the layer sizes.
         memcpy(pos, ffcell.output, ffcell.output_size * sizeof(*ffcell.output));
         memcpy(neg, o_buffer, ffcell.output_size * sizeof(*ffcell.output));
+        loss_value += loss_suite.loss(g_pos, g_neg, threshold);
     }
 
     // Compute mean gradient of the batch.
@@ -171,7 +172,7 @@ double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_r
     log_info("Standard deviation of weight value: %f\n", std_weights);
 
     // Return the loss of the layer
-    return loss_suite.loss(g_pos, g_neg, threshold);
+    return loss_value / batch.size;
 }
 
 // Performs forward propagation.

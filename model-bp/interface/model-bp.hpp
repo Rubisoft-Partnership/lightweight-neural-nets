@@ -39,6 +39,7 @@ private:
     tiny_dnn::network<tiny_dnn::sequential> bpnet;
     std::vector<tiny_dnn::label_t> train_labels, test_labels;
     std::vector<tiny_dnn::vec_t> train_images, test_images;
+    tiny_dnn::tensor_t test_labels_onehot;
     tiny_dnn::adam optimizer;
 
     const tiny_dnn::float_t min_scale = -1.0;

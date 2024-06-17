@@ -24,7 +24,6 @@ void ModelBP::build(const std::string &data_path)
     // Load MNIST dataset
     try
     {
-
         tiny_dnn::parse_mnist_labels(data_path + "/train-labels.idx1-ubyte", &train_labels);
         tiny_dnn::parse_mnist_images(data_path + "/train-images.idx3-ubyte", &train_images, min_scale, max_scale, x_padding, y_padding);
     }
@@ -34,6 +33,15 @@ void ModelBP::build(const std::string &data_path)
     }
     tiny_dnn::parse_mnist_labels(data_path + "/t10k-labels.idx1-ubyte", &test_labels);
     tiny_dnn::parse_mnist_images(data_path + "/t10k-images.idx3-ubyte", &test_images, min_scale, max_scale, x_padding, y_padding);
+
+    // Convert test_labels to the one-hot encoding
+    test_labels_onehot.reserve(test_labels.size());
+    for (int i = 0; i < test_labels.size(); i++)
+    {
+        tiny_dnn::vec_t onehot(num_classes, 0);
+        onehot[test_labels[i]] = 1;
+        test_labels_onehot.push_back(onehot);
+    }
 
     // Compute the size of the train dataset
     dataset_size = train_images.size();
@@ -91,8 +99,11 @@ metrics::Metrics ModelBP::evaluate()
         }
     }
 
+    spdlog::debug("Computing metrics..");
     // Create a Metrics object and generate the metrics
     metrics::Metrics metrics;
+    metrics.loss = bpnet.get_loss<tiny_dnn::cross_entropy>(test_images, test_labels_onehot)/test_images.size();
+    spdlog::debug("Loss: {}", metrics.loss);
     metrics.generate();
 
     return metrics;
