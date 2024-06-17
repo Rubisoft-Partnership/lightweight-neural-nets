@@ -65,7 +65,7 @@ static void setup(void)
     layers_sizes[0] = input_size;
 
     // Load the model from checkpoint file.
-    // load_ff_net(&ffnet, "ffnet.bin", relu, pdrelu, beta1, beta2);
+    // load_ff_net(&ffnet, "ffnet.bin", relu, pdrelu, beta1, beta2, true);
 
     // Build the model from scratch.
     ffnet = new_ff_net(layers_sizes, layers_number, relu, pdrelu, threshold, beta1, beta2, LOSS_TYPE_FF);

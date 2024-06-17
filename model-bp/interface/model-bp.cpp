@@ -21,8 +21,6 @@ void ModelBP::build(const std::string &data_path)
     bpnet = tiny_dnn::make_mlp<relu>(units.begin(), units.end());
     bpnet << softmax();
 
-    spdlog::debug("Model-bp built with {} layers.", bpnet.layer_size());
-
     // Load MNIST dataset
     try
     {

@@ -127,8 +127,7 @@ metrics::Metrics ModelFF::evaluate()
     metrics.loss = test_ff_net(ffnet, data.test, units[0]);
     spdlog::debug("Loss: {}", metrics.loss);
     metrics.generate();
-    // Print the metrics
-    metrics.print();
+
     return metrics;
 }
 
@@ -157,6 +156,6 @@ void ModelFF::save(const std::string filename)
 
 void ModelFF::load(const std::string filename)
 {
-    load_ff_net(ffnet, filename.c_str(), relu, pdrelu, beta1, beta2);
+    load_ff_net(ffnet, filename.c_str(), relu, pdrelu, beta1, beta2, false); // set checkpoint default path to false
     log_debug("FFNet loaded from %s", filename.c_str());
 }

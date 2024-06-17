@@ -305,11 +305,14 @@ void save_ff_net(const FFNet *ffnet, const char *filename, bool default_path)
  * @param beta2 The hyperparameter for the FF algorithm.
  */
 void load_ff_net(FFNet *ffnet, const char *filename, double (*act)(double), double (*pdact)(double),
-                 const double beta1, const double beta2)
+                 const double beta1, const double beta2, bool default_path)
 {
     size_t res;
     char full_path[256];
-    snprintf(full_path, sizeof(full_path), "%s/%s", FFNET_CHECKPOINT_PATH, filename);
+    if (default_path)
+        snprintf(full_path, sizeof(full_path), "%s/%s", FFNET_CHECKPOINT_PATH, filename);
+    else
+        snprintf(full_path, sizeof(full_path), "%s", filename);
 
     log_debug("Loading FFNet from file %s", full_path);
     FILE *file = fopen(full_path, "rb");

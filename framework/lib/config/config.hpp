@@ -12,7 +12,8 @@ extern "C"
 namespace config
 {
     void init_config();
-    void init_metrics_logger();
+    void log_simulation_params();
+    void save_config_to_file();
 
     const std::string datasets_folder = "/dataset/federated/";        // relative path for datasets
     const std::string dataset_digits = "/digits/";                    // digits dataset folder name
@@ -46,7 +47,7 @@ namespace config
         extern int epochs;
     }
 
-    namespace orchestrator
+    namespace orchestration
     {
         extern size_t num_clients;
         extern size_t num_rounds;
