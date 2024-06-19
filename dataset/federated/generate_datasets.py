@@ -26,6 +26,9 @@ TEST_DATASET_PERCENTAGE = 0.2
 
 BINARY_MNIST_BASEPATH = "../../tiny-dnn/data/"
 
+ACTION_GENERATE = 0
+ACTION_DELETE = 1
+
 
 def main():
     # Check if mnist and digits folders exist
@@ -33,23 +36,80 @@ def main():
         os.makedirs(PATH_DIGITS)
     if not os.path.exists(PATH_MNIST):
         os.makedirs(PATH_MNIST)
-    dataset_actions = ["Generate federated dataset", "Erase federated dataset"]
-    terminal_menu = TerminalMenu(dataset_actions, title="Select an action:")
-    menu_entry_index = terminal_menu.show()
-    if menu_entry_index == 0:
-        generate_federated_datasets()
-    elif menu_entry_index == 1:
-        erase_federated_dataset()
+
+    # Default values
+    selected_model = MODEL_ALL
+    seleted_dataset = DATASETS_ALL
+    number_of_datasets = 10
+    selected_action = ACTION_GENERATE
+
+    # Check if there are cli arguments
+    if len(os.sys.argv) > 5:
+            print("Too many arguments")
+            os.sys.exit(1)
+    if len(os.sys.argv) > 1:
+        if os.sys.argv[1] == "help":
+            print("Usage: python3 generate_datasets.py [action] [dataset] [model] [number_of_datasets]")
+            print("action: gen | del - default: gen")
+            print("dataset: all | digits | mnist - default: all")
+            print("model: all | ff | bp - default: all")
+            print("number_of_datasets: int - default: {}".format(number_of_datasets))
+            os.sys.exit(0)
+        if os.sys.argv[1] == "gen":
+            selected_action = ACTION_GENERATE
+        elif os.sys.argv[1] == "del":
+            selected_action = ACTION_DELETE
+        else:
+            print("Invalid action. Use 'gen' or 'del'")
+            os.sys.exit(1)
+        if len(os.sys.argv) > 2:
+            if os.sys.argv[2] == "all":
+                seleted_dataset = DATASETS_ALL
+            elif os.sys.argv[2] == "digits":
+                seleted_dataset = DATASETS_DIGITS
+            elif os.sys.argv[2] == "mnist":
+                seleted_dataset = DATASETS_MNIST
+            else:
+                print("Invalid dataset. Use 'all', 'digits' or 'mnist'")
+                os.sys.exit(1)
+        if len(os.sys.argv) > 3:
+            if os.sys.argv[3] == "all":
+                selected_model = MODEL_ALL
+            elif os.sys.argv[3] == "ff":
+                selected_model = MODEL_FF
+            elif os.sys.argv[3] == "bp":
+                selected_model = MODEL_BP
+            else:
+                print("Invalid model. Use 'all', 'ff' or 'bp'")
+                os.sys.exit(1)
+        if len(os.sys.argv) > 4:
+            number_of_datasets = int(os.sys.argv[4])
+            if number_of_datasets < 1:
+                print("Invalid number of datasets. Must be greater than 0")
+                os.sys.exit(1)
+    else:
+        dataset_actions = ["Generate federated dataset",
+                           "Delete federated dataset"]
+        terminal_menu = TerminalMenu(
+            dataset_actions, title="Select an action:")
+        selected_action = terminal_menu.show()
+        seleted_dataset = select_dataset()
+        if selected_action == ACTION_GENERATE:
+            selected_model = select_model()
+            number_of_datasets = select_datasets_number()
+
+    if selected_action == ACTION_GENERATE:
+        generate_federated_datasets(
+            selected_model, seleted_dataset, number_of_datasets)
+    elif selected_action == ACTION_DELETE:
+        delete_federated_dataset(seleted_dataset)
 
 
-def generate_federated_datasets():
-    seleted_dataset = select_dataset()
-    selected_model = select_model()
-    number_of_datasets = select_datasets_number()
-    if seleted_dataset == DATASETS_ALL or seleted_dataset == DATASETS_DIGITS:
-        generate_digits_datasets(selected_model, number_of_datasets)
-    if seleted_dataset == DATASETS_ALL or seleted_dataset == DATASETS_MNIST:
-        generate_mnist_datasets(selected_model, number_of_datasets)
+def generate_federated_datasets(model: int = MODEL_ALL, dataset: int = DATASETS_ALL, number_of_datasets: int = 10):
+    if dataset == DATASETS_ALL or dataset == DATASETS_DIGITS:
+        generate_digits_datasets(model, number_of_datasets)
+    if dataset == DATASETS_ALL or dataset == DATASETS_MNIST:
+        generate_mnist_datasets(model, number_of_datasets)
 
 
 def generate_mnist_datasets(selected_model: int, number_of_datasets: int):
@@ -63,8 +123,10 @@ def generate_mnist_datasets(selected_model: int, number_of_datasets: int):
     test_labels = idx2numpy.convert_from_file(BINARY_MNIST_BASEPATH +
                                               "t10k-labels.idx1-ubyte")
     if selected_model == MODEL_BP or selected_model == MODEL_ALL:
-        train_images_split = np.array_split(train_images, number_of_datasets - 1)
-        train_labels_split = np.array_split(train_labels, number_of_datasets - 1)
+        train_images_split = np.array_split(
+            train_images, number_of_datasets - 1)
+        train_labels_split = np.array_split(
+            train_labels, number_of_datasets - 1)
         test_images_split = np.array_split(test_images, number_of_datasets)
         test_labels_split = np.array_split(test_labels, number_of_datasets)
 
@@ -87,29 +149,34 @@ def generate_mnist_datasets(selected_model: int, number_of_datasets: int):
         # Flatten the images
         train_images = train_images.reshape(-1, 28 * 28)
         test_images = test_images.reshape(-1, 28 * 28)
-        
-        train_images_split = np.array_split(train_images, number_of_datasets - 1)
-        train_labels_split = np.array_split(train_labels, number_of_datasets - 1)
+
+        train_images_split = np.array_split(
+            train_images, number_of_datasets - 1)
+        train_labels_split = np.array_split(
+            train_labels, number_of_datasets - 1)
         test_images_split = np.array_split(test_images, number_of_datasets)
         test_labels_split = np.array_split(test_labels, number_of_datasets)
-        
+
         for dataset in range(number_of_datasets - 1):
             with open(PATH_MNIST + CLIENT_DATASET_PREFIX + str(dataset) + "/train.txt", "w") as f:
                 for row in range(len(train_images_split[dataset])):
-                    f.write(" ".join(map(str, train_images_split[dataset][row])) + " ")
+                    f.write(
+                        " ".join(map(str, train_images_split[dataset][row])) + " ")
                     one_hot_target = np.zeros(10)
                     one_hot_target[train_labels_split[dataset]] = 1
                     f.write(" ".join(map(str, one_hot_target)) + "\n")
             with open(PATH_MNIST + CLIENT_DATASET_PREFIX + str(dataset) + "/test.txt", "w") as f:
                 for row in range(len(test_images_split[dataset])):
-                    f.write(" ".join(map(str, test_images_split[dataset][row])) + " ")
+                    f.write(
+                        " ".join(map(str, test_images_split[dataset][row])) + " ")
                     one_hot_target = np.zeros(10)
                     one_hot_target[test_labels_split[dataset]] = 1
                     f.write(" ".join(map(str, one_hot_target)) + "\n")
         # Test dataset for global model
         with open(PATH_MNIST + GLOBAL_DATASET + "/test.txt", "w") as f:
             for row in range(len(test_images_split[number_of_datasets - 1])):
-                f.write(" ".join(map(str, test_images_split[number_of_datasets - 1][row])) + " ")
+                f.write(
+                    " ".join(map(str, test_images_split[number_of_datasets - 1][row])) + " ")
                 one_hot_target = np.zeros(10)
                 one_hot_target[test_labels_split[number_of_datasets - 1]] = 1
                 f.write(" ".join(map(str, one_hot_target)) + "\n")
@@ -171,17 +238,15 @@ def select_datasets_number():
     return number_of_datasets
 
 
-def erase_federated_dataset():
-    print("Select the federated dataset you want to erase:")
-    selected_dataset = select_dataset()
-    if selected_dataset == DATASETS_ALL or selected_dataset == DATASETS_DIGITS:
+def delete_federated_dataset(dataset: int):
+    if dataset == DATASETS_ALL or dataset == DATASETS_DIGITS:
         # rm -rf digits/*
         os.system("rm -rf digits/*")
-        print("Erased Digits dataset")
-    if selected_dataset == DATASETS_ALL or selected_dataset == DATASETS_MNIST:
+        print("Deleted Digits dataset")
+    if dataset == DATASETS_ALL or dataset == DATASETS_MNIST:
         # rm -rf mnist/*
         os.system("rm -rf mnist/*")
-        print("Erased MNIST dataset")
+        print("Deleted MNIST dataset")
 
 
 def select_dataset() -> int:
