@@ -172,8 +172,16 @@ def select_datasets_number():
 
 
 def erase_federated_dataset():
-    print("Erasing federated dataset...")
-    print("TODO: Implement this functionality")
+    print("Select the federated dataset you want to erase:")
+    selected_dataset = select_dataset()
+    if selected_dataset == DATASETS_ALL or selected_dataset == DATASETS_DIGITS:
+        # rm -rf digits/*
+        os.system("rm -rf digits/*")
+        print("Erased Digits dataset")
+    if selected_dataset == DATASETS_ALL or selected_dataset == DATASETS_MNIST:
+        # rm -rf mnist/*
+        os.system("rm -rf mnist/*")
+        print("Erased MNIST dataset")
 
 
 def select_dataset() -> int:
