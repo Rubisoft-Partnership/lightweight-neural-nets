@@ -27,8 +27,6 @@ void Client::update(int round_index, double learning_rate, size_t batch_size, si
 {
     spdlog::info("Updating client: {}.", id);
     spdlog::debug("Round index: {}.", round_index);
-    spdlog::debug("Learning rate: {}.", learning_rate);
-    spdlog::debug("Batch size: {}.", batch_size);
 
     if (dataset_size == 0)
     {
@@ -47,7 +45,8 @@ void Client::update(int round_index, double learning_rate, size_t batch_size, si
     {
         metrics::Metrics metrics = model->evaluate();
         log_metrics(round_index, id, epoch, DatasetType::LOCAL, metrics);
-        spdlog::info("Client {} epoch {} accuracy: {}.", id, epoch, metrics.accuracy);
+        spdlog::debug("Client {} epoch {} accuracy: {}, loss {}.", id, epoch, metrics.accuracy, metrics.loss);
+        epoch++;
     };
     // Train the model
     model->train(epochs, batch_size, learning_rate, on_enumerate_epoch);
@@ -60,7 +59,6 @@ void Client::update(int round_index, double learning_rate, size_t batch_size, si
     rounds.push_back(round_index);
 
     spdlog::info("Done updating client: {}.", id);
-    spdlog::debug("Client {} accuracy: {}.", id, metrics.accuracy);
 }
 
 void Client::logRounds() const

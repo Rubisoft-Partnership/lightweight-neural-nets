@@ -103,7 +103,6 @@ metrics::Metrics ModelBP::evaluate()
     // Create a Metrics object and generate the metrics
     metrics::Metrics metrics;
     metrics.loss = bpnet.get_loss<tiny_dnn::cross_entropy>(test_images, test_labels_onehot)/test_images.size();
-    spdlog::debug("Loss: {}", metrics.loss);
     metrics.generate();
 
     return metrics;

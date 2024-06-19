@@ -87,8 +87,6 @@ void ModelFF::train(const int &epochs, const int &batch_size, const double &lear
     for (int i = 0; i < epochs; i++) // iterate over model epochs
     {
         clock_t epoch_start_time = clock();
-        printf("Epoch %d\n", i);
-        log_info("Epoch %d", i);
         shuffle_data(data.train);
         double loss = 0.0f;
         int num_batches = data.train->rows / batch_size;
@@ -100,11 +98,11 @@ void ModelFF::train(const int &epochs, const int &batch_size, const double &lear
             // Update progress bar
             update_progress_bar(j, num_batches);
 
-            generate_batch(data.train, j, batch); // generate positive and negative samples
-            loss += train_ff_net(ffnet, batch, learning_rate);
+            generate_batch(data.train, j, batch);                            // generate positive and negative samples
+            loss += train_ff_net(ffnet, batch, learning_rate) / num_batches; // train the model
         }
         finish_progress_bar();
-        printf("\tLoss %.12f\n", (double)loss / num_batches);
+        spdlog::debug("Training loss: {}", loss);
         int epoch_time = (clock() - epoch_start_time) / CLOCKS_PER_SEC;
         printf("\tEpoch time: ");
         print_elapsed_time(epoch_time);
@@ -126,7 +124,6 @@ metrics::Metrics ModelFF::evaluate()
     metrics::Metrics metrics;
     init_predictions();
     metrics.loss = test_ff_net(ffnet, data.test, units[0]);
-    spdlog::debug("Loss: {}", metrics.loss);
     metrics.generate();
 
     return metrics;
