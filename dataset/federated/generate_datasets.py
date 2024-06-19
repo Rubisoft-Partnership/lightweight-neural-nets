@@ -105,6 +105,16 @@ def main():
     elif selected_action == ACTION_DELETE:
         delete_federated_dataset(seleted_dataset)
 
+def display(img, width=28, threshold=200):
+        render = ''
+        for i in range(len(img)):
+            if i % width == 0:
+                render += '\n'
+            if img[i] > threshold:
+                render += '@'
+            else:
+                render += '.'
+        return render
 
 def generate_federated_datasets(model: int = MODEL_ALL, dataset: int = DATASETS_ALL, number_of_datasets: int = 10):
     if dataset == DATASETS_ALL or dataset == DATASETS_DIGITS:
@@ -139,6 +149,39 @@ def generate_mnist_datasets(selected_model: int, number_of_datasets: int):
             train_labels, number_of_datasets - 1)
         test_images_split = np.array_split(test_images, number_of_datasets)
         test_labels_split = np.array_split(test_labels, number_of_datasets)
+
+
+        # TEST ------------------------------------------------
+        # Check splits:
+        # Check if for every split all labels are present
+        # print("Train labels:")
+        for ds in train_labels_split:
+            # print(np.unique(ds, return_counts=True))
+            # Check if all labels are present
+            if len(np.unique(ds)) != 10:
+                print("Error: Not all labels are present in the split")
+                os.sys.exit(1)
+        # print("Test labels:")
+        for ds in test_labels_split:
+            # print(np.unique(ds, return_counts=True))
+            # Check if all labels are present
+            if len(np.unique(ds)) != 10:
+                print("Error: Not all labels are present in the split")
+                os.sys.exit(1)
+
+        # print 1 random image from each split from train
+        # for i in range(len(train_images_split)):
+        #     print("Train split: ", i)
+        #     print("Label: ", train_labels_split[i][0])
+        #     flattened_image = train_images_split[i][0].reshape(28*28)
+        #     print(display(flattened_image))
+        # # print 1 random image from each split from test
+        # for i in range(len(test_images_split)):
+        #     print("Label: ", test_labels_split[i][0])
+        #     flattened_image = test_images_split[i][0].reshape(28*28)
+        #     print(display(flattened_image))
+                
+        # -----------------------------------------------------
 
         for dataset in range(number_of_datasets - 1):
             idx2numpy.convert_to_file(PATH_MNIST + CLIENT_DATASET_PREFIX + str(dataset) + "/train-images.idx3-ubyte",
