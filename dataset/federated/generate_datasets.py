@@ -63,10 +63,10 @@ def generate_mnist_datasets(selected_model: int, number_of_datasets: int):
     test_labels = idx2numpy.convert_from_file(BINARY_MNIST_BASEPATH +
                                               "t10k-labels.idx1-ubyte")
     if selected_model == MODEL_BP or selected_model == MODEL_ALL:
-        train_images_split = split_data(train_images, number_of_datasets - 1)
-        train_labels_split = split_data(train_labels, number_of_datasets - 1)
-        test_images_split = split_data(test_images, number_of_datasets)
-        test_labels_split = split_data(test_labels, number_of_datasets)
+        train_images_split = np.array_split(train_images, number_of_datasets - 1)
+        train_labels_split = np.array_split(train_labels, number_of_datasets - 1)
+        test_images_split = np.array_split(test_images, number_of_datasets)
+        test_labels_split = np.array_split(test_labels, number_of_datasets)
 
         for dataset in range(number_of_datasets - 1):
             idx2numpy.convert_to_file(PATH_MNIST + CLIENT_DATASET_PREFIX + str(dataset) + "/train-images.idx3-ubyte",
@@ -88,10 +88,10 @@ def generate_mnist_datasets(selected_model: int, number_of_datasets: int):
         train_images = train_images.reshape(-1, 28 * 28)
         test_images = test_images.reshape(-1, 28 * 28)
         
-        train_images_split = split_data(train_images, number_of_datasets - 1)
-        train_labels_split = split_data(train_labels, number_of_datasets - 1)
-        test_images_split = split_data(test_images, number_of_datasets)
-        test_labels_split = split_data(test_labels, number_of_datasets)
+        train_images_split = np.array_split(train_images, number_of_datasets - 1)
+        train_labels_split = np.array_split(train_labels, number_of_datasets - 1)
+        test_images_split = np.array_split(test_images, number_of_datasets)
+        test_labels_split = np.array_split(test_labels, number_of_datasets)
         
         for dataset in range(number_of_datasets - 1):
             with open(PATH_MNIST + CLIENT_DATASET_PREFIX + str(dataset) + "/train.txt", "w") as f:
@@ -137,11 +137,6 @@ def generate_digits_datasets(selected_model: int, number_of_datasets: int):
             for line in global_test:
                 f.write(" ".join(map(str, line)) + "\n")
         print("Generated Digits datasets for model FF")
-
-
-def split_data(data, n):
-    """ Splits data into n sub-datasets """
-    return np.array_split(data, n)
 
 
 def get_joined_digits():
