@@ -45,11 +45,12 @@ def main():
 
     # Check if there are cli arguments
     if len(os.sys.argv) > 5:
-            print("Too many arguments")
-            os.sys.exit(1)
+        print("Too many arguments")
+        os.sys.exit(1)
     if len(os.sys.argv) > 1:
         if os.sys.argv[1] == "help":
-            print("Usage: python3 generate_datasets.py [action] [dataset] [model] [number_of_datasets]")
+            print(
+                "Usage: python3 generate_datasets.py [action] [dataset] [model] [number_of_datasets]")
             print("action: gen | del - default: gen")
             print("dataset: all | digits | mnist - default: all")
             print("model: all | ff | bp - default: all")
@@ -115,7 +116,7 @@ def generate_federated_datasets(model: int = MODEL_ALL, dataset: int = DATASETS_
 def generate_mnist_datasets(selected_model: int, number_of_datasets: int):
     create_folders(number_of_datasets, PATH_MNIST)
     train_images = idx2numpy.convert_from_file(
-        BINARY_MNIST_BASEPATH + "train-images.idx3-ubyte").reshape(-1, 28 * 28)
+        BINARY_MNIST_BASEPATH + "train-images.idx3-ubyte")
     train_labels = idx2numpy.convert_from_file(
         BINARY_MNIST_BASEPATH + "train-labels.idx1-ubyte")
     test_images = idx2numpy.convert_from_file(BINARY_MNIST_BASEPATH +

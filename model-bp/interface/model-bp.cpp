@@ -26,6 +26,11 @@ void ModelBP::build(const std::string &data_path)
     {
         tiny_dnn::parse_mnist_labels(data_path + "/train-labels.idx1-ubyte", &train_labels);
         tiny_dnn::parse_mnist_images(data_path + "/train-images.idx3-ubyte", &train_images, min_scale, max_scale, x_padding, y_padding);
+        if (train_images.size() == 0 || train_labels.size() == 0)
+        {
+            spdlog::error("Empty training dataset.");
+            exit(EXIT_FAILURE);
+        }
     }
     catch (const std::exception &e)
     {
@@ -33,6 +38,11 @@ void ModelBP::build(const std::string &data_path)
     }
     tiny_dnn::parse_mnist_labels(data_path + "/t10k-labels.idx1-ubyte", &test_labels);
     tiny_dnn::parse_mnist_images(data_path + "/t10k-images.idx3-ubyte", &test_images, min_scale, max_scale, x_padding, y_padding);
+    if (test_images.size() == 0 || test_labels.size() == 0)
+    {
+        spdlog::error("Empty test dataset.");
+        exit(EXIT_FAILURE);
+    }
 
     // Convert test_labels to the one-hot encoding
     test_labels_onehot.reserve(test_labels.size());
