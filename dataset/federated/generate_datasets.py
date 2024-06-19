@@ -28,6 +28,11 @@ BINARY_MNIST_BASEPATH = "../../tiny-dnn/data/"
 
 
 def main():
+    # Check if mnist and digits folders exist
+    if not os.path.exists(PATH_DIGITS):
+        os.makedirs(PATH_DIGITS)
+    if not os.path.exists(PATH_MNIST):
+        os.makedirs(PATH_MNIST)
     dataset_actions = ["Generate federated dataset", "Erase federated dataset"]
     terminal_menu = TerminalMenu(dataset_actions, title="Select an action:")
     menu_entry_index = terminal_menu.show()
