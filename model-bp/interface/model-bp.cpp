@@ -74,7 +74,7 @@ void ModelBP::train(const int &epochs, const int &batch_size, const double &lear
     auto on_epoch = [&]()
     {
         on_enumerate_epoch();
-        std::cout << "Epoch " << epoch << "/" << epochs << " finished. "
+        std::cout << std::endl << "Epoch " << epoch << "/" << epochs << " finished. "
                   << epoch_time.elapsed() << "s elapsed." << std::endl;
         ++epoch;
 
