@@ -173,14 +173,14 @@ def generate_mnist_datasets(selected_model: int, number_of_datasets: int):
                     f.write(
                         " ".join(map(str, train_images_split[dataset][row])) + " ")
                     one_hot_target = np.zeros(10)
-                    one_hot_target[train_labels_split[dataset]] = 1
+                    one_hot_target[train_labels_split[dataset][row]] = 1
                     f.write(" ".join(map(str, one_hot_target)) + "\n")
             with open(PATH_MNIST + CLIENT_DATASET_PREFIX + str(dataset) + "/test.txt", "w") as f:
                 for row in range(len(test_images_split[dataset])):
                     f.write(
                         " ".join(map(str, test_images_split[dataset][row])) + " ")
                     one_hot_target = np.zeros(10)
-                    one_hot_target[test_labels_split[dataset]] = 1
+                    one_hot_target[test_labels_split[dataset][row]] = 1
                     f.write(" ".join(map(str, one_hot_target)) + "\n")
         # Test dataset for global model
         with open(PATH_MNIST + GLOBAL_DATASET + "/test.txt", "w") as f:
@@ -188,7 +188,7 @@ def generate_mnist_datasets(selected_model: int, number_of_datasets: int):
                 f.write(
                     " ".join(map(str, test_images_split[number_of_datasets - 1][row])) + " ")
                 one_hot_target = np.zeros(10)
-                one_hot_target[test_labels_split[number_of_datasets - 1]] = 1
+                one_hot_target[test_labels_split[number_of_datasets - 1][row]] = 1
                 f.write(" ".join(map(str, one_hot_target)) + "\n")
         print("Generated MNIST datasets for model FF")
 
