@@ -112,6 +112,10 @@ def generate_federated_datasets(model: int = MODEL_ALL, dataset: int = DATASETS_
     if dataset == DATASETS_ALL or dataset == DATASETS_MNIST:
         generate_mnist_datasets(model, number_of_datasets)
 
+def shuffle_data_mnist(images, labels):
+    indices = np.arange(images.shape[0])
+    np.random.shuffle(indices)
+    return images[indices], labels[indices]
 
 def generate_mnist_datasets(selected_model: int, number_of_datasets: int):
     create_folders(number_of_datasets, PATH_MNIST)
@@ -123,6 +127,11 @@ def generate_mnist_datasets(selected_model: int, number_of_datasets: int):
                                               "t10k-images.idx3-ubyte")
     test_labels = idx2numpy.convert_from_file(BINARY_MNIST_BASEPATH +
                                               "t10k-labels.idx1-ubyte")
+
+    # Shuffle the dataset before splitting
+    train_images, train_labels = shuffle_data_mnist(train_images, train_labels)
+    test_images, test_labels = shuffle_data_mnist(test_images, test_labels)
+
     if selected_model == MODEL_BP or selected_model == MODEL_ALL:
         train_images_split = np.array_split(
             train_images, number_of_datasets - 1)
