@@ -202,6 +202,9 @@ def generate_mnist_datasets(selected_model: int, number_of_datasets: int):
         # Flatten the images
         train_images = train_images.reshape(-1, 28 * 28)
         test_images = test_images.reshape(-1, 28 * 28)
+        # Normalize the images
+        train_images = train_images / 255
+        test_images = test_images / 255
 
         train_images_split = np.array_split(
             train_images, number_of_datasets - 1)
@@ -261,6 +264,8 @@ def generate_digits_datasets(selected_model: int, number_of_datasets: int):
 
 def get_joined_digits():
     (digits_feat, digits_gt) = datasets.load_digits(return_X_y=True)
+    # Normalize the features by dividing by 16
+    digits_feat = digits_feat / 16
     digits_one_hot_targets = np.zeros((len(digits_gt), 10))
     digits_one_hot_targets[np.arange(len(digits_gt)), digits_gt] = 1
     zeros_padding = np.zeros((len(digits_gt), 10))
