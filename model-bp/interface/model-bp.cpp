@@ -21,23 +21,73 @@ void ModelBP::build(const std::string &data_path)
     bpnet = tiny_dnn::make_mlp<relu>(units.begin(), units.end());
     bpnet << softmax();
 
-    // Load MNIST dataset
-    try
-    {
-        tiny_dnn::parse_mnist_labels(data_path + "/train-labels.idx1-ubyte", &train_labels);
-        tiny_dnn::parse_mnist_images(data_path + "/train-images.idx3-ubyte", &train_images, min_scale, max_scale, x_padding, y_padding);
-        if (train_images.size() == 0 || train_labels.size() == 0)
+    if (selected_dataset == dataset_mnist)
+    { // Load MNIST dataset
+        try
         {
-            spdlog::error("Empty training dataset.");
+            tiny_dnn::parse_mnist_labels(data_path + "/train-labels.idx1-ubyte", &train_labels);
+            tiny_dnn::parse_mnist_images(data_path + "/train-images.idx3-ubyte", &train_images, min_scale, max_scale, x_padding, y_padding);
+            if (train_images.size() == 0 || train_labels.size() == 0)
+            {
+                spdlog::error("Empty training dataset.");
+                exit(EXIT_FAILURE);
+            }
+        }
+        catch (const std::exception &e)
+        {
+            spdlog::warn("Could not load training dataset.");
+        }
+        tiny_dnn::parse_mnist_labels(data_path + "/t10k-labels.idx1-ubyte", &test_labels);
+        tiny_dnn::parse_mnist_images(data_path + "/t10k-images.idx3-ubyte", &test_images, min_scale, max_scale, x_padding, y_padding);
+    }
+    else if (selected_dataset == dataset_digits)
+    {
+        // Read space-separated values from `test-images.txt` and `test-labels.txt`
+        std::ifstream test_images_file(data_path + "/test-images.txt");
+        std::ifstream test_labels_file(data_path + "/test-labels.txt");
+        if (!test_images_file.is_open() || !test_labels_file.is_open())
+        {
+            spdlog::error("Could not open test dataset files.");
             exit(EXIT_FAILURE);
         }
+
+        std::string line;
+        while (std::getline(test_images_file, line))
+        {
+            std::istringstream iss(line);
+            tiny_dnn::vec_t image;
+            float pixel;
+            while (iss >> pixel)
+                image.push_back(pixel);
+            test_images.push_back(image);
+        }
+
+        while (std::getline(test_labels_file, line))
+
+            test_labels.push_back(std::stoi(line));
+
+        // Read space-separated values from `train-images.txt` and `train-labels.txt`
+        std::ifstream train_images_file(data_path + "/train-images.txt");
+        std::ifstream train_labels_file(data_path + "/train-labels.txt");
+        if (!train_images_file.is_open() || !train_labels_file.is_open())
+            spdlog::warn("Could not open train dataset files.");
+        else
+        {
+            while (std::getline(train_images_file, line))
+            {
+                std::istringstream iss(line);
+                tiny_dnn::vec_t image;
+                float pixel;
+                while (iss >> pixel)
+                    image.push_back(pixel);
+                train_images.push_back(image);
+            }
+
+            while (std::getline(train_labels_file, line))
+                train_labels.push_back(std::stoi(line));
+        }
     }
-    catch (const std::exception &e)
-    {
-        spdlog::warn("Could not load training dataset.");
-    }
-    tiny_dnn::parse_mnist_labels(data_path + "/t10k-labels.idx1-ubyte", &test_labels);
-    tiny_dnn::parse_mnist_images(data_path + "/t10k-images.idx3-ubyte", &test_images, min_scale, max_scale, x_padding, y_padding);
+
     if (test_images.size() == 0 || test_labels.size() == 0)
     {
         spdlog::error("Empty test dataset.");
@@ -74,7 +124,8 @@ void ModelBP::train(const int &epochs, const int &batch_size, const double &lear
     auto on_epoch = [&]()
     {
         on_enumerate_epoch();
-        std::cout << std::endl << "Epoch " << epoch << "/" << epochs << " finished. "
+        std::cout << std::endl
+                  << "Epoch " << epoch << "/" << epochs << " finished. "
                   << epoch_time.elapsed() << "s elapsed." << std::endl;
         ++epoch;
 
@@ -112,7 +163,7 @@ metrics::Metrics ModelBP::evaluate()
     spdlog::debug("Computing metrics..");
     // Create a Metrics object and generate the metrics
     metrics::Metrics metrics;
-    metrics.loss = bpnet.get_loss<tiny_dnn::cross_entropy>(test_images, test_labels_onehot)/test_images.size();
+    metrics.loss = bpnet.get_loss<tiny_dnn::cross_entropy>(test_images, test_labels_onehot) / test_images.size();
     metrics.generate();
 
     return metrics;

@@ -105,16 +105,18 @@ def main():
     elif selected_action == ACTION_DELETE:
         delete_federated_dataset(seleted_dataset)
 
+
 def display(img, width=28, threshold=200):
-        render = ''
-        for i in range(len(img)):
-            if i % width == 0:
-                render += '\n'
-            if img[i] > threshold:
-                render += '@'
-            else:
-                render += '.'
-        return render
+    render = ''
+    for i in range(len(img)):
+        if i % width == 0:
+            render += '\n'
+        if img[i] > threshold:
+            render += '@'
+        else:
+            render += '.'
+    return render
+
 
 def generate_federated_datasets(model: int = MODEL_ALL, dataset: int = DATASETS_ALL, number_of_datasets: int = 10):
     if dataset == DATASETS_ALL or dataset == DATASETS_DIGITS:
@@ -122,10 +124,12 @@ def generate_federated_datasets(model: int = MODEL_ALL, dataset: int = DATASETS_
     if dataset == DATASETS_ALL or dataset == DATASETS_MNIST:
         generate_mnist_datasets(model, number_of_datasets)
 
+
 def shuffle_data_mnist(images, labels):
     indices = np.arange(images.shape[0])
     np.random.shuffle(indices)
     return images[indices], labels[indices]
+
 
 def generate_mnist_datasets(selected_model: int, number_of_datasets: int):
     create_folders(number_of_datasets, PATH_MNIST)
@@ -149,7 +153,6 @@ def generate_mnist_datasets(selected_model: int, number_of_datasets: int):
             train_labels, number_of_datasets - 1)
         test_images_split = np.array_split(test_images, number_of_datasets)
         test_labels_split = np.array_split(test_labels, number_of_datasets)
-
 
         # TEST ------------------------------------------------
         # Check splits:
@@ -180,7 +183,7 @@ def generate_mnist_datasets(selected_model: int, number_of_datasets: int):
         #     print("Label: ", test_labels_split[i][0])
         #     flattened_image = test_images_split[i][0].reshape(28*28)
         #     print(display(flattened_image))
-                
+
         # -----------------------------------------------------
 
         for dataset in range(number_of_datasets - 1):
@@ -260,6 +263,40 @@ def generate_digits_datasets(selected_model: int, number_of_datasets: int):
             for line in global_test:
                 f.write(" ".join(map(str, line)) + "\n")
         print("Generated Digits datasets for model FF")
+    if selected_model == MODEL_BP or selected_model == MODEL_ALL:
+        images, labels = datasets.load_digits(return_X_y=True)
+        # Rescale images from [0, 16] to [-1, 1]
+        images = (images / 8) - 1
+        create_folders(number_of_datasets, PATH_DIGITS)
+        # divide in `number_of_datasets` parts
+        images_split = np.array_split(images, number_of_datasets)
+        labels_split = np.array_split(labels, number_of_datasets)
+        for i in range(number_of_datasets - 1):
+            # Concatenate images and labels
+            joined = np.concatenate(
+                (images_split[i], labels_split[i].reshape(-1, 1)), axis=1)
+            train, test = train_test_split(joined, test_size=TEST_DATASET_PERCENTAGE, random_state=42)
+            # Write train and test files
+            with open(PATH_DIGITS + CLIENT_DATASET_PREFIX + str(i) + "/train-images.txt", "w") as f:
+                for line in train:
+                    f.write(" ".join(map(str, line[:-1])) + "\n")
+            with open(PATH_DIGITS + CLIENT_DATASET_PREFIX + str(i) + "/train-labels.txt", "w") as f:
+                for line in train:
+                    f.write(str(int(line[-1])) + "\n")
+            with open(PATH_DIGITS + CLIENT_DATASET_PREFIX + str(i) + "/test-images.txt", "w") as f:
+                for line in test:
+                    f.write(" ".join(map(str, line[:-1])) + "\n")
+            with open(PATH_DIGITS + CLIENT_DATASET_PREFIX + str(i) + "/test-labels.txt", "w") as f:
+                for line in test:
+                    f.write(str(int(line[-1])) + "\n")
+        # Write only test dataset for global model
+        with open(PATH_DIGITS + GLOBAL_DATASET + "/test-images.txt", "w") as f:
+            for line in images_split[number_of_datasets - 1]:
+                f.write(" ".join(map(str, line)) + "\n")
+        with open(PATH_DIGITS + GLOBAL_DATASET + "/test-labels.txt", "w") as f:
+            for line in labels_split[number_of_datasets - 1]:
+                f.write(str(int(line)) + "\n")
+        print("Generated Digits datasets for model BP")
 
 
 def get_joined_digits():
