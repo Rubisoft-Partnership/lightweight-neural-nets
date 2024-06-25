@@ -111,23 +111,23 @@ void ModelBP::train(const int &epochs, const int &batch_size, const double &lear
 
 {
     // Specify loss-function and learning strategy
-    tiny_dnn::progress_display disp(train_images.size());
     tiny_dnn::timer epoch_time;
     tiny_dnn::timer total_train_time;
     optimizer.alpha *= std::min(tiny_dnn::float_t(4), static_cast<tiny_dnn::float_t>(sqrt(batch_size) * learning_rate));
 
-    int epoch = 0;
+    // Evaluate the model before training
     on_enumerate_epoch();
-    epoch++;
+
+    int epoch = 1;
+    tiny_dnn::progress_display disp(train_images.size());
 
     // create callback
     auto on_epoch = [&]()
     {
-        on_enumerate_epoch();
         std::cout << std::endl
-                  << "Epoch " << epoch << "/" << epochs << " finished. "
+                  << "Epoch " << epoch++ << "/" << epochs << " finished. "
                   << epoch_time.elapsed() << "s elapsed." << std::endl;
-        ++epoch;
+        on_enumerate_epoch();
 
         disp.restart(train_images.size());
         epoch_time.restart();
@@ -149,16 +149,17 @@ metrics::Metrics ModelBP::evaluate()
     spdlog::debug("Generating metrics..");
     init_predictions();
     // iterate over confusion matrix
-    for (int i = 0; i < results.confusion_matrix.size(); i++)
+    for (int actual = 0; actual < results.confusion_matrix.size(); actual++)
     {
-        for (int j = 0; j < results.confusion_matrix[i].size(); j++)
+        for (int predicted = 0; predicted < results.confusion_matrix[actual].size(); predicted++)
         {
-            for (int k = 0; k < results.confusion_matrix[i][j]; k++)
+            for (int k = 0; k < results.confusion_matrix[actual][predicted]; k++)
             {
-                add_prediction(i, j);
+                add_prediction(actual, predicted);
             }
         }
     }
+
 
     spdlog::debug("Computing metrics..");
     // Create a Metrics object and generate the metrics
