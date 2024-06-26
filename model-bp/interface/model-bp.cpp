@@ -7,19 +7,24 @@ void ModelBP::build(const std::string &data_path)
     using namespace config;
     num_classes = parameters::num_classes;
     units = parameters::units;
-    if (units.back() != num_classes)
-    {
-        spdlog::warn("The last layer should have the same number of units as the number of classes. The last layer will be set to {}.", num_classes);
-        units.back() = num_classes;
-    }
     // Initialize the model
     tiny_dnn::core::backend_t backend_type = tiny_dnn::core::default_engine();
     using fc = tiny_dnn::layers::fc;
-    using relu = tiny_dnn::activation::relu;
+    using act = tiny_dnn::activation::relu;
     using softmax = tiny_dnn::activation::softmax;
 
-    bpnet = tiny_dnn::make_mlp<relu>(units.begin(), units.end());
+    // Make MLP with the hidden layers
+    bpnet = tiny_dnn::make_mlp<act>(units.begin(), units.end());
+    // Entail the output layer and the softmax operation
+    bpnet << fc(units.back(), num_classes);
     bpnet << softmax();
+
+    spdlog::debug("Model-bp built with the following layers:{}.", [&]()
+                  {
+        std::string layers = "[ ";
+        for (int i = 0; i < units.size(); i++)
+            layers += std::to_string(units[i]) + " ";
+        return layers + "]"; }());
 
     if (selected_dataset == dataset_mnist)
     { // Load MNIST dataset
@@ -159,7 +164,6 @@ metrics::Metrics ModelBP::evaluate()
             }
         }
     }
-
 
     spdlog::debug("Computing metrics..");
     // Create a Metrics object and generate the metrics
