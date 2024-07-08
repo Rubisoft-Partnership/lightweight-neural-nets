@@ -189,7 +189,6 @@ void parse_args(const int argc, const char *argv[])
             if (dataset == "digits")
             {
                 config::selected_dataset = config::dataset_digits;
-                config::parameters::units.front() = 74;
             }
             else if (dataset == "mnist")
             {
@@ -238,7 +237,7 @@ void print_help(std::string name)
               << "--help, -h: Show this help message." << std::endl
               << "--model-type, -mt: Model type (bp, ff). Default: bp." << std::endl
               << "--num-classes, -nc: Number of classes in the dataset. Default: " << config::parameters::num_classes << "." << std::endl
-              << "--layer-units, -lu: Number of units in each layer. Default: [ ";
+              << "--layer-units, -lu: Number of units in each hidden layer. Default: [ ";
     for (int unit : config::parameters::units)
         std::cout << unit << " ";
     std::cout << "]" << std::endl

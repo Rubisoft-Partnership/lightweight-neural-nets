@@ -50,7 +50,7 @@ namespace config
     namespace parameters
     {
         int num_classes = 10;
-        std::vector<int> units = {784, 100, 10};
+        std::vector<int> units = {784, 100};
         namespace ff
         {
             float threshold = 5.0;

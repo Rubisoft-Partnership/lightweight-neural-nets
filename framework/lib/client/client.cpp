@@ -34,12 +34,6 @@ void Client::update(int round_index, double learning_rate, size_t batch_size, si
         exit(EXIT_FAILURE);
     }
 
-    if (dataset_size == 0)
-    {
-        spdlog::error("Empty dataset for client {}.", id);
-        exit(EXIT_FAILURE);
-    }
-
     int epoch = 0;
     auto on_enumerate_epoch = [&]()
     {

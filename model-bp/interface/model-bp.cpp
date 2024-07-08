@@ -7,32 +7,97 @@ void ModelBP::build(const std::string &data_path)
     using namespace config;
     num_classes = parameters::num_classes;
     units = parameters::units;
-    if (units.back() != num_classes)
-    {
-        spdlog::warn("The last layer should have the same number of units as the number of classes. The last layer will be set to {}.", num_classes);
-        units.back() = num_classes;
-    }
     // Initialize the model
     tiny_dnn::core::backend_t backend_type = tiny_dnn::core::default_engine();
     using fc = tiny_dnn::layers::fc;
-    using relu = tiny_dnn::activation::relu;
+    using act = tiny_dnn::activation::relu;
     using softmax = tiny_dnn::activation::softmax;
 
-    bpnet = tiny_dnn::make_mlp<relu>(units.begin(), units.end());
+    // Make MLP with the hidden layers
+    bpnet = tiny_dnn::make_mlp<act>(units.begin(), units.end());
+    // Entail the output layer and the softmax operation
+    bpnet << fc(units.back(), num_classes);
     bpnet << softmax();
 
-    // Load MNIST dataset
-    try
-    {
-        tiny_dnn::parse_mnist_labels(data_path + "/train-labels.idx1-ubyte", &train_labels);
-        tiny_dnn::parse_mnist_images(data_path + "/train-images.idx3-ubyte", &train_images, min_scale, max_scale, x_padding, y_padding);
+    spdlog::debug("Model-bp built with the following layers:{}.", [&]()
+                  {
+        std::string layers = "[ ";
+        for (int i = 0; i < units.size(); i++)
+            layers += std::to_string(units[i]) + " ";
+        return layers + "]"; }());
+
+    if (selected_dataset == dataset_mnist)
+    { // Load MNIST dataset
+        try
+        {
+            tiny_dnn::parse_mnist_labels(data_path + "/train-labels.idx1-ubyte", &train_labels);
+            tiny_dnn::parse_mnist_images(data_path + "/train-images.idx3-ubyte", &train_images, min_scale, max_scale, x_padding, y_padding);
+            if (train_images.size() == 0 || train_labels.size() == 0)
+            {
+                spdlog::error("Empty training dataset.");
+                exit(EXIT_FAILURE);
+            }
+        }
+        catch (const std::exception &e)
+        {
+            spdlog::warn("Could not load training dataset.");
+        }
+        tiny_dnn::parse_mnist_labels(data_path + "/t10k-labels.idx1-ubyte", &test_labels);
+        tiny_dnn::parse_mnist_images(data_path + "/t10k-images.idx3-ubyte", &test_images, min_scale, max_scale, x_padding, y_padding);
     }
-    catch (const std::exception &e)
+    else if (selected_dataset == dataset_digits)
     {
-        spdlog::warn("Could not load training dataset.");
+        // Read space-separated values from `test-images.txt` and `test-labels.txt`
+        std::ifstream test_images_file(data_path + "/test-images.txt");
+        std::ifstream test_labels_file(data_path + "/test-labels.txt");
+        if (!test_images_file.is_open() || !test_labels_file.is_open())
+        {
+            spdlog::error("Could not open test dataset files.");
+            exit(EXIT_FAILURE);
+        }
+
+        std::string line;
+        while (std::getline(test_images_file, line))
+        {
+            std::istringstream iss(line);
+            tiny_dnn::vec_t image;
+            float pixel;
+            while (iss >> pixel)
+                image.push_back(pixel);
+            test_images.push_back(image);
+        }
+
+        while (std::getline(test_labels_file, line))
+
+            test_labels.push_back(std::stoi(line));
+
+        // Read space-separated values from `train-images.txt` and `train-labels.txt`
+        std::ifstream train_images_file(data_path + "/train-images.txt");
+        std::ifstream train_labels_file(data_path + "/train-labels.txt");
+        if (!train_images_file.is_open() || !train_labels_file.is_open())
+            spdlog::warn("Could not open train dataset files.");
+        else
+        {
+            while (std::getline(train_images_file, line))
+            {
+                std::istringstream iss(line);
+                tiny_dnn::vec_t image;
+                float pixel;
+                while (iss >> pixel)
+                    image.push_back(pixel);
+                train_images.push_back(image);
+            }
+
+            while (std::getline(train_labels_file, line))
+                train_labels.push_back(std::stoi(line));
+        }
     }
-    tiny_dnn::parse_mnist_labels(data_path + "/t10k-labels.idx1-ubyte", &test_labels);
-    tiny_dnn::parse_mnist_images(data_path + "/t10k-images.idx3-ubyte", &test_images, min_scale, max_scale, x_padding, y_padding);
+
+    if (test_images.size() == 0 || test_labels.size() == 0)
+    {
+        spdlog::error("Empty test dataset.");
+        exit(EXIT_FAILURE);
+    }
 
     // Convert test_labels to the one-hot encoding
     test_labels_onehot.reserve(test_labels.size());
@@ -51,22 +116,23 @@ void ModelBP::train(const int &epochs, const int &batch_size, const double &lear
 
 {
     // Specify loss-function and learning strategy
-    tiny_dnn::progress_display disp(train_images.size());
     tiny_dnn::timer epoch_time;
     tiny_dnn::timer total_train_time;
     optimizer.alpha *= std::min(tiny_dnn::float_t(4), static_cast<tiny_dnn::float_t>(sqrt(batch_size) * learning_rate));
 
-    int epoch = 0;
+    // Evaluate the model before training
     on_enumerate_epoch();
-    epoch++;
+
+    int epoch = 1;
+    tiny_dnn::progress_display disp(train_images.size());
 
     // create callback
     auto on_epoch = [&]()
     {
-        on_enumerate_epoch();
-        std::cout << "Epoch " << epoch << "/" << epochs << " finished. "
+        std::cout << std::endl
+                  << "Epoch " << epoch++ << "/" << epochs << " finished. "
                   << epoch_time.elapsed() << "s elapsed." << std::endl;
-        ++epoch;
+        on_enumerate_epoch();
 
         disp.restart(train_images.size());
         epoch_time.restart();
@@ -88,13 +154,13 @@ metrics::Metrics ModelBP::evaluate()
     spdlog::debug("Generating metrics..");
     init_predictions();
     // iterate over confusion matrix
-    for (int i = 0; i < results.confusion_matrix.size(); i++)
+    for (int actual = 0; actual < results.confusion_matrix.size(); actual++)
     {
-        for (int j = 0; j < results.confusion_matrix[i].size(); j++)
+        for (int predicted = 0; predicted < results.confusion_matrix[actual].size(); predicted++)
         {
-            for (int k = 0; k < results.confusion_matrix[i][j]; k++)
+            for (int k = 0; k < results.confusion_matrix[actual][predicted]; k++)
             {
-                add_prediction(i, j);
+                add_prediction(actual, predicted);
             }
         }
     }
@@ -102,7 +168,7 @@ metrics::Metrics ModelBP::evaluate()
     spdlog::debug("Computing metrics..");
     // Create a Metrics object and generate the metrics
     metrics::Metrics metrics;
-    metrics.loss = bpnet.get_loss<tiny_dnn::cross_entropy>(test_images, test_labels_onehot)/test_images.size();
+    metrics.loss = bpnet.get_loss<tiny_dnn::cross_entropy>(test_images, test_labels_onehot) / test_images.size();
     metrics.generate();
 
     return metrics;
