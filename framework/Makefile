@@ -1,6 +1,7 @@
 # Basic Configuration
 BIN_PATH = target
 BIN_FILE = main.out
+BIN_FILE_STATIC = main_static.out
 BUILD_PATH = build
 LIB_FOLDER = lib
 PROJECT_BASEPATH = $(realpath .)
@@ -30,7 +31,7 @@ MODELFF_OBJ = $(addprefix $(BUILD_PATH)/, $(notdir $(patsubst %.c,%.o,$(filter %
 MODELBP_SRC = $(MODELBP_BASEPATH)/interface/model-bp.cpp
 MODELBP_OBJ = $(addprefix $(BUILD_PATH)/, $(notdir $(patsubst %.cpp,%.o,$(MODELBP_SRC))))
 
-#Include Paths
+# Include Paths
 METRICS_INCLUDE = -I $(METRICS_BASEPATH)/$(LIB_FOLDER)
 FRAMEWORK_INCLUDE = -I $(PROJECT_BASEPATH)/$(LIB_FOLDER)
 SPDLOG_INCLUDE = -I $(PROJECT_BASEPATH)/$(LIB_FOLDER)/logging/include
@@ -52,6 +53,9 @@ OBJ_FILES = $(FRAMEWORK_OBJ) $(METRICS_OBJ) $(DEPS_OBJ) $(MODELFF_OBJ) $(MODELBP
 
 # Default target
 all: $(BIN_PATH)/$(BIN_FILE)
+
+# Static target
+static: $(BIN_PATH)/$(BIN_FILE_STATIC)
 
 # Metrics C files Compilation
 $(METRICS_OBJ): $(METRICS_SRC)
@@ -107,7 +111,14 @@ $(BIN_PATH)/$(BIN_FILE): $(DEPS_OBJ) $(FRAMEWORK_OBJ) $(METRICS_OBJ) $(MODELFF_O
 	@mkdir -p $(BIN_PATH) # Ensure the bin directory exists
 	$(GPP) -o $@ $^
 
+# Linking all object files to create the static executable
+$(BIN_PATH)/$(BIN_FILE_STATIC): $(DEPS_OBJ) $(FRAMEWORK_OBJ) $(METRICS_OBJ) $(MODELFF_OBJ) $(MODELBP_OBJ)
+	@echo "Linking all object files for static binary..."
+	@mkdir -p $(BIN_PATH) # Ensure the bin directory exists
+	$(GPP) -static -o $@ $^
+
 # Clean target and object files
 clean:
 	rm -f $(BIN_PATH)/$(BIN_FILE)
+	rm -f $(BIN_PATH)/$(BIN_FILE_STATIC)
 	rm -f $(OBJ_FILES)
