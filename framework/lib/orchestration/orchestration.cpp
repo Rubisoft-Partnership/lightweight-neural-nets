@@ -182,7 +182,7 @@ metrics::Metrics Orchestrator::evaluateClients(std::vector<std::shared_ptr<Clien
         if (threaded)
             threads.emplace_back(evaluate_client, client, &round_metrics[i]);
         else
-            evaluate_client(client, &round_metrics[i]);
+            round_metrics[i] = client->model->evaluate();
     }
 
     for (auto &thread : threads)
