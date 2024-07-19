@@ -71,11 +71,36 @@ metrics::Metrics Server::executeRound(int round_index, std::vector<std::shared_p
 
 void Server::broadcast()
 {
-    std::vector<double> model_weights = model->get_weights();
-    for (auto &client : round_clients)
-    {
-        client->model->set_weights(model_weights);
+    std::vector<std::thread> threads;
+    // Reserve space only if threaded mode is enabled
+    if (threaded)
+        threads.reserve(round_clients.size());
+
+    // Use a shared pointer for model_weights
+    auto model_weights = std::make_shared<std::vector<double>>(model->get_weights());
+
+    // Function to set weights for a client
+    auto set_weights_for_client = [&](Client& client) {
+        client.model->set_weights(*model_weights);
+    };
+   
+    for (auto& client : round_clients) {
+        if (threaded) {
+            // Create a thread for each client
+            threads.emplace_back(std::thread(set_weights_for_client, std::ref(*client)));
+        } else {
+            // Set weights directly if not using threads
+            set_weights_for_client(*client);
+        }
     }
+
+    // Join all threads if threaded
+    if (threaded) {
+        for (auto& thread : threads) {
+            thread.join();
+        }
+    }
+
     spdlog::info("Server model broadcast completed.");
 }
 
