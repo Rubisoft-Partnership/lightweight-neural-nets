@@ -25,7 +25,7 @@ namespace metrics
         ~Metrics() = default;
 
         // Generate metrics from the C library and populate the C++ class
-        void generate();
+        void generate(Predictions *predictions);
 
         // Reset the metrics
         void reset();

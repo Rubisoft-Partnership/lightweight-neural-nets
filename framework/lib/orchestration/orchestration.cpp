@@ -16,7 +16,7 @@ using namespace config::orchestration;
 
 static std::vector<std::string> listFolders(const std::string &folder, const std::string &match);
 
-Orchestrator::Orchestrator(const std::string &datasets_path, const std::string &checkpoints_path) : datasets_path(datasets_path),
+Orchestrator::Orchestrator(const std::string &datasets_path, const std::string &checkpoints_path, bool threaded) : datasets_path(datasets_path),
                                                                                                     checkpoints_path(checkpoints_path)
 {
     // Search datasets folders
@@ -31,7 +31,7 @@ Orchestrator::Orchestrator(const std::string &datasets_path, const std::string &
     clients = initializeClients(data);
 
     // Initialize server
-    server = std::make_shared<Server>(clients, datasets_path + config::global_dataset, true);
+    server = std::make_shared<Server>(clients, datasets_path + config::global_dataset, threaded);
 }
 
 std::vector<std::shared_ptr<Client>> Orchestrator::sampleClients()
@@ -162,12 +162,31 @@ metrics::Metrics Orchestrator::evaluateClients(std::vector<std::shared_ptr<Clien
                      return ids;
                  }());
 
-    std::vector<metrics::Metrics> round_metrics;
-    for (const auto &client : clients)
+    std::vector<std::thread> threads;
+    // Reserve space for threads only if threaded mode is enabled
+    if (threaded)
+        threads.reserve(clients.size());
+
+    std::vector<metrics::Metrics> round_metrics(clients.size());
+
+    auto evaluate_client = [](std::shared_ptr<Client> client, metrics::Metrics* metrics) {
+        spdlog::debug("Thread spawned");
+        *metrics = client->model->evaluate();
+        spdlog::debug("Client {} accuracy: {}.", client->id, metrics->accuracy);
+    };
+
+    for (size_t i = 0; i < clients.size(); ++i)
     {
-        round_metrics.push_back(client->model->evaluate());
-        spdlog::debug("Client {} accuracy: {}.", client->id, round_metrics.back().accuracy);
+        round_metrics[i] = metrics::Metrics();
+        auto client = clients[i];
+        if (threaded)
+            threads.emplace_back(evaluate_client, client, &round_metrics[i]);
+        else
+            evaluate_client(client, &round_metrics[i]);
     }
+
+    for (auto &thread : threads)
+        thread.join();
 
     return metrics::mean(round_metrics);
 }

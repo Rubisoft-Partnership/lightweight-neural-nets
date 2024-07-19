@@ -11,6 +11,7 @@
 
 #include <ff-cell/ff-cell.h>
 #include <losses/losses.h>
+#include <predictions/predictions.h>
 
 #define MAX_LAYERS_NUM 16
 
@@ -77,7 +78,7 @@ double train_ff_net(FFNet *ffnet, const FFBatch batch, const double learning_rat
  * @param data The dataset to test the model on.
  * @return The average loss of the model on the dataset.
  */
-double test_ff_net(FFNet *ffnet, Data *data, const int input_size);
+double test_ff_net(FFNet *ffnet, Data *data, const int input_size, Predictions *predictions);
 
 /**
  * @brief Performs inference with a FFNet.

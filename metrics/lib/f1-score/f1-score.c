@@ -7,11 +7,6 @@
 
 #include <stdio.h>
 
-/**
- * Predictions struct that holds the true and predicted labels.
- * This struct is externed from predictions.c.
- */
-extern Predictions predictions;
 
 /**
  * @brief Calculates the average f1-score metric.
@@ -20,7 +15,7 @@ extern Predictions predictions;
  *
  * @return The average f1-score metric as a float value.
  */
-float get_average_f1_score(void)
+float get_average_f1_score(Predictions *predictions)
 {
     // Initialize arrays to store true positives and false negatives for each class
     int true_positives[NUM_CLASSES] = {0};  // Initialize all elements to 0
@@ -28,14 +23,14 @@ float get_average_f1_score(void)
     int false_negatives[NUM_CLASSES] = {0}; // Initialize all elements to 0
 
     // Count true positives and false negatives for each class
-    for (int i = 0; i < predictions.num_predictions; i++)
+    for (int i = 0; i < predictions->num_predictions; i++)
     {
-        if (predictions.true_labels[i] == predictions.predicted_labels[i])
-            true_positives[predictions.true_labels[i]]++;
+        if (predictions->true_labels[i] == predictions->predicted_labels[i])
+            true_positives[predictions->true_labels[i]]++;
         else
         {
-            false_negatives[predictions.true_labels[i]]++;
-            false_positives[predictions.predicted_labels[i]]++;
+            false_negatives[predictions->true_labels[i]]++;
+            false_positives[predictions->predicted_labels[i]]++;
         }
     }
 
@@ -60,18 +55,18 @@ float get_average_f1_score(void)
  *
  * @return The f1-score for the target class as a float value.
  */
-float get_f1_score_for_class(Label target_class)
+float get_f1_score_for_class(Predictions *predictions, Label target_class)
 {
     int true_positives = 0;
     int false_negatives = 0;
     int false_positives = 0;
-    for (int i = 0; i < predictions.num_predictions; i++)
+    for (int i = 0; i < predictions->num_predictions; i++)
     {
-        if (predictions.true_labels[i] != target_class && predictions.predicted_labels[i] != target_class)
+        if (predictions->true_labels[i] != target_class && predictions->predicted_labels[i] != target_class)
             continue;
-        if (predictions.true_labels[i] == predictions.predicted_labels[i])
+        if (predictions->true_labels[i] == predictions->predicted_labels[i])
             true_positives++;
-        else if (predictions.true_labels[i] == target_class)
+        else if (predictions->true_labels[i] == target_class)
             false_negatives++;
         else
             false_positives++;

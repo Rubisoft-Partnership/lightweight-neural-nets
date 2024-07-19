@@ -14,7 +14,7 @@
  *
  * @return The average recall metric as a float value.
  */
-float get_average_recall(void);
+float get_average_recall(Predictions *predictions);
 
 /**
  * @brief Calculates the recall metric for a specific class.
@@ -26,4 +26,4 @@ float get_average_recall(void);
  *
  * @return The recall for the target class as a float value.
  */
-float get_recall_for_class(Label target_class);
+float get_recall_for_class(Predictions *predictions, Label target_class);

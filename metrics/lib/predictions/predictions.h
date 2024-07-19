@@ -25,7 +25,7 @@ typedef struct
 /**
  * @brief Initializes the predictions structure by setting the number of predictions to 0.
  */
-void init_predictions(void);
+void init_predictions(Predictions *predictions);
 
 /**
  * @brief Resets the predictions.
@@ -34,7 +34,7 @@ void init_predictions(void);
  * After calling this function, the predictions will be cleared and ready
  * for new predictions.
  */
-void reset_predictions(void);
+void reset_predictions(Predictions *predictions);
 
 /**
  * @brief Adds a prediction to the predictions structure.
@@ -42,4 +42,4 @@ void reset_predictions(void);
  * @param true_label The true label of the prediction.
  * @param predicted_label The predicted label of the prediction.
  */
-void add_prediction(const Label true_label, const Label predicted_label);
+void add_prediction(const Label true_label, const Label predicted_label, Predictions *predictions);

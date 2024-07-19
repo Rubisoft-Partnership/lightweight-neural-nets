@@ -5,20 +5,12 @@
 
 #include <confusion-matrix/confusion-matrix.h>
 
-#include <predictions/predictions.h>
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
 /**
- * Predictions struct that holds the true and predicted labels.
- * This struct is externed from predictions.c.
- */
-extern Predictions predictions;
-
-/**
- * @brief Creates a new confusion matrix based on the predictions.
+ * @brief Creates a new confusion matrix based on the predictions->
  *
  * This function creates a new confusion matrix based on the true and predicted labels stored in the predictions struct.
  * The confusion matrix is a square matrix that represents the performance of a classification model.
@@ -27,17 +19,17 @@ extern Predictions predictions;
  * @param None
  * @return The newly created confusion matrix.
  */
-int **new_confusion_matrix(void)
+int **new_confusion_matrix(Predictions *predictions)
 {
     int **confusionMatrix = (int **)calloc(NUM_CLASSES, sizeof(int *));
     for (Label i = 0; i < NUM_CLASSES; i++)
     {
         confusionMatrix[i] = (int *)calloc(NUM_CLASSES, sizeof(int));
     }
-    for (int i = 0; i < predictions.num_predictions; i++)
+    for (int i = 0; i < predictions->num_predictions; i++)
     {
-        Label true_label = predictions.true_labels[i];
-        Label predicted_label = predictions.predicted_labels[i];
+        Label true_label = predictions->true_labels[i];
+        Label predicted_label = predictions->predicted_labels[i];
         confusionMatrix[true_label][predicted_label]++;
     }
     return confusionMatrix;
@@ -82,9 +74,9 @@ void free_normalized_confusion_matrix(float **normalized_confusion_matrix)
  *
  * @return A 2D array of floats representing the normalized confusion matrix.
  */
-float **get_normalized_confusion_matrix(void)
+float **get_normalized_confusion_matrix(Predictions *predictions)
 {
-    int **confusionMatrix = new_confusion_matrix();
+    int **confusionMatrix = new_confusion_matrix(predictions);
     float **normalized_confusion_matrix = (float **)calloc(NUM_CLASSES, sizeof(float *));
     for (Label i = 0; i < NUM_CLASSES; i++)
     {
@@ -121,9 +113,8 @@ float **get_normalized_confusion_matrix(void)
  *
  * @param None
  */
-void print_confusion_matrix(void)
+void print_confusion_matrix(int **confusionMatrix)
 {
-    int **confusionMatrix = new_confusion_matrix();
     const int width = 7; // Adjust the cell width as needed
 
     printf("Confusion Matrix:\n");
@@ -178,11 +169,9 @@ void print_confusion_matrix(void)
  *
  * @param None
  */
-void print_normalized_confusion_matrix(void)
+void print_normalized_confusion_matrix(float **confusionMatrix)
 {
-    int **confusionMatrix = new_confusion_matrix();
     const int width = 7; // Width of each cell in the table
-    printf("Normalized confusion Matrix with %d samples:\n", predictions.num_predictions);
 
     // Print top header
     printf("  *  ");
@@ -203,12 +192,6 @@ void print_normalized_confusion_matrix(void)
 
     for (int i = 0; i < NUM_CLASSES; ++i)
     {
-        // Calculate sum for normalization
-        int samples_per_class = 0;
-        for (int j = 0; j < NUM_CLASSES; ++j)
-        {
-            samples_per_class += confusionMatrix[i][j];
-        }
 
         // Print row label
         printf("  %d  | ", i);
@@ -216,14 +199,7 @@ void print_normalized_confusion_matrix(void)
         // Print row data
         for (int j = 0; j < NUM_CLASSES; ++j)
         {
-            if (samples_per_class > 0)
-            {
-                printf("%-*.*f| ", width - 2, 2, (float)confusionMatrix[i][j] / samples_per_class);
-            }
-            else
-            {
-                printf("%-*s| ", width - 2, "0.00");
-            }
+            printf("%-*.*f| ", width - 2, 2, (float)confusionMatrix[i][j]);
         }
         printf("\n");
     }
@@ -236,5 +212,5 @@ void print_normalized_confusion_matrix(void)
             printf("-");
     }
     printf("|\n");
-    free_confusion_matrix(confusionMatrix);
+    free_normalized_confusion_matrix(confusionMatrix);
 }

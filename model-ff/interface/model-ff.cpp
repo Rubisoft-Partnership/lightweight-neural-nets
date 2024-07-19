@@ -122,9 +122,10 @@ metrics::Metrics ModelFF::evaluate()
     log_info("Testing FFNet...");
     // Create a Metrics object and generate the metrics
     metrics::Metrics metrics;
-    init_predictions();
-    metrics.loss = test_ff_net(ffnet, data.test, units[0]);
-    metrics.generate();
+    Predictions predictions;
+    init_predictions(&predictions);
+    metrics.loss = test_ff_net(ffnet, data.test, units[0], &predictions);
+    metrics.generate(&predictions);
 
     return metrics;
 }
