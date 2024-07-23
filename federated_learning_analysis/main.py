@@ -1,5 +1,6 @@
 import os
 from analysis.parser import parse_all_metrics, parse_log_file
+from analysis.plotter import plot_server_model_accuracy_over_rounds
 
 def main():
     input_path = 'input/'
@@ -12,6 +13,9 @@ def main():
 
     # Parse metrics files
     all_metrics = parse_all_metrics(simulations_path)
+    
+    for metrics in all_metrics:
+        plot_server_model_accuracy_over_rounds(metrics)
 
 
 if __name__ == '__main__':
