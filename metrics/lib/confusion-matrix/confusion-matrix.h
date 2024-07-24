@@ -4,6 +4,8 @@
  */
 #pragma once
 
+#include <predictions/predictions.h>
+
 /**
  * @brief Prints the confusion matrix.
  *
@@ -13,7 +15,7 @@
  *
  * @param None
  */
-void print_confusion_matrix(void);
+void print_confusion_matrix(int **confusionMatrix);
 
 /**
  * @brief Prints the normalized confusion matrix.
@@ -24,14 +26,14 @@ void print_confusion_matrix(void);
  *
  * @param None
  */
-void print_normalized_confusion_matrix(void);
+void print_normalized_confusion_matrix(float **confusionMatrix);
 
 /**
  * Calculates and returns the normalized confusion matrix.
  * 
  * @return A 2D array of floats representing the normalized confusion matrix.
  */
-float** get_normalized_confusion_matrix(void);
+float** get_normalized_confusion_matrix(Predictions *predictions);
 
 
 /**

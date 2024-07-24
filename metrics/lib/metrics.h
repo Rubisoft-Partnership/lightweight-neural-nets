@@ -13,6 +13,13 @@
  */
 #pragma once
 
+#include <predictions/predictions.h>
+#include <confusion-matrix/confusion-matrix.h>
+#include <accuracy/accuracy.h>
+#include <precision/precision.h>
+#include <recall/recall.h>
+#include <f1-score/f1-score.h>
+
 typedef struct
 {
     float accuracy;
@@ -23,14 +30,7 @@ typedef struct
     float** normalized_confusion_matrix;
 } Metrics;
 
-#include <predictions/predictions.h>
-#include <confusion-matrix/confusion-matrix.h>
-#include <accuracy/accuracy.h>
-#include <precision/precision.h>
-#include <recall/recall.h>
-#include <f1-score/f1-score.h>
-
-Metrics generate_metrics(void);
+Metrics generate_metrics(Predictions* predictions);
 
 void reset_metrics(Metrics metrics);
 

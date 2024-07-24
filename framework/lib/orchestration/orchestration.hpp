@@ -14,7 +14,7 @@ std::vector<std::shared_ptr<Client>> initializeClients(const std::vector<std::st
 class Orchestrator
 {
 public:
-    Orchestrator(const std::string &datasets_path, const std::string &checkpoints_path);
+    Orchestrator(const std::string &datasets_path, const std::string &checkpoints_path, bool threaded = false);
     void run();
 
 private:
@@ -27,6 +27,7 @@ private:
     const std::string datasets_path;
     const std::string checkpoints_path;
     std::shared_ptr<Server> server;
+    bool threaded;
 };
 
 #endif // ORCHESTRATION_H

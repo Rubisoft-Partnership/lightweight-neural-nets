@@ -13,9 +13,9 @@ namespace metrics
     {
     }
 
-    void Metrics::generate()
+    void Metrics::generate(Predictions *predictions)
     {
-        ::Metrics c_metrics = generate_metrics();
+        ::Metrics c_metrics = generate_metrics(predictions);
         accuracy = c_metrics.accuracy;
         balanced_accuracy = c_metrics.balanced_accuracy;
         average_precision = c_metrics.average_precision;

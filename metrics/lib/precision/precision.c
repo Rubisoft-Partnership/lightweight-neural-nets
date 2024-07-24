@@ -7,11 +7,6 @@
 
 #include <stdio.h>
 
-/**
- * Predictions struct that holds the true and predicted labels.
- * This struct is externed from predictions.c.
- */
-extern Predictions predictions;
 
 /**
  * @brief Calculates the average precision metric.
@@ -20,19 +15,19 @@ extern Predictions predictions;
  *
  * @return The average precision metric as a float value.
  */
-float get_average_precision(void)
+float get_average_precision(Predictions *predictions)
 {
     // Initialize arrays to store true positives and false positives for each class
     int true_positives[NUM_CLASSES] = {0};  // Initialize all elements to 0
     int false_positives[NUM_CLASSES] = {0}; // Initialize all elements to 0
 
     // Count true positives and false positives for each class
-    for (int i = 0; i < predictions.num_predictions; i++)
+    for (int i = 0; i < predictions->num_predictions; i++)
     {
-        if (predictions.true_labels[i] == predictions.predicted_labels[i])
-            true_positives[predictions.true_labels[i]]++;
+        if (predictions->true_labels[i] == predictions->predicted_labels[i])
+            true_positives[predictions->true_labels[i]]++;
         else
-            false_positives[predictions.predicted_labels[i]]++;
+            false_positives[predictions->predicted_labels[i]]++;
     }
 
     // Calculate average precision
@@ -56,15 +51,15 @@ float get_average_precision(void)
  *
  * @return The precision for the target class as a float value.
  */
-float get_precision_for_class(Label target_class)
+float get_precision_for_class(Predictions *predictions, Label target_class)
 {
     int true_positives = 0;
     int false_positives = 0;
-    for (int i = 0; i < predictions.num_predictions; i++)
+    for (int i = 0; i < predictions->num_predictions; i++)
     {
-        if (predictions.predicted_labels[i] != target_class)
+        if (predictions->predicted_labels[i] != target_class)
             continue;
-        if (predictions.true_labels[i] == target_class)
+        if (predictions->true_labels[i] == target_class)
             true_positives++;
         else
             false_positives++;

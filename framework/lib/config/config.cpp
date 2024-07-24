@@ -45,6 +45,7 @@ namespace config
         size_t num_rounds = 3;
         float c_rate = 0.1;
         float checkpoint_rate = 0.2;
+        bool threaded = false;
     }
 
     namespace parameters
@@ -196,6 +197,7 @@ void config::log_simulation_params()
         units_str += "]";
         return units_str; }());
     spdlog::info("Number of classes: {}", parameters::num_classes);
+    spdlog::info("Threaded mode: [{}]", orchestration::threaded ? "enabled" : "disabled");
     spdlog::info("Finished logging simulation parameters\n");
 }
 

@@ -5,15 +5,9 @@
 
 #include <accuracy/accuracy.h>
 
-#include <predictions/predictions.h>
 
 #include <stdio.h>
 
-/**
- * Predictions struct that holds the true and predicted labels.
- * This struct is externed from predictions.c.
- */
-extern Predictions predictions;
 
 /**
  * @brief Calculates the accuracy metric.
@@ -22,23 +16,23 @@ extern Predictions predictions;
  *
  * @return The accuracy metric as a float value.
  */
-float get_accuracy(void)
+float get_accuracy(Predictions *predictions)
 {
-    if (predictions.num_predictions == 0)
+    if (predictions->num_predictions == 0)
         return 0.0;
     int correct_predictions = 0;
-    for (int i = 0; i < predictions.num_predictions; i++)
+    for (int i = 0; i < predictions->num_predictions; i++)
     {
-        if (predictions.true_labels[i] == predictions.predicted_labels[i])
+        if (predictions->true_labels[i] == predictions->predicted_labels[i])
         {
             correct_predictions++;
         }
     }
-    return (float)correct_predictions / predictions.num_predictions;
+    return (float)correct_predictions / predictions->num_predictions;
 }
 
 /**
- * Calculates the balanced accuracy of a set of predictions.
+ * Calculates the balanced accuracy of a set of predictions->
  *
  * The balanced accuracy is a metric that measures the performance of a binary classifier.
  * It takes into account both the sensitivity (true positive rate) and specificity (true negative rate)
@@ -46,25 +40,25 @@ float get_accuracy(void)
  *
  * @return The balanced accuracy value.
  */
-float get_balanced_accuracy(void)
+float get_balanced_accuracy(Predictions *predictions)
 {
-    if (predictions.num_predictions == 0)
+    if (predictions->num_predictions == 0)
         return 0.0;
     
     int correct_predictions[NUM_CLASSES];
     // Initialize correct predictions to the number of predictions for each class
     for (Label i = 0; i < NUM_CLASSES; i++)
     {
-        correct_predictions[i] = predictions.num_predictions;
+        correct_predictions[i] = predictions->num_predictions;
     }
 
-    for (Label i = 0; i < predictions.num_predictions; i++)
+    for (Label i = 0; i < predictions->num_predictions; i++)
     {
         // If the prediction is incorrect, decrement the correct predictions for both the true and predicted labels
-        if (predictions.true_labels[i] != predictions.predicted_labels[i])
+        if (predictions->true_labels[i] != predictions->predicted_labels[i])
         {
-            correct_predictions[predictions.true_labels[i]]--;
-            correct_predictions[predictions.predicted_labels[i]]--;
+            correct_predictions[predictions->true_labels[i]]--;
+            correct_predictions[predictions->predicted_labels[i]]--;
         }
     }
     int sum = 0;
@@ -72,5 +66,5 @@ float get_balanced_accuracy(void)
     {
         sum += correct_predictions[i];
     }
-    return (float)sum / (NUM_CLASSES * predictions.num_predictions);
+    return (float)sum / (NUM_CLASSES * predictions->num_predictions);
 }
