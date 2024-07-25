@@ -9,6 +9,7 @@
 #include <model-ff.hpp>
 #include <model-bp.hpp>
 #include <config/config.hpp>
+#include <metrics-logger/metrics-logger.hpp>
 
 namespace fs = std::filesystem;
 
@@ -66,6 +67,7 @@ void Orchestrator::run()
 
         spdlog::info("Starting global evaluation.");
         metrics::Metrics global_avg_metrics = evaluateClients(clients);
+        log_metrics(round_index, -2, -1, DatasetType::GLOBAL, global_avg_metrics);
         spdlog::info("Global average accuracy: {}.\n", global_avg_metrics.accuracy);
 
         if (round_index % std::max(static_cast<int>(num_rounds * checkpoint_rate), 1) == 0 && round_index > 0)
