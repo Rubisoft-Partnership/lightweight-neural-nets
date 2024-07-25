@@ -71,7 +71,7 @@ int main(const int argc, const char *argv[])
     {
         spdlog::info("Starting Federated Learning Orchestrator...");
         // Initialize the orchestrator
-        Orchestrator orchestrator(config::datasets_path + config::selected_dataset, config::checkpoints_path);
+        Orchestrator orchestrator(config::datasets_path + config::selected_dataset, config::checkpoints_path, config::orchestration::threaded);
 
         // Run the orchestrator
         orchestrator.run();

@@ -91,7 +91,7 @@ static double softplus(double x, double betha)
  */
 double symba_loss(const double g_pos, const double g_neg, const double threshold)
 {
-    return softplus(threshold * (g_pos - g_neg), 0.1);
+    return softplus(-threshold * (g_pos - g_neg), 1.0);
 }
 
 /**
@@ -104,7 +104,7 @@ double symba_loss(const double g_pos, const double g_neg, const double threshold
  */
 double symba_pdloss_pos(const double g_pos, const double g_neg, const double threshold)
 {
-    return threshold * stable_sigmoid(-threshold * (g_pos - g_neg));
+    return -threshold * stable_sigmoid(-threshold * (g_pos - g_neg));
 }
 
 /**
@@ -117,7 +117,7 @@ double symba_pdloss_pos(const double g_pos, const double g_neg, const double thr
  */
 double symba_pdloss_neg(const double g_pos, const double g_neg, const double threshold)
 {
-    return -threshold * stable_sigmoid(-threshold * (g_pos - g_neg));
+    return threshold * stable_sigmoid(-threshold * (g_pos - g_neg));
 }
 
 /**

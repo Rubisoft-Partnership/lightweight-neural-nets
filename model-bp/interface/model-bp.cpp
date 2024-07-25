@@ -124,7 +124,7 @@ void ModelBP::train(const int &epochs, const int &batch_size, const double &lear
     on_enumerate_epoch();
 
     int epoch = 1;
-    tiny_dnn::progress_display disp(train_images.size());
+    // tiny_dnn::progress_display disp(train_images.size());
 
     // create callback
     auto on_epoch = [&]()
@@ -134,11 +134,13 @@ void ModelBP::train(const int &epochs, const int &batch_size, const double &lear
                   << epoch_time.elapsed() << "s elapsed." << std::endl;
         on_enumerate_epoch();
 
-        disp.restart(train_images.size());
+        // disp.restart(train_images.size());
         epoch_time.restart();
     };
     auto on_enumerate_minibatch = [&]()
-    { disp += batch_size; };
+    { // disp += batch_size;
+    int nothing = 0;
+    };
 
     // Training
     bpnet.train<tiny_dnn::cross_entropy>(optimizer, train_images, train_labels, batch_size, epochs, on_enumerate_minibatch, on_epoch);
@@ -152,7 +154,8 @@ metrics::Metrics ModelBP::evaluate()
     tiny_dnn::result results = bpnet.test(test_images, test_labels);
 
     spdlog::debug("Generating metrics..");
-    init_predictions();
+    Predictions predictions;
+    init_predictions(&predictions);
     // iterate over confusion matrix
     for (int actual = 0; actual < results.confusion_matrix.size(); actual++)
     {
@@ -160,7 +163,7 @@ metrics::Metrics ModelBP::evaluate()
         {
             for (int k = 0; k < results.confusion_matrix[actual][predicted]; k++)
             {
-                add_prediction(actual, predicted);
+                add_prediction(actual, predicted, &predictions);
             }
         }
     }
@@ -169,7 +172,7 @@ metrics::Metrics ModelBP::evaluate()
     // Create a Metrics object and generate the metrics
     metrics::Metrics metrics;
     metrics.loss = bpnet.get_loss<tiny_dnn::cross_entropy>(test_images, test_labels_onehot) / test_images.size();
-    metrics.generate();
+    metrics.generate(&predictions);
 
     return metrics;
 }

@@ -53,6 +53,7 @@ namespace config
         extern size_t num_rounds;
         extern float c_rate;
         extern float checkpoint_rate;
+        extern bool threaded;
     }
 
     namespace parameters

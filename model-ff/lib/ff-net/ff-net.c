@@ -109,10 +109,10 @@ double train_ff_net(FFNet *ffnet, const FFBatch batch, const double learning_rat
  * @param data The dataset to test the model on.
  * @return The average loss of the model on the dataset.
  */
-double test_ff_net(FFNet *ffnet, Data *data, const int input_size)
+double test_ff_net(FFNet *ffnet, Data *data, const int input_size, Predictions *predictions)
 {
     // initialize predictions for metrics generation
-    init_predictions();
+    init_predictions(predictions);
     // Buffer to store activations to feed the next layer.
     double *netinput = (double *)malloc((input_size) * sizeof(double));
     // History of goodnesses for the ground truth class.
@@ -165,7 +165,7 @@ double test_ff_net(FFNet *ffnet, Data *data, const int input_size)
             if (goodnesses[i] > goodnesses[max_goodness_index])
                 max_goodness_index = i;
 
-        add_prediction(ground_truth, max_goodness_index);
+        add_prediction(ground_truth, max_goodness_index, predictions);
         double mean_loss = 0.0;
         for (Label i = 0; i < data->num_class; i++)
             mean_loss += losses[i];

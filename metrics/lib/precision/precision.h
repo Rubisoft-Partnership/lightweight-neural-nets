@@ -14,7 +14,7 @@
  *
  * @return The average precision metric as a float value.
  */
-float get_average_precision(void);
+float get_average_precision(Predictions *predictions);
 
 /**
  * @brief Calculates the precision metric for a specific class.
@@ -26,4 +26,4 @@ float get_average_precision(void);
  *
  * @return The precision for the target class as a float value.
  */
-float get_precision_for_class(Label target_class);
+float get_precision_for_class(Predictions *predictions,Label target_class);

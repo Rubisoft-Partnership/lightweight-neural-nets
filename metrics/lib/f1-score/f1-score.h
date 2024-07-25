@@ -14,7 +14,7 @@
  *
  * @return The average f1-score metric as a float value.
  */
-float get_average_f1_score(void);
+float get_average_f1_score(Predictions *predictions);
 
 /**
  * @brief Calculates the f1-score metric for a specific class.
@@ -26,4 +26,4 @@ float get_average_f1_score(void);
  *
  * @return The f1-score for the target class as a float value.
  */
-float get_f1_score_for_class(Label target_class);
+float get_f1_score_for_class(Predictions *predictions, Label target_class);

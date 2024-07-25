@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <predictions/predictions.h>
+
 /**
  * @brief Calculates the accuracy metric.
  *
@@ -12,7 +14,7 @@
  *
  * @return The accuracy metric as a double value.
  */
-float get_accuracy(void);
+float get_accuracy(Predictions *predictions);
 
 /**
  * Calculates the balanced accuracy of a set of predictions.
@@ -23,4 +25,4 @@ float get_accuracy(void);
  * 
  * @return The balanced accuracy value.
  */
-float get_balanced_accuracy(void);
+float get_balanced_accuracy(Predictions *predictions);
