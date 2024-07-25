@@ -1,21 +1,15 @@
 import os
-from analysis.parser import parse_all_metrics, parse_log_file
+from analysis.parser import parse_all_simulations
 from analysis.plotter import plot_server_model_metrics_over_rounds
 
 def main():
-    input_path = 'input/'
-    log_files_path = os.path.join(input_path, 'logs')
-    simulations_path = os.path.join(input_path, 'simulations')
-
-    # Parse log files
-    # log_files = [os.path.join(log_files_path, f) for f in os.listdir(log_files_path)]
-    # log_params = [parse_log_file(f) for f in log_files]
+    simulations_path = 'input/'
 
     # Parse metrics files
-    all_metrics = parse_all_metrics(simulations_path)
+    simulations = parse_all_simulations(simulations_path)
     
-    for metrics in all_metrics:
-        plot_server_model_metrics_over_rounds(metrics)
+    for sim in simulations:
+        plot_server_model_metrics_over_rounds(sim)
 
 
 if __name__ == '__main__':

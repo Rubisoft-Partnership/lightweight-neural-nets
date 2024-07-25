@@ -1,4 +1,4 @@
-from analysis.parser import SimulationMetrics
+from analysis.parser import Simulation
 import matplotlib.pyplot as plt
 import os
 
@@ -15,9 +15,9 @@ def save_plot(data, title, ylabel, filename, y_limit=None):
     plt.savefig(filename)
     plt.close()  # Close the figure to free memory
 
-def plot_server_model_metrics_over_rounds(metrics: SimulationMetrics):
+def plot_server_model_metrics_over_rounds(metrics: Simulation):
     output_dir = 'output/'
-    sim_dir = os.path.join(output_dir, metrics.simulation_id)
+    sim_dir = os.path.join(output_dir, str(metrics.simulation_id))
     os.makedirs(sim_dir, exist_ok=True)
 
     # Initialize lists to store the metrics
