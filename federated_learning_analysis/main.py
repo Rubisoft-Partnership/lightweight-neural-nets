@@ -1,6 +1,6 @@
 import os
 from analysis.parser import parse_all_simulations
-from analysis.plotter import plot_server_model_metrics_over_rounds
+from analysis.plotter import plot_server_model_metrics_over_rounds, plot_average_global_metrics_over_rounds
 import sys
 
 def main():
@@ -23,6 +23,7 @@ def main():
     
     for sim in simulations:
         plot_server_model_metrics_over_rounds(sim, output_dir=output_dir)
+        plot_average_global_metrics_over_rounds(sim, output_dir=output_dir)
 
 
 if __name__ == '__main__':

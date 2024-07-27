@@ -34,16 +34,15 @@ def plot_server_model_metrics_over_rounds(simulation: Simulation, output_dir = '
             f1s.append(row['average_f1_score'])
     
     if caption is None:        
-        caption = f"Model: {simulation.config['model_type']}"
+        caption = f"Model {simulation.config['model_type']}"
         if simulation.config['model_type'] == 'FF':
             caption += f" with {simulation.config['parameters']['ff']['loss']} loss"
-        caption += f", Dataset: {simulation.config['selected_dataset'].replace('/', '')}"
+        caption += f", {simulation.config['selected_dataset'].replace('/', '')}"
         caption += f", {simulation.config['orchestration']['num_clients']} clients, {simulation.config['orchestration']['num_rounds']} rounds"
-        caption += f"\nLearning rate: {round(simulation.config['training']['learning_rate'], 3)}, Batch size: {simulation.config['training']['batch_size']}"
-        caption += f", Layer units: {simulation.config['parameters']['units']}"
-       
+        caption += f", Units: {simulation.config['parameters']['units']}"
+        caption += f"\nη: {round(simulation.config['training']['learning_rate'], 3)}, Batch: {simulation.config['training']['batch_size']}, epochs: {simulation.config['training']['epochs']}"
         
-    
+       
 
     # Plot each metric
     if accuracies:
@@ -57,3 +56,43 @@ def plot_server_model_metrics_over_rounds(simulation: Simulation, output_dir = '
     if f1s:
         save_plot(f1s, 'Server model F1 score over rounds', 'F1 score', os.path.join(sim_dir, 'server_model_f1_over_rounds.png'), y_limit=(0, 1), caption=caption)
 
+def plot_average_global_metrics_over_rounds(simulation: Simulation, output_dir = 'output/', caption=None):
+    sim_dir = os.path.join(output_dir, str(simulation.simulation_id))
+    os.makedirs(sim_dir, exist_ok=True)
+
+    # Initialize lists to store the metrics
+    accuracies, losses, recalls, precisions, f1s = [], [], [], [], []
+
+    # Collect data from the metrics
+    for row in simulation.metrics:
+        if row['client_id'] == -2:
+            accuracies.append(row['accuracy'])
+            losses.append(float(row['loss']))
+            recalls.append(row['average_recall'])
+            precisions.append(row['average_precision'])
+            f1s.append(row['average_f1_score'])
+    
+    if caption is None:        
+        caption = f"Model {simulation.config['model_type']}"
+        if simulation.config['model_type'] == 'FF':
+            caption += f" with {simulation.config['parameters']['ff']['loss']} loss"
+        caption += f", {simulation.config['selected_dataset'].replace('/', '')}"
+        caption += f", {simulation.config['orchestration']['num_clients']} clients, {simulation.config['orchestration']['num_rounds']} rounds"
+        caption += f", Units: {simulation.config['parameters']['units']}"
+        caption += f"\nη: {round(simulation.config['training']['learning_rate'], 3)}, Batch: {simulation.config['training']['batch_size']}, epochs: {simulation.config['training']['epochs']}"
+        
+       
+        
+    
+
+    # Plot each metric
+    if accuracies:
+        save_plot(accuracies, 'Global accuracy over rounds', 'Accuracy', os.path.join(sim_dir, 'global_accuracy_over_rounds.png'), y_limit=(0, 1), caption=caption)
+    if losses:
+        save_plot(losses, 'Global loss over rounds', 'Loss', os.path.join(sim_dir, 'global_loss_over_rounds.png'), y_limit=(0, max(losses) + 1), caption=caption)
+    if recalls:
+        save_plot(recalls, 'Global recall over rounds', 'Recall', os.path.join(sim_dir, 'global_recall_over_rounds.png'), y_limit=(0, 1), caption=caption)
+    if precisions:
+        save_plot(precisions, 'Global precision over rounds', 'Precision', os.path.join(sim_dir, 'global_precision_over_rounds.png'), y_limit=(0, 1), caption=caption)
+    if f1s:
+        save_plot(f1s, 'Global F1 score over rounds', 'F1 score', os.path.join(sim_dir, 'global_f1_over_rounds.png'), y_limit=(0, 1), caption=caption)
