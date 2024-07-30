@@ -2,7 +2,7 @@ from analysis.parser import Simulation
 import matplotlib.pyplot as plt
 import os
 
-def save_plot(data, title, ylabel, filename, y_limit=None, caption=None):
+def save_plot(data, title, ylabel, filename, y_limit=None, caption=None, max_value_line=True):
     plt.figure(figsize=(10, 8))
     plt.plot(data)
     plt.xticks(range(0, len(data), max(1, len(data) // 15)))
@@ -14,6 +14,10 @@ def save_plot(data, title, ylabel, filename, y_limit=None, caption=None):
         plt.ylim(y_limit)
     if caption:
         plt.figtext(0.5, 0.01, caption, wrap=True, horizontalalignment='center', fontsize=12)
+    if max_value_line:
+        plt.axhline(max(data), color='r', linestyle='--', label='Max value')
+        # Add a tick for the max value
+        plt.yticks(list(plt.yticks()[0]) + [max(data)])
     plt.savefig(filename)
     plt.close()  # Close the figure to free memory
 
@@ -48,7 +52,7 @@ def plot_server_model_metrics_over_rounds(simulation: Simulation, output_dir = '
     if accuracies:
         save_plot(accuracies, 'Server model accuracy over rounds', 'Accuracy', os.path.join(sim_dir, 'server_model_accuracy_over_rounds.png'), y_limit=(0, 1), caption=caption)
     if losses:
-        save_plot(losses, 'Server model loss over rounds', 'Loss', os.path.join(sim_dir, 'server_model_loss_over_rounds.png'), y_limit=(0, max(losses) + 1), caption=caption)
+        save_plot(losses, 'Server model loss over rounds', 'Loss', os.path.join(sim_dir, 'server_model_loss_over_rounds.png'), y_limit=(0, max(losses) + 1), caption=caption, max_value_line=False)
     if recalls:
         save_plot(recalls, 'Server model recall over rounds', 'Recall', os.path.join(sim_dir, 'server_model_recall_over_rounds.png'), y_limit=(0, 1), caption=caption)
     if precisions:
