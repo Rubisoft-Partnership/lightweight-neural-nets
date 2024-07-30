@@ -11,7 +11,10 @@ def save_plot(data, title, ylabel, filename, y_limit=None, caption=None, max_val
     plt.title(title)
     plt.grid(True)
     if y_limit:
-        plt.ylim(y_limit)
+        try:
+            plt.ylim(y_limit)
+        except ValueError:
+            pass
     if caption:
         plt.figtext(0.5, 0.01, caption, wrap=True, horizontalalignment='center', fontsize=12)
     if max_value_line:
