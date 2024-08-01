@@ -91,17 +91,17 @@ void ModelFF::train(const int &epochs, const int &batch_size, const double &lear
         double loss = 0.0f;
         int num_batches = data.train->rows / batch_size;
         // Print progress bar
-        init_progress_bar();
+        // init_progress_bar();
 
         for (int j = 0; j < num_batches; j++) // iterate over batches
         {
             // Update progress bar
-            update_progress_bar(j, num_batches);
+            // update_progress_bar(j, num_batches);
 
             generate_batch(data.train, j, batch);                            // generate positive and negative samples
             loss += train_ff_net(ffnet, batch, learning_rate) / num_batches; // train the model
         }
-        finish_progress_bar();
+        // finish_progress_bar();
         spdlog::debug("Training loss: {}", loss);
         int epoch_time = (clock() - epoch_start_time) / CLOCKS_PER_SEC;
         printf("\tEpoch time: ");

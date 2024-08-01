@@ -11,8 +11,8 @@ GCC = gcc
 GPP = g++
 
 # Compiler Flags
-CFLAGS = -Wall -Wextra -pedantic -std=c99 -Ilib
-CPPFLAGS = -Wall -Wextra -pedantic -std=c++17 -Ilib -DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE
+CFLAGS = -Wall -Wextra -pedantic -std=c99 -Ilib -pthread
+CPPFLAGS = -Wall -Wextra -pedantic -std=c++17 -Ilib -DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE -pthread
 CPPFLAGS_NO_WARNINGS = -std=c++17 -Ilib -DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE
 
 METRICS_BASEPATH = $(PROJECT_BASEPATH)/../metrics

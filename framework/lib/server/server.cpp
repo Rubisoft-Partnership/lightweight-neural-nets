@@ -116,7 +116,6 @@ void Server::update_clients()
         if (threaded)
             threads.emplace_back([&client, this]()
                                  { 
-                                    spdlog::info("Updating client {}, spawned in thread.", client->id); 
                                     client->update(round_index, learning_rate, batch_size, epochs); });
         else
             client->update(round_index, learning_rate, batch_size, epochs);

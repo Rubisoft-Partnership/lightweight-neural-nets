@@ -129,9 +129,9 @@ void ModelBP::train(const int &epochs, const int &batch_size, const double &lear
     // create callback
     auto on_epoch = [&]()
     {
-        std::cout << std::endl
-                  << "Epoch " << epoch++ << "/" << epochs << " finished. "
-                  << epoch_time.elapsed() << "s elapsed." << std::endl;
+        // std::cout << std::endl
+        //           << "Epoch " << epoch++ << "/" << epochs << " finished. "
+        //           << epoch_time.elapsed() << "s elapsed." << std::endl;
         on_enumerate_epoch();
 
         // disp.restart(train_images.size());
@@ -145,7 +145,7 @@ void ModelBP::train(const int &epochs, const int &batch_size, const double &lear
     // Training
     bpnet.train<tiny_dnn::cross_entropy>(optimizer, train_images, train_labels, batch_size, epochs, on_enumerate_minibatch, on_epoch);
 
-    std::cout << "Training finished. It took " << total_train_time.elapsed() << " seconds." << std::endl;
+    spdlog::debug("Training finished. It took {} seconds.", total_train_time.elapsed());
 }
 
 metrics::Metrics ModelBP::evaluate()
