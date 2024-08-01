@@ -91,7 +91,7 @@ static double softplus(double x, double betha)
  */
 double symba_loss(const double g_pos, const double g_neg, const double threshold)
 {
-    return softplus(-threshold * (g_pos - g_neg), 1.0);
+    return softplus(-threshold * (g_pos - g_neg), 0.05);
 }
 
 /**

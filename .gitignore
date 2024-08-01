@@ -17,3 +17,10 @@ build
 
 # Python venv files
 **/venv/**
++
+*.cpython-*
+
+# Plotting module
+*.png
+*.tar
+federated_learning_analysis/input/*
