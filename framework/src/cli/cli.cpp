@@ -231,6 +231,10 @@ void parse_args(const int argc, const char *argv[])
             config::orchestration::threaded = true;
         }
     }
+    if (args[argc - 1] == "--threaded-mode" || args[argc - 1] == "-tm")
+    {
+        config::orchestration::threaded = true;
+    }
 }
 
 void print_help(std::string name)
