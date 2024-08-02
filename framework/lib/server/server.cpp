@@ -8,6 +8,7 @@
 #include <model-bp.hpp>
 #include <metrics-logger/metrics-logger.hpp>
 #include <thread>
+#include "server.hpp"
 
 using namespace config::training;
 
@@ -57,6 +58,9 @@ metrics::Metrics Server::executeRound(int round_index, std::vector<std::shared_p
 
     // Update clients
     update_clients();
+
+    // Add round clients to the updated clients set
+    updated_clients.insert(round_clients.begin(), round_clients.end());
 
     // Aggregate models
     model->set_weights(aggregate_models());

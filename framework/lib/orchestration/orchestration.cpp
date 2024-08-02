@@ -108,10 +108,11 @@ void Orchestrator::saveCheckpoint()
     }
 
     // Save the models of all clients
-    for (auto &client : clients)
+    for (auto &client : server->updated_clients)
     {
         client->model->save(round_folder + "/model-client-" + std::to_string(client->id) + ".bin");
     }
+    server->updated_clients.clear();
     // Save the model of the server
     server->model->save(round_folder + "/model-server.bin");
 }
