@@ -18,7 +18,7 @@ using namespace config::orchestration;
 static std::vector<std::string> listFolders(const std::string &folder, const std::string &match);
 
 Orchestrator::Orchestrator(const std::string &datasets_path, const std::string &checkpoints_path, bool threaded) : datasets_path(datasets_path),
-                                                                                                    checkpoints_path(checkpoints_path)
+                                                                                                                   checkpoints_path(checkpoints_path)
 {
     // Search datasets folders
     std::vector<std::string> data = listFolders(datasets_path, "^client-\\d+$");
@@ -33,7 +33,6 @@ Orchestrator::Orchestrator(const std::string &datasets_path, const std::string &
 
     // Initialize server
     server = std::make_shared<Server>(clients, datasets_path + config::global_dataset, threaded);
-    
     // Setup client metrics
     auto _ = evaluateClients(clients);
 }
@@ -66,6 +65,7 @@ void Orchestrator::run()
 
         spdlog::info("Starting round clients evaluation.");
         metrics::Metrics round_avg_metrics = evaluateClients(round_clients);
+        log_metrics(round_index, -3, config::training::epochs, DatasetType::LOCAL, round_avg_metrics);
         spdlog::info("Round average accuracy: {}.\n", round_avg_metrics.accuracy);
 
         spdlog::info("Starting global evaluation.");
@@ -175,10 +175,12 @@ metrics::Metrics Orchestrator::evaluateClients(std::vector<std::shared_ptr<Clien
 
     std::vector<metrics::Metrics> round_metrics(clients.size());
 
-    auto evaluate_client = [](std::shared_ptr<Client> client, metrics::Metrics* metrics) {
+    auto evaluate_client = [](std::shared_ptr<Client> client, metrics::Metrics *metrics, std::shared_ptr<Server> server)
+    {
         spdlog::debug("Thread spawned");
         *metrics = client->model->evaluate();
         spdlog::debug("Client {} accuracy: {}.", client->id, metrics->accuracy);
+        server->client_metrics[client->id] = *metrics;
     };
 
     for (size_t i = 0; i < clients.size(); ++i)
@@ -186,15 +188,16 @@ metrics::Metrics Orchestrator::evaluateClients(std::vector<std::shared_ptr<Clien
         round_metrics[i] = metrics::Metrics();
         auto client = clients[i];
         if (threaded)
-            threads.emplace_back(evaluate_client, client, &round_metrics[i]);
+            threads.emplace_back(evaluate_client, client, &round_metrics[i], server);
         else
+        {
             round_metrics[i] = client->model->evaluate();
-        server->client_metrics[client->id] = round_metrics[i];
+            server->client_metrics[client->id] = round_metrics[i];
+        }
     }
 
     for (auto &thread : threads)
         thread.join();
-
     return metrics::mean(round_metrics);
 }
 
