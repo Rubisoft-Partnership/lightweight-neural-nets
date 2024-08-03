@@ -15,6 +15,7 @@ using namespace config::training;
 Server::Server(const std::vector<std::shared_ptr<Client>> &clients, const std::string &global_dataset_path, bool threaded)
     : clients(clients), max_clients(clients.size()), threaded(threaded)
 {
+    client_metrics = std::vector<metrics::Metrics>(max_clients);
     // Initialize server model weights with the first client model weights
     if (config::model_type == config::ModelType::FF)
     {

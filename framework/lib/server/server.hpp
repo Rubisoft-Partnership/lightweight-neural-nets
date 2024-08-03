@@ -17,7 +17,10 @@ public:
     // Execute a federated learning round
     metrics::Metrics executeRound(int round_index, std::vector<std::shared_ptr<Client>> round_clients);
 
+    // Updated clients since the last checkpoint
     std::set<std::shared_ptr<Client>> updated_clients;
+
+    std::vector<metrics::Metrics> client_metrics;    
 
     // Server model
     std::shared_ptr<Model> model;

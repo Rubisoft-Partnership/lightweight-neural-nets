@@ -33,6 +33,9 @@ Orchestrator::Orchestrator(const std::string &datasets_path, const std::string &
 
     // Initialize server
     server = std::make_shared<Server>(clients, datasets_path + config::global_dataset, threaded);
+    
+    // Setup client metrics
+    auto _ = evaluateClients(clients);
 }
 
 std::vector<std::shared_ptr<Client>> Orchestrator::sampleClients()
@@ -66,8 +69,8 @@ void Orchestrator::run()
         spdlog::info("Round average accuracy: {}.\n", round_avg_metrics.accuracy);
 
         spdlog::info("Starting global evaluation.");
-        metrics::Metrics global_avg_metrics = evaluateClients(clients);
-        log_metrics(round_index, -2, -1, DatasetType::GLOBAL, global_avg_metrics);
+        metrics::Metrics global_avg_metrics = metrics::mean(server->client_metrics);
+        log_metrics(round_index, -2, -1, DatasetType::LOCAL, global_avg_metrics);
         spdlog::info("Global average accuracy: {}.\n", global_avg_metrics.accuracy);
 
         if (round_index % std::max(static_cast<int>(num_rounds * checkpoint_rate), 1) == 0 && round_index > 0)
@@ -186,6 +189,7 @@ metrics::Metrics Orchestrator::evaluateClients(std::vector<std::shared_ptr<Clien
             threads.emplace_back(evaluate_client, client, &round_metrics[i]);
         else
             round_metrics[i] = client->model->evaluate();
+        server->client_metrics[client->id] = round_metrics[i];
     }
 
     for (auto &thread : threads)
