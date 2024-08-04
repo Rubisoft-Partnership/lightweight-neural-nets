@@ -8,12 +8,14 @@
 #include <model-bp.hpp>
 #include <metrics-logger/metrics-logger.hpp>
 #include <thread>
+#include "server.hpp"
 
 using namespace config::training;
 
 Server::Server(const std::vector<std::shared_ptr<Client>> &clients, const std::string &global_dataset_path, bool threaded)
     : clients(clients), max_clients(clients.size()), threaded(threaded)
 {
+    client_metrics = std::vector<metrics::Metrics>(max_clients);
     // Initialize server model weights with the first client model weights
     if (config::model_type == config::ModelType::FF)
     {
@@ -57,6 +59,9 @@ metrics::Metrics Server::executeRound(int round_index, std::vector<std::shared_p
 
     // Update clients
     update_clients();
+
+    // Add round clients to the updated clients set
+    updated_clients.insert(round_clients.begin(), round_clients.end());
 
     // Aggregate models
     model->set_weights(aggregate_models());
