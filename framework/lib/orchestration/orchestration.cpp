@@ -177,7 +177,6 @@ metrics::Metrics Orchestrator::evaluateClients(std::vector<std::shared_ptr<Clien
 
     auto evaluate_client = [](std::shared_ptr<Client> client, metrics::Metrics *metrics, std::shared_ptr<Server> server)
     {
-        spdlog::debug("Thread spawned");
         *metrics = client->model->evaluate();
         spdlog::debug("Client {} accuracy: {}.", client->id, metrics->accuracy);
         server->client_metrics[client->id] = *metrics;
