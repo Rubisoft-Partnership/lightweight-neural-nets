@@ -22,10 +22,6 @@
 #include <metrics.h>
 #include <assert.h>
 
-// Buffer to store output activations.
-#define H_BUFFER_SIZE 1024
-double o_buffer[H_BUFFER_SIZE]; // outputs buffer for positive pass
-
 int parse_label(const double *target, const int num_classes);
 
 /**

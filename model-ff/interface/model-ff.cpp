@@ -36,7 +36,7 @@ void ModelFF::build(const std::string &data_path)
 
     auto seed = std::hash<std::string>{}(data_path);
     set_seed(seed); // comment for reproducibility
-    set_log_level(LOG_DEBUG);
+    set_log_level(LOG_INFO);
     std::filesystem::path ff_logs_folder = basepath + logs_folder + FF_LOG_DIR;
     if (!std::filesystem::exists(ff_logs_folder))
     {
@@ -47,7 +47,7 @@ void ModelFF::build(const std::string &data_path)
         }
     }
     open_log_file_with_timestamp(ff_logs_folder.c_str());
-    set_log_level(LOG_INFO);
+    set_log_level(LOG_DEBUG);
 
     // Build the model.
     ffnet = new_ff_net(units_array, layers_num, relu, pdrelu, threshold, beta1, beta2, loss);
@@ -79,14 +79,14 @@ void ModelFF::train(const int &epochs, const int &batch_size, const double &lear
     // Find max layer size.
     const int max_units = *std::max_element(units.begin(), units.end());
 
-    clock_t start_time = clock();
+    // clock_t start_time = clock();
     // Since batch is used for all layers, sample size is set to the maximum of the layers sizes.
     FFBatch batch = new_ff_batch(batch_size, max_units);
 
     on_enumerate_epoch();
     for (int i = 0; i < epochs; i++) // iterate over model epochs
     {
-        clock_t epoch_start_time = clock();
+        // clock_t epoch_start_time = clock();
         shuffle_data(data.train);
         double loss = 0.0f;
         int num_batches = data.train->rows / batch_size;
@@ -103,16 +103,16 @@ void ModelFF::train(const int &epochs, const int &batch_size, const double &lear
         }
         // finish_progress_bar();
         spdlog::debug("Training loss: {}", loss);
-        int epoch_time = (clock() - epoch_start_time) / CLOCKS_PER_SEC;
-        printf("\tEpoch time: ");
-        print_elapsed_time(epoch_time);
-        printf("\n\n");
+        // int epoch_time = (clock() - epoch_start_time) / CLOCKS_PER_SEC;
+        // printf("\tEpoch time: ");
+        // print_elapsed_time(epoch_time);
+        // printf("\n\n");
         on_enumerate_epoch();
     }
-    int total_time = (clock() - start_time) / CLOCKS_PER_SEC;
-    printf("Total training time: ");
-    print_elapsed_time(total_time);
-    printf("\n\n");
+    // int total_time = (clock() - start_time) / CLOCKS_PER_SEC;
+    // printf("Total training time: ");
+    // print_elapsed_time(total_time);
+    // printf("\n\n");
 
     free_ff_batch(batch);
 }

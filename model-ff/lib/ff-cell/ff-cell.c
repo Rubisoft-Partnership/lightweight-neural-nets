@@ -18,9 +18,6 @@
 #include <losses/losses.h>
 #include <ff-utils/ff-utils.h>
 
-// Buffer to store activations and output activations for the positive pass.
-extern double o_buffer[H_BUFFER_SIZE]; // outputs buffer
-
 /**
  * Performs the forward pass for a feedforward (FF) cell.
  *
@@ -43,13 +40,15 @@ static void bprop(const FFCell ffcell, const double learning_rate);
  * @param ffcell The FFCell for which the gradient is computed.
  * @param in_pos The positive input values.
  * @param in_neg The negative input values.
+ * @param positive_output_buffer The positive output buffer.
  * @param g_pos The positive goodness value.
  * @param g_neg The negative goodness value.
  * @param threshold The threshold value.
  * @param loss_suite The loss function suite to be used.
  */
 static void compute_gradient(const FFCell ffcell, const double *const in_pos, const double *const in_neg,
-                             const double g_pos, const double g_neg, const double threshold, const Loss loss_suite);
+                             const double *const positive_output_buffer, const double g_pos, const double g_neg,
+                             const double threshold, const Loss loss_suite);
 
 // Random number generation for weights.
 static void wbrand(FFCell *ffcell);
@@ -119,6 +118,8 @@ double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_r
     double g_pos = 0.0, g_neg = 0.0;
     double loss_value = 0.0;
 
+    double *positive_output_buffer = malloc(ffcell.output_size * sizeof(*positive_output_buffer));
+
     for (int i = 0; i < batch.size; i++)
     {
         // Get the positive and negative samples from the batch
@@ -128,7 +129,7 @@ double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_r
         // Positive forward pass.
         fprop_ff_cell(ffcell, pos);
         // Copy positive activation output.
-        memcpy(o_buffer, ffcell.output, ffcell.output_size * sizeof(*ffcell.output));
+        memcpy(positive_output_buffer, ffcell.output, ffcell.output_size * sizeof(*ffcell.output));
         // Calculate the goodness of the positive pass.
         g_pos = goodness(ffcell.output, ffcell.output_size);
 
@@ -138,16 +139,16 @@ double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_r
         g_neg = goodness(ffcell.output, ffcell.output_size);
 
         // Compute and accumulate the gradient of the loss function with respect to the weights.
-        compute_gradient(ffcell, pos, neg, g_pos, g_neg, threshold, loss_suite);
+        compute_gradient(ffcell, pos, neg, positive_output_buffer, g_pos, g_neg, threshold, loss_suite);
 
-        // Normalize the output of the layer
-        normalize_vector(ffcell.output, ffcell.output_size);
-        normalize_vector(o_buffer, ffcell.output_size);
+        // Copy the positive and negative activation output for normalization.
+        memcpy(pos, positive_output_buffer, ffcell.output_size * sizeof(*positive_output_buffer));
+        memcpy(neg, ffcell.output, ffcell.output_size * sizeof(*ffcell.output));
 
-        // Store normalized output as input for the next cell.
-        // Note that pos and neg available size is the maximum of the layer sizes.
-        memcpy(pos, ffcell.output, ffcell.output_size * sizeof(*ffcell.output));
-        memcpy(neg, o_buffer, ffcell.output_size * sizeof(*ffcell.output));
+        // Normalize the output in order to feed it to the next layer.
+        normalize_vector(pos, ffcell.output_size);
+        normalize_vector(neg, ffcell.output_size);
+
         loss_value += loss_suite.loss(g_pos, g_neg, threshold);
     }
 
@@ -170,6 +171,9 @@ double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_r
     decrease_indent();
     log_info("Mean weight value: %f\n", mean_weights);
     log_info("Standard deviation of weight value: %f\n", std_weights);
+
+    // Free the positive output buffer.
+    free(positive_output_buffer);
 
     // Return the loss of the layer
     return loss_value / batch.size;
@@ -195,7 +199,8 @@ void fprop_ff_cell(const FFCell ffcell, const double *const in)
 }
 
 static void compute_gradient(const FFCell ffcell, const double *const in_pos, const double *const in_neg,
-                             const double g_pos, const double g_neg, const double threshold, const Loss loss_suite)
+                             const double *const positive_output_buffer, const double g_pos, const double g_neg,
+                             const double threshold, const Loss loss_suite)
 {
     log_debug("Computing gradient for FFCell with %d inputs and %d outputs", ffcell.input_size, ffcell.output_size);
     // Calculate the partial derivative of the loss with respect to the goodness of the positive and negative pass.
@@ -205,7 +210,7 @@ static void compute_gradient(const FFCell ffcell, const double *const in_pos, co
     log_debug("Loss: %.17g", loss_suite.loss(g_pos, g_neg, threshold));
     log_debug("Partial derivative of the loss with resect to the goodness pos: %.17g, neg: %.17g", pdloss_pos, pdloss_neg);
 
-    ///TODO: change loops to i < ffcell.num_weights
+    /// TODO: change loops to i < ffcell.num_weights
     for (int i = 0; i < ffcell.input_size; i++)
     {
         for (int j = 0; j < ffcell.output_size; j++)
@@ -213,7 +218,7 @@ static void compute_gradient(const FFCell ffcell, const double *const in_pos, co
             int weight_index = j * ffcell.input_size + i;
 
             // Calculate the gradient of the loss with respect to the weight for the positive and negative pass
-            double gradient_pos = pdloss_pos * 2.0 * o_buffer[j] * in_pos[i];
+            double gradient_pos = pdloss_pos * 2.0 * positive_output_buffer[j] * in_pos[i];
             double gradient_neg = pdloss_neg * 2.0 * ffcell.output[j] * in_neg[i];
             ffcell.gradient[weight_index] += gradient_pos + gradient_neg; // accumulate the gradient
         }
@@ -231,7 +236,7 @@ static void bprop(const FFCell ffcell, const double learning_rate)
 
     // Update the weights for each connection between input and output units
 
-    ///TODO: change loops to i < ffcell.num_weights
+    /// TODO: change loops to i < ffcell.num_weights
     for (int i = 0; i < ffcell.input_size; i++)
     {
         for (int j = 0; j < ffcell.output_size; j++)
