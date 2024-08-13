@@ -50,10 +50,25 @@ int main(const int argc, const char *argv[])
     // Parse command line arguments
     parse_args(argc, argv);
 
+    #define MAX_ATTEMPTS 5
     // Create the simulation folder
-    if (!std::filesystem::create_directories(config::simulation_path))
+    int numAttempts = 0;
+    while (numAttempts < MAX_ATTEMPTS)
     {
-        spdlog::error("Failed to create simulation directory at: {}", config::simulation_path);
+        if (std::filesystem::create_directories(config::simulation_path))
+        {
+            break;
+        }
+        else
+        {
+            spdlog::error("Failed to create simulation directory at: {}", config::simulation_path);
+            numAttempts++;
+            config::init_config();
+        }
+    }
+    if (numAttempts == MAX_ATTEMPTS)
+    {
+        spdlog::error("Failed to create simulation directory after {} attempts. Quitting...", MAX_ATTEMPTS);
         return EXIT_FAILURE;
     }
     // Create the checkpoints folder
