@@ -6,18 +6,20 @@ import os
 import numpy as np
 from sklearn.model_selection import train_test_split
 import idx2numpy
+import emnist
 
 DATASETS_ALL = 0
 DATASETS_DIGITS = 1
 DATASETS_MNIST = 2
+DATASETS_EMNIST = 3
 
 MODEL_ALL = 0
 MODEL_FF = 1
 MODEL_BP = 2
 
-
 PATH_DIGITS = "digits/"
 PATH_MNIST = "mnist/"
+PATH_EMNIST = "emnist/"
 
 GLOBAL_DATASET = "/global/"
 CLIENT_DATASET_PREFIX = "/client-"
@@ -31,11 +33,13 @@ ACTION_DELETE = 1
 
 
 def main():
-    # Check if mnist and digits folders exist
+    # Check if mnist, emnist and digits folders exist
     if not os.path.exists(PATH_DIGITS):
         os.makedirs(PATH_DIGITS)
     if not os.path.exists(PATH_MNIST):
         os.makedirs(PATH_MNIST)
+    if not os.path.exists(PATH_EMNIST):
+        os.makedirs(PATH_EMNIST)
 
     # Default values
     selected_model = MODEL_ALL
@@ -52,7 +56,7 @@ def main():
             print(
                 "Usage: python3 generate_datasets.py [action] [dataset] [model] [number_of_datasets]")
             print("action: gen | del - default: gen")
-            print("dataset: all | digits | mnist - default: all")
+            print("dataset: all | digits | mnist | emnist - default: all")
             print("model: all | ff | bp - default: all")
             print("number_of_datasets: int - default: {}".format(number_of_datasets))
             os.sys.exit(0)
@@ -70,8 +74,10 @@ def main():
                 seleted_dataset = DATASETS_DIGITS
             elif os.sys.argv[2] == "mnist":
                 seleted_dataset = DATASETS_MNIST
+            elif os.sys.argv[2] == "emnist":
+                seleted_dataset = DATASETS_EMNIST
             else:
-                print("Invalid dataset. Use 'all', 'digits' or 'mnist'")
+                print("Invalid dataset. Use 'all', 'digits', 'mnist' or 'emnist'")
                 os.sys.exit(1)
         if len(os.sys.argv) > 3:
             if os.sys.argv[3] == "all":
@@ -123,7 +129,8 @@ def generate_federated_datasets(model: int = MODEL_ALL, dataset: int = DATASETS_
         generate_digits_datasets(model, number_of_datasets)
     if dataset == DATASETS_ALL or dataset == DATASETS_MNIST:
         generate_mnist_datasets(model, number_of_datasets)
-
+    if dataset == DATASETS_ALL or dataset == DATASETS_EMNIST:
+        generate_emnist_datasets(model, number_of_datasets)
 
 def shuffle_data_mnist(images, labels):
     indices = np.arange(images.shape[0])
@@ -275,7 +282,8 @@ def generate_digits_datasets(selected_model: int, number_of_datasets: int):
             # Concatenate images and labels
             joined = np.concatenate(
                 (images_split[i], labels_split[i].reshape(-1, 1)), axis=1)
-            train, test = train_test_split(joined, test_size=TEST_DATASET_PERCENTAGE, random_state=42)
+            train, test = train_test_split(
+                joined, test_size=TEST_DATASET_PERCENTAGE, random_state=42)
             # Write train and test files
             with open(PATH_DIGITS + CLIENT_DATASET_PREFIX + str(i) + "/train-images.txt", "w") as f:
                 for line in train:
@@ -335,20 +343,14 @@ def select_datasets_number():
 
 def delete_federated_dataset(dataset: int):
     if dataset == DATASETS_ALL or dataset == DATASETS_DIGITS:
-        # rm -rf digits/*
         os.system("rm -rf digits/*")
         print("Deleted Digits dataset")
     if dataset == DATASETS_ALL or dataset == DATASETS_MNIST:
-        # rm -rf mnist/*
         os.system("rm -rf mnist/*")
         print("Deleted MNIST dataset")
-
-
-def select_dataset() -> int:
-    datasets = ["All", "Digits", "MNIST"]
-    terminal_menu = TerminalMenu(datasets, title="Select a dataset:")
-    menu_entry_index = terminal_menu.show()
-    return menu_entry_index
+    if dataset == DATASETS_ALL or dataset == DATASETS_EMNIST:
+        os.system("rm -rf emnist/*")
+        print("Deleted EMNIST dataset")
 
 
 def select_model() -> int:
@@ -357,6 +359,99 @@ def select_model() -> int:
     menu_entry_index = terminal_menu.show()
     return menu_entry_index
 
+
+def select_dataset() -> int:
+    datasets = ["All", "Digits", "MNIST", "EMNIST"]
+    terminal_menu = TerminalMenu(datasets, title="Select a dataset:")
+    menu_entry_index = terminal_menu.show()
+    return menu_entry_index
+
+def generate_emnist_datasets(selected_model: int, number_of_datasets: int):
+    create_folders(number_of_datasets, PATH_EMNIST)
+    try:
+        train_images, train_labels = emnist.extract_training_samples('digits')
+        test_images, test_labels = emnist.extract_test_samples('digits')
+    except Exception as _:
+        url = 'https://biometrics.nist.gov/cs_links/EMNIST/gzip.zip'
+        dest = '~/.cache/emnist/emnist.zip'
+        print("Downloading EMNIST dataset from: ", url)
+        print("Extracting to: ", dest)
+        command = "wget -O " + dest + " " + url
+        print(command)
+        os.system(command)
+        
+        # Read the dataset
+        train_images, train_labels = emnist.extract_training_samples('digits')
+        test_images, test_labels = emnist.extract_test_samples('digits')
+
+    # Shuffle the dataset before splitting
+    train_images, train_labels = shuffle_data_mnist(train_images, train_labels)
+    test_images, test_labels = shuffle_data_mnist(test_images, test_labels)
+
+    if selected_model == MODEL_BP or selected_model == MODEL_ALL:
+        train_images_split = np.array_split(
+            train_images, number_of_datasets - 1)
+        train_labels_split = np.array_split(
+            train_labels, number_of_datasets - 1)
+        test_images_split = np.array_split(test_images, number_of_datasets)
+        test_labels_split = np.array_split(test_labels, number_of_datasets)
+
+        for dataset in range(number_of_datasets - 1):
+            idx2numpy.convert_to_file(PATH_EMNIST + CLIENT_DATASET_PREFIX + str(dataset) + "/train-images.idx3-ubyte",
+                                      train_images_split[dataset])
+            idx2numpy.convert_to_file(PATH_EMNIST + CLIENT_DATASET_PREFIX + str(dataset) + "/train-labels.idx1-ubyte",
+                                      train_labels_split[dataset])
+            idx2numpy.convert_to_file(PATH_EMNIST + CLIENT_DATASET_PREFIX + str(dataset) + "/t10k-images.idx3-ubyte",
+                                      test_images_split[dataset])
+            idx2numpy.convert_to_file(PATH_EMNIST + CLIENT_DATASET_PREFIX + str(dataset) + "/t10k-labels.idx1-ubyte",
+                                      test_labels_split[dataset])
+
+        idx2numpy.convert_to_file(PATH_EMNIST + GLOBAL_DATASET + "/t10k-images.idx3-ubyte",
+                                  test_images_split[number_of_datasets - 1])
+        idx2numpy.convert_to_file(PATH_EMNIST + GLOBAL_DATASET + "/t10k-labels.idx1-ubyte",
+                                  test_labels_split[number_of_datasets - 1])
+        print("Generated EMNIST datasets for model BP")
+
+    if selected_model == MODEL_FF or selected_model == MODEL_ALL:
+        # Flatten the images
+        train_images = train_images.reshape(-1, 28 * 28)
+        test_images = test_images.reshape(-1, 28 * 28)
+        # Normalize the images
+        train_images = train_images / 255
+        test_images = test_images / 255
+
+        train_images_split = np.array_split(
+            train_images, number_of_datasets - 1)
+        train_labels_split = np.array_split(
+            train_labels, number_of_datasets - 1)
+        test_images_split = np.array_split(test_images, number_of_datasets)
+        test_labels_split = np.array_split(test_labels, number_of_datasets)
+
+        for dataset in range(number_of_datasets - 1):
+            with open(PATH_EMNIST + CLIENT_DATASET_PREFIX + str(dataset) + "/train.txt", "w") as f:
+                for row in range(len(train_images_split[dataset])):
+                    f.write(
+                        " ".join(map(str, train_images_split[dataset][row])) + " ")
+                    one_hot_target = np.zeros(10)
+                    one_hot_target[train_labels_split[dataset][row]] = 1
+                    f.write(" ".join(map(str, one_hot_target)) + "\n")
+            with open(PATH_EMNIST + CLIENT_DATASET_PREFIX + str(dataset) + "/test.txt", "w") as f:
+                for row in range(len(test_images_split[dataset])):
+                    f.write(
+                        " ".join(map(str, test_images_split[dataset][row])) + " ")
+                    one_hot_target = np.zeros(10)
+                    one_hot_target[test_labels_split[dataset][row]] = 1
+                    f.write(" ".join(map(str, one_hot_target)) + "\n")
+
+        # Test dataset for global model
+        with open(PATH_EMNIST + GLOBAL_DATASET + "/test.txt", "w") as f:
+            for row in range(len(test_images_split[number_of_datasets - 1])):
+                f.write(
+                    " ".join(map(str, test_images_split[number_of_datasets - 1][row])) + " ")
+                one_hot_target = np.zeros(10)
+                one_hot_target[test_labels_split[number_of_datasets - 1][row]] = 1
+                f.write(" ".join(map(str, one_hot_target)) + "\n")
+        print("Generated EMNIST datasets for model FF")
 
 if __name__ == "__main__":
     main()
