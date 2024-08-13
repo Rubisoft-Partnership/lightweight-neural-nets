@@ -14,6 +14,10 @@ void init_logger()
 {
     try
     {
+        if (std::filesystem::exists(config::log_path))
+        {
+            throw std::runtime_error("Log file already exists.");
+        }
         // Create a file sink
         auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(config::log_path, true);
         // Create a console sink
@@ -38,39 +42,39 @@ void init_logger()
 
 int main(const int argc, const char *argv[])
 {
-    (void)argc; // Unused parameter
-    (void)argv; // Unused parameter
-
     // Initialize configurations.
     config::init_config();
 
-    // Set up logger
-    init_logger();
-
-    // Parse command line arguments
-    parse_args(argc, argv);
-
-    #define MAX_ATTEMPTS 5
+    // Initialize the logger. Retry up to 5 times if a concurrency issue occurs.
+#define MAX_ATTEMPTS 5
     // Create the simulation folder
     int numAttempts = 0;
     while (numAttempts < MAX_ATTEMPTS)
     {
-        if (std::filesystem::create_directories(config::simulation_path))
+        try
         {
+            init_logger();
             break;
         }
-        else
+        catch (const std::exception &e)
         {
-            spdlog::error("Failed to create simulation directory at: {}", config::simulation_path);
-            numAttempts++;
+            std::cerr << "An error occurred while initializing the logger: " << e.what() << std::endl
+                      << "Retrying..." << std::endl;
             config::init_config();
+            numAttempts++;
         }
     }
-    if (numAttempts == MAX_ATTEMPTS)
+
+    // Parse command line arguments
+    parse_args(argc, argv);
+
+    if (!std::filesystem::create_directories(config::simulation_path))
     {
-        spdlog::error("Failed to create simulation directory after {} attempts. Quitting...", MAX_ATTEMPTS);
+        spdlog::error("Failed to create simulation directory at: {}", config::simulation_path);
         return EXIT_FAILURE;
     }
+    spdlog::info("Simulation directory created at: {}", config::simulation_path);
+
     // Create the checkpoints folder
     if (!std::filesystem::create_directories(config::checkpoints_path))
     {
