@@ -194,6 +194,10 @@ void parse_args(const int argc, const char *argv[])
             {
                 config::selected_dataset = config::dataset_mnist;
             }
+            else if (dataset == "emnist")
+            {
+                config::selected_dataset = config::dataset_emnist;
+            }
             else
             {
                 spdlog::error("Invalid dataset.");
@@ -260,7 +264,7 @@ void print_help(std::string name)
               << "--num-rounds, -nr: Number of rounds in the simulation. Default: " << config::orchestration::num_rounds << "." << std::endl
               << "--client-rate, -cr: Client rate for the simulation. Default: " << config::orchestration::c_rate << "." << std::endl
               << "--checkpoint-rate, -chr: Checkpoint rate for the simulation. Default: " << config::orchestration::checkpoint_rate << "." << std::endl
-              << "--dataset, -d: Dataset to use (digits, mnist). Default: << " << config::selected_dataset << "." << std::endl
+              << "--dataset, -d: Dataset to use (digits, mnist, emnist). Default: << " << config::selected_dataset << "." << std::endl
               << "--log-level, -ll: Log level (debug, info, warn, error). Default: info." << std::endl
               << "--threaded-mode, -tm: Enable threaded mode for the orchestrator. Default: false." << std::endl;
 }

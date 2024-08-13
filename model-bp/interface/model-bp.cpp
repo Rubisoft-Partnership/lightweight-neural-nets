@@ -26,8 +26,8 @@ void ModelBP::build(const std::string &data_path)
             layers += std::to_string(units[i]) + " ";
         return layers + "]"; }());
 
-    if (selected_dataset == dataset_mnist)
-    { // Load MNIST dataset
+    if (selected_dataset == dataset_mnist || selected_dataset == dataset_emnist)
+    { // Load MNIST or EMNIST dataset
         try
         {
             tiny_dnn::parse_mnist_labels(data_path + "/train-labels.idx1-ubyte", &train_labels);
