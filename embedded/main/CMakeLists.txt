@@ -5,4 +5,4 @@ idf_component_register(SRCS "main.cpp"
                     REQUIRES model-bp
                     INCLUDE_DIRS ".")
 
-target_compile_options(${COMPONENT_LIB} PRIVATE -frtti)
+target_compile_options(${COMPONENT_LIB} PRIVATE -frtti -fexceptions)
