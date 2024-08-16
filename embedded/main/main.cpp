@@ -3,6 +3,8 @@
 #include "freertos/task.h"
 #include "driver/uart.h"
 
+#include "model-bp.hpp"
+
 extern "C"
 {
     void app_main(void);
