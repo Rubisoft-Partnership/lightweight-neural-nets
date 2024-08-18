@@ -1,0 +1,10 @@
+idf_component_register(SRCS "lib/ff-net/ff-net.c"
+                        "lib/ff-cell/ff-cell.c"
+                        "lib/adam/adam.c"
+                        "lib/utils/utils.c"
+                        "lib/data/data.c"
+                        "lib/ff-utils/ff-utils.c"
+                        "lib/losses/losses.c"
+                        "lib/logging/logging.c"
+                       INCLUDE_DIRS "lib"
+                       REQUIRES metrics)

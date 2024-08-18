@@ -13,6 +13,7 @@ build
 *.DS_Store
 *.bin
 *.idx*-ubyte
+**/.cache
 
 # Datasets
 test.txt
