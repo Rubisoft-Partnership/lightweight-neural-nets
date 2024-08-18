@@ -1,6 +1,5 @@
 *.out
 *.json
-*.txt
 */models/*
 */checkpoints/*
 .vscode/*
@@ -15,9 +14,19 @@ build
 *.bin
 *.idx*-ubyte
 
+# Datasets
+test.txt
+train.txt
+test-images.txt
+test-labels.txt
+train-images.txt
+train-labels.txt
+
+# Valgrind files
+valgrind-out.txt
+
 # Python venv files
 **/venv/**
-+
 *.cpython-*
 
 # Plotting module
