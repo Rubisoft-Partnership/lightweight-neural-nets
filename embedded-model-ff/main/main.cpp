@@ -37,16 +37,5 @@ void app_main(void)
 
     model.build();
 
-    printf("Waiting for data...\n");
-    while (1)
-    {
-        // Read data from the UART
-        int len = uart_read_bytes(UART_NUM, data, BUF_SIZE, 20 / portTICK_PERIOD_MS);
-        if (len > 0)
-        {
-            // Write data back to the UART
-            uart_write_bytes(UART_NUM, (const char *)data, len);
-        }
-        vTaskDelay(100 / portTICK_PERIOD_MS);
-    }
+    model.train(1, 2, 0.005);
 }

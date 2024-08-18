@@ -5,6 +5,8 @@
 #include <filesystem>
 #include <unordered_map>
 
+#include "driver/uart.h"
+
 extern "C"
 {
 #include <ff-net/ff-net.h>
@@ -13,10 +15,15 @@ extern "C"
 #include <losses/losses.h>
 }
 
+#define UART_NUM UART_NUM_0
+#define BUF_SIZE (1024)
+
 #define NUM_CLASSES 10
 #define THRESHOLD 5.0
 #define BETA1 0.9
 #define BETA2 0.999
+
+// void generate_negative_samples(FFBatch batch);
 
 void ModelFF::build()
 {
@@ -26,7 +33,7 @@ void ModelFF::build()
 
     printf("Building model...\n");
 
-    int units_array[] = {100, 50};
+    int units_array[] = {74, 50};
 #define LAYERS_NUM 2
     // Bigger layer size
     max_units = *std::max_element(units_array, units_array + LAYERS_NUM);
@@ -48,17 +55,60 @@ void ModelFF::train(const int &epochs, const int &batch_size, const double &lear
 
     FFBatch batch = new_ff_batch(batch_size, max_units);
 
+    char serial_buffer[BUF_SIZE];
+    sprintf(serial_buffer, "READY. BS: %d\n", batch_size);
+    int len = strlen(serial_buffer);
+    uart_write_bytes(UART_NUM, (const char *)serial_buffer, len);
+
+    int feature_index = 0;
+    int sample_num = 0;
+
+    while (1)
+    {
+        // Read data from the UART
+        int len = uart_read_bytes(UART_NUM, serial_buffer, BUF_SIZE - 1, 20 / portTICK_PERIOD_MS);
+        if (len > 0)
+        {
+            serial_buffer[len] = '\0'; // Null-terminate the string
+            printf("Received data: %s\n", serial_buffer);
+
+            // Handle completion signal
+            if (strcmp(serial_buffer, "DONE") == 0)
+            {
+                printf("Transfer complete\n");
+                printf("Feature index: %d\n", feature_index);
+                break;
+            }
+
+            // Convert the received string to a float and store it in the features array
+            double received_value;
+            sscanf(serial_buffer, "%lf", &received_value);
+            batch.pos[sample_num][feature_index++] = received_value;
+
+            // Ensure we do not exceed the features array size
+            if (feature_index >= 74)
+            {
+                printf("ESP-DONE.\n");
+                feature_index = 0;
+                memcpy(batch.neg[sample_num], batch.pos[sample_num], 74);
+                sample_num++;
+                if (sample_num >= batch_size)
+                {
+                    printf("Batch full.\n");
+                    break;
+                }
+            }
+        }
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
+
     for (int i = 0; i < epochs; i++) // iterate over model epochs
     {
-        shuffle_data(data.train);
         double loss = 0.0f;
-        int num_batches = data.train->rows / batch_size;
-        for (int j = 0; j < num_batches; j++) // iterate over batches
-        {
-            generate_batch(data.train, j, batch);                            // generate positive and negative samples
-            loss += train_ff_net(ffnet, batch, learning_rate) / num_batches; // train the model
-        }
+        loss += train_ff_net(ffnet, batch, learning_rate); // train the model
+        printf("Epoch %d: Loss: %f\n", i, loss);
     }
+    printf("Training complete.\n");
     free_ff_batch(batch);
 }
 
