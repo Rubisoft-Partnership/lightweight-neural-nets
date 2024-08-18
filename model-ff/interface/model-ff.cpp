@@ -47,7 +47,7 @@ void ModelFF::build(const std::string &data_path)
         }
     }
     open_log_file_with_timestamp(ff_logs_folder.c_str());
-    set_log_level(LOG_DEBUG);
+    set_log_level(LOG_INFO);
 
     // Build the model.
     ffnet = new_ff_net(units_array, layers_num, relu, pdrelu, threshold, beta1, beta2, loss);
