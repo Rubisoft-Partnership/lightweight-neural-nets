@@ -17,6 +17,8 @@
 #include <losses/losses.h>
 #include <ff-utils/ff-utils.h>
 
+// #include "buffers/buffers.h"
+
 /**
  * Performs the forward pass for a feedforward (FF) cell.
  *
@@ -31,7 +33,7 @@ void fprop_ff_cell(const FFCell ffcell, const double *const in);
  * @param ffcell The FF cell to perform the backward pass on.
  * @param learning_rate The learning rate for the cell.
  */
-static void bprop(const FFCell ffcell, const double learning_rate);
+static void bprop(FFCell ffcell, const double learning_rate);
 
 /**
  * Computes the gradient for the given of a sample of the batch for the FF cell and stores it in the gradient array.
@@ -45,7 +47,7 @@ static void bprop(const FFCell ffcell, const double learning_rate);
  * @param threshold The threshold value.
  * @param loss_suite The loss function suite to be used.
  */
-static void compute_gradient(const FFCell ffcell, const double *const in_pos, const double *const in_neg,
+static void compute_gradient(FFCell ffcell, const double *const in_pos, const double *const in_neg,
                              const double *const positive_output_buffer, const double g_pos, const double g_neg,
                              const double threshold, const Loss loss_suite);
 
@@ -70,18 +72,28 @@ FFCell new_ff_cell(const int input_size, const int output_size, double (*act)(do
 {
     FFCell ffcell;
     ffcell.num_weights = input_size * output_size; // total number of weights
+    printf("ffcell.num_weights: %d\n", ffcell.num_weights);
 
     // Adam optimizer
     ffcell.adam = adam_create(beta1, beta2, ffcell.num_weights);
 
-    ffcell.weights = (double *)calloc(ffcell.num_weights, sizeof(*ffcell.weights));   // weights
-    ffcell.output = (double *)calloc(output_size, sizeof(*ffcell.output));            // output neurons
-    ffcell.gradient = (double *)calloc(ffcell.num_weights, sizeof(*ffcell.gradient)); // gradient of each weight
+    for (int i = 0; i < ffcell.num_weights; i++)
+    {
+        ffcell.gradient[i] = 0.0;
+        ffcell.weights[i] = 0.0;
+    }
+
+    printf("Initializing FFCell...\n");
+
+    // ffcell.weights = (double *)calloc(ffcell.num_weights, sizeof(*ffcell.weights));   // weights
+    ffcell.output = (double *)calloc(output_size, sizeof(*ffcell.output)); // output neurons
+    // ffcell.gradient = (double *)calloc(ffcell.num_weights, sizeof(*ffcell.gradient)); // gradient of each weight
     ffcell.input_size = input_size;
     ffcell.output_size = output_size;
     ffcell.act = act;
     ffcell.pdact = pdact;
     // Randomize weights and bias.
+    printf("Randomizing weights...\n");
     wbrand(&ffcell);
     return ffcell;
 }
@@ -104,7 +116,7 @@ void free_ff_cell(const FFCell ffcell)
  * @param loss_suite The loss function suite.
  * @return The loss value after training.
  */
-double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_rate, const double threshold, const LossType loss)
+double train_ff_cell(FFCell ffcell, FFBatch batch, const double learning_rate, const double threshold, const LossType loss)
 {
     Loss loss_suite = select_loss(loss);
 
@@ -151,16 +163,6 @@ double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_r
     // Performs weight update.
     bprop(ffcell, learning_rate);
 
-    // Calculate the average and standard deviation of weight values for debugging.
-    double sum_weights = 0.0;
-    double sum_weights_squared = 0.0;
-    for (int i = 0; i < ffcell.num_weights; i++)
-    {
-        sum_weights += ffcell.weights[i];
-        sum_weights_squared += ffcell.weights[i] * ffcell.weights[i];
-    }
-    double mean_weights = sum_weights / ffcell.num_weights;
-    double std_weights = sqrt((sum_weights_squared / ffcell.num_weights) - (mean_weights * mean_weights));
 
     // Free the positive output buffer.
     free(positive_output_buffer);
@@ -186,7 +188,7 @@ void fprop_ff_cell(const FFCell ffcell, const double *const in)
     }
 }
 
-static void compute_gradient(const FFCell ffcell, const double *const in_pos, const double *const in_neg,
+static void compute_gradient(FFCell ffcell, const double *const in_pos, const double *const in_neg,
                              const double *const positive_output_buffer, const double g_pos, const double g_neg,
                              const double threshold, const Loss loss_suite)
 {
@@ -210,7 +212,7 @@ static void compute_gradient(const FFCell ffcell, const double *const in_pos, co
 }
 
 // Performs backward pass for the FF algorithm.
-static void bprop(const FFCell ffcell, const double learning_rate)
+static void bprop(FFCell ffcell, const double learning_rate)
 {
     // Debugging variables statistics about weight updates.
     int updated_weights = 0;

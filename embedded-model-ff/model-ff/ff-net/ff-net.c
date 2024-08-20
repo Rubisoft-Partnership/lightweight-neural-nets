@@ -43,23 +43,19 @@ int parse_label(const double *target, const int num_classes);
 FFNet *new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double),
                   const double treshold, const double beta1, const double beta2, LossType loss)
 {
+    printf("Building FFNet with %d layers: ", num_layers);
     FFNet *ffnet = (FFNet *)malloc(sizeof(FFNet));
     ffnet->loss = loss;
     ffnet->num_cells = num_layers - 1;
     ffnet->threshold = treshold;
 
-    char layers_str[256];
-    layers_str[0] = '\0';
-    for (int i = 0; i < num_layers; i++)
-    {
-        char layer_str[32];
-        snprintf(layer_str, sizeof(layer_str), "%d ", layer_sizes[i]);
-        strcat(layers_str, layer_str);
-    }
+    printf("Constructing FFNet with %d layers: ", num_layers);
+
 
     for (int i = 0; i < ffnet->num_cells; i++)
         ffnet->layers[i] = new_ff_cell(layer_sizes[i], layer_sizes[i + 1], act, pdact, beta1, beta2);
 
+    printf("Done.\n");
     return ffnet;
 }
 

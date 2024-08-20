@@ -17,5 +17,7 @@ void app_main(void)
 
     model.build();
 
+    printf("Training model...\n");
+
     model.train(1, 2, 0.005);
 }
