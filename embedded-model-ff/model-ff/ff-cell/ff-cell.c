@@ -12,7 +12,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include <logging/logging.h>
 #include <utils/utils.h>
 #include <data/data.h>
 #include <losses/losses.h>
@@ -84,10 +83,6 @@ FFCell new_ff_cell(const int input_size, const int output_size, double (*act)(do
     ffcell.pdact = pdact;
     // Randomize weights and bias.
     wbrand(&ffcell);
-    // Log the construction of the FF cell.
-    increase_indent();
-    log_debug("FFCell built with %d inputs, %d outputs, and %d weights", input_size, output_size, ffcell.num_weights);
-    decrease_indent();
     return ffcell;
 }
 
@@ -113,8 +108,6 @@ double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_r
 {
     Loss loss_suite = select_loss(loss);
 
-    // Increase the indent level for logging
-    increase_indent();
     double g_pos = 0.0, g_neg = 0.0;
     double loss_value = 0.0;
 
@@ -168,9 +161,6 @@ double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_r
     }
     double mean_weights = sum_weights / ffcell.num_weights;
     double std_weights = sqrt((sum_weights_squared / ffcell.num_weights) - (mean_weights * mean_weights));
-    decrease_indent();
-    log_info("Mean weight value: %f\n", mean_weights);
-    log_info("Standard deviation of weight value: %f\n", std_weights);
 
     // Free the positive output buffer.
     free(positive_output_buffer);
@@ -183,7 +173,6 @@ double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_r
 void fprop_ff_cell(const FFCell ffcell, const double *const in)
 {
     double debug_sum = 0.0;
-    log_debug("Computing forward propagation for FFCell with %d inputs and %d outputs", ffcell.input_size, ffcell.output_size);
     // Calculate the activation output for each output unit
     for (int i = 0; i < ffcell.output_size; i++)
     {
@@ -195,20 +184,15 @@ void fprop_ff_cell(const FFCell ffcell, const double *const in)
         ffcell.output[i] = ffcell.act(sum + ffcell.bias);
         debug_sum += ffcell.output[i]; // for debugging
     }
-    log_debug("Overall activation output: %f", debug_sum);
 }
 
 static void compute_gradient(const FFCell ffcell, const double *const in_pos, const double *const in_neg,
                              const double *const positive_output_buffer, const double g_pos, const double g_neg,
                              const double threshold, const Loss loss_suite)
 {
-    log_debug("Computing gradient for FFCell with %d inputs and %d outputs", ffcell.input_size, ffcell.output_size);
     // Calculate the partial derivative of the loss with respect to the goodness of the positive and negative pass.
     const double pdloss_pos = loss_suite.pdloss_pos(g_pos, g_neg, threshold);
     const double pdloss_neg = loss_suite.pdloss_neg(g_pos, g_neg, threshold);
-    log_debug("G_pos: %f, G_neg: %f", g_pos, g_neg);
-    log_debug("Loss: %.17g", loss_suite.loss(g_pos, g_neg, threshold));
-    log_debug("Partial derivative of the loss with resect to the goodness pos: %.17g, neg: %.17g", pdloss_pos, pdloss_neg);
 
     /// TODO: change loops to i < ffcell.num_weights
     for (int i = 0; i < ffcell.input_size; i++)
@@ -228,7 +212,6 @@ static void compute_gradient(const FFCell ffcell, const double *const in_pos, co
 // Performs backward pass for the FF algorithm.
 static void bprop(const FFCell ffcell, const double learning_rate)
 {
-    log_debug("Performing backward pass for FFCell with %d inputs and %d outputs", ffcell.input_size, ffcell.output_size);
     // Debugging variables statistics about weight updates.
     int updated_weights = 0;
     double sum_weight_update = 0.0;
@@ -248,8 +231,6 @@ static void bprop(const FFCell ffcell, const double learning_rate)
 
             // Update the weight
             ffcell.weights[weight_index] -= weight_update;
-            // log_debug("Weight update: %.17g", weight_update);
-            // log_debug("Weight after correction: %.17g", ffcell.weights[j * ffcell.input_size + i]);
 
             // Update statistics about weight updates.
             if (weight_update != 0.0)
@@ -269,82 +250,6 @@ static void bprop(const FFCell ffcell, const double learning_rate)
         mean_weight_update = sum_weight_update / updated_weights;
         std_weight_update = sqrt((sum_weight_update_squared / updated_weights) - (mean_weight_update * mean_weight_update));
     }
-    log_debug("Updated weights: %d\n", updated_weights);
-    log_debug("Mean weight update: %f\n", mean_weight_update);
-    log_debug("Standard deviation of weight update: %f\n", std_weight_update);
-}
-
-/**
- * Saves the FFCell structure to a file.
- *
- * This function writes the weights, bias, number of weights, input size, and output size
- * of the FFCell structure to the specified file.
- *
- * @param ffcell The FFCell structure to be saved.
- * @param file The file pointer to write the FFCell structure to.
- */
-void save_ff_cell(const FFCell ffcell, FILE *file)
-{
-    log_debug("Saving FFCell with %d inputs, %d outputs, and %d weights", ffcell.input_size, ffcell.output_size, ffcell.num_weights);
-    // Write the input and output size of the FFCell to the file.
-    fwrite(&ffcell.input_size, sizeof(ffcell.input_size), 1, file);
-    fwrite(&ffcell.output_size, sizeof(ffcell.output_size), 1, file);
-
-    // Save the weights and bias of the FFCell to the file.
-    fwrite(ffcell.weights, sizeof(*ffcell.weights), ffcell.num_weights, file);
-    fwrite(&ffcell.bias, sizeof(ffcell.bias), 1, file);
-}
-
-/**
- * Loads an FFCell object from a file.
- *
- * @param file The file to read the FFCell object from.
- * @param act Pointer to the activation function.
- * @param pdact Pointer to the derivative of the activation function.
- * @param beta1 The beta1 parameter for the FFCell object.
- * @param beta2 The beta2 parameter for the FFCell object.
- * @return The loaded FFCell object.
- */
-FFCell load_ff_cell(FILE *file, double (*act)(double), double (*pdact)(double), const double beta1, const double beta2)
-{
-    // Read input and output size from file.
-    int input_size = 0;
-    int output_size = 0;
-    size_t res;
-    res = fread(&input_size, sizeof(input_size), 1, file);
-    if (res != 1)
-    {
-        log_error("Failed to read input size from file");
-        exit(1);
-    }
-    res = fread(&output_size, sizeof(output_size), 1, file);
-    if (res != 1)
-    {
-        log_error("Failed to read output size from file");
-        exit(1);
-    }
-
-    log_debug("Loading FFCell with %d inputs and %d outputs", input_size, output_size);
-
-    // Allocate memory to create FFCell object.
-    FFCell ffcell = new_ff_cell(input_size, output_size, act, pdact, beta1, beta2);
-
-    // Load weights and bias from the file.
-    res = fread(ffcell.weights, sizeof(*ffcell.weights), ffcell.num_weights, file);
-    if (res != (size_t)ffcell.num_weights)
-    {
-        log_error("Failed to read weights from file");
-        exit(1);
-    }
-    res = fread(&ffcell.bias, sizeof(ffcell.bias), 1, file);
-    if (res != 1)
-    {
-        log_error("Failed to read bias from file");
-        exit(1);
-    }
-
-    log_debug("FFCell loaded with %d inputs, %d outputs, and %d weights", ffcell.input_size, ffcell.output_size, ffcell.num_weights);
-    return ffcell;
 }
 
 // ReLU activation function.

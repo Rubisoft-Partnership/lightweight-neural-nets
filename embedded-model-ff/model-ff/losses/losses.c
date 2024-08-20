@@ -4,8 +4,8 @@
  */
 
 #include <losses/losses.h>
-#include <logging/logging.h>
 #include <math.h>
+#include <stdio.h>
 
 // Static function declarations.
 static double stable_sigmoid(double x);
@@ -138,7 +138,7 @@ Loss select_loss(LossType loss_type)
         loss = LOSS_SYMBA;
         break;
     default:
-        log_error("Unknown loss function type %d. Setting default loss function.", loss_type);
+        printf("Unknown loss function type %d. Setting default loss function.", loss_type);
         loss = LOSS_FF;
     }
     return loss;

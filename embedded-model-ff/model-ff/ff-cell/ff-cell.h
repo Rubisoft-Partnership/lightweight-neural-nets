@@ -79,32 +79,6 @@ double train_ff_cell(const FFCell ffcell, FFBatch batch, const double learning_r
  */
 void fprop_ff_cell(const FFCell ffcell, const double *const in);
 
-/**
- * Saves the FFCell to a file.
- *
- * This function saves the given FFCell to the specified file.
- *
- * @param ffcell The FFCell to be saved.
- * @param file   The file pointer to save the FFCell to.
- */
-void save_ff_cell(const FFCell ffcell, FILE *file);
-
-/**
- * Loads a feedforward cell from a file.
- *
- * This function reads the parameters of a feedforward cell from the given file
- * and returns a loaded FFCell structure. The activation function and its
- * derivative are passed as function pointers. The beta1 and beta2 parameters
- * are used for some internal calculations.
- *
- * @param file   The file to read the cell parameters from.
- * @param act    The activation function pointer.
- * @param pdact  The derivative of the activation function pointer.
- * @param beta1  The beta1 parameter for internal calculations.
- * @param beta2  The beta2 parameter for internal calculations.
- * @return       The loaded FFCell structure.
- */
-FFCell load_ff_cell(FILE *file, double (*act)(double), double (*pdact)(double), const double beta1, const double beta2);
 
 /**
  * @brief Activation function: Rectified Linear Unit (ReLU).

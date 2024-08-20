@@ -72,15 +72,6 @@ void free_ff_net(FFNet *ffnet);
 double train_ff_net(FFNet *ffnet, const FFBatch batch, const double learning_rate);
 
 /**
- * Calculates the loss on the given dataset and adds the predictions to the metrics.
- *
- * @param ffnet The FFNet model to test.
- * @param data The dataset to test the model on.
- * @return The average loss of the model on the dataset.
- */
-double test_ff_net(FFNet *ffnet, Data *data, const int input_size, Predictions *predictions);
-
-/**
  * @brief Performs inference with a FFNet.
  *
  * This function performs inference with a FFNet by predicting the class label for the given input.
@@ -93,29 +84,3 @@ double test_ff_net(FFNet *ffnet, Data *data, const int input_size, Predictions *
  */
 int predict_ff_net(const FFNet *ffnet, const double *input, const int num_classes, const int input_size);
 
-/**
- * @brief Saves a FFNet to a file.
- *
- * This function saves a FFNet to a file.
- *
- * @param ffnet The FFNet to save.
- * @param filename The name of the file to save the FFNet.
- * @param default_path The flag to use the default path for the FFNet file.
- */
-void save_ff_net(const FFNet *ffnet, const char *filename, bool default_path);
-
-/**
- * @brief Loads a FFNet from a file.
- *
- * This function loads a FFNet from a file.
- *
- * @param ffnet The FFNet to load.
- * @param filename The name of the file to load the FFNet.
- * @param act The activation function for the FFNet.
- * @param pdact The derivative of the activation function for the FFNet.
- * @param beta1 The beta1 value of the Adam optimizer.
- * @param beta2 The beta2 value of the Adam optimizer.
- * @param default_path The flag to use the default path for the FFNet file.
- */
-void load_ff_net(FFNet *ffnet, const char *filename, double (*act)(double), double (*pdact)(double),
-                 const double beta1, const double beta2, bool default_path);

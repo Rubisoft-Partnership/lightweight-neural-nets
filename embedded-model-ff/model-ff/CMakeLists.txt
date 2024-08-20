@@ -5,6 +5,5 @@ idf_component_register(SRCS "ff-net/ff-net.c"
                         "data/data.c"
                         "ff-utils/ff-utils.c"
                         "losses/losses.c"
-                        "logging/logging.c"
                        INCLUDE_DIRS "."
                        REQUIRES metrics)

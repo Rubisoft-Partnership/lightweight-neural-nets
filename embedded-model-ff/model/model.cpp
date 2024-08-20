@@ -11,7 +11,6 @@
 extern "C"
 {
 #include <ff-net/ff-net.h>
-#include <logging/logging.h>
 #include <utils/utils.h>
 #include <losses/losses.h>
 }
