@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(EXTRA_COMPONENT_DIRS ${CMAKE_SOURCE_DIR}/../metrics ${CMAKE_SOURCE_DIR}/model ${CMAKE_SOURCE_DIR}/../model-ff)
+set(EXTRA_COMPONENT_DIRS ${CMAKE_SOURCE_DIR}/../metrics ${CMAKE_SOURCE_DIR}/model ${CMAKE_SOURCE_DIR}/model-ff)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(embedded-model-ff)
