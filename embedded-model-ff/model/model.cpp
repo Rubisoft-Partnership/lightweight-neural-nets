@@ -26,11 +26,13 @@ void generate_negative_samples(FFBatch batch, int sample_size)
 {
     for (int i = 0; i < batch.size; i++)
     {
+        printf("Generating negative sample %d of %d\n", i + 1, batch.size);
         int lab_idx = 0;
         while (lab_idx - 10 < 0)
         {
             if (batch.pos[i][sample_size - 10 + lab_idx] == 1)
                 break;
+            lab_idx++;
         }
         printf("Positive label index: %d\n", lab_idx);
         int step = 1 + get_random() % (10 - 1);
@@ -50,7 +52,7 @@ void ModelFF::build()
 
     printf("Building model...\n");
 
-    int units_array[] = {FEATURES, 50};
+    int units_array[] = {FEATURES, 10};
 #define LAYERS_NUM 2
     // Bigger layer size
     max_units = *std::max_element(units_array, units_array + LAYERS_NUM);
@@ -86,6 +88,8 @@ void ModelFF::train(const int &epochs, const int &batch_size, const float &learn
 
     printf("Generating negative samples...\n");
     generate_negative_samples(batch, FEATURES);
+
+    printf("Training model...\n");
 
     for (int i = 0; i < epochs; i++) // iterate over model epochs
     {
