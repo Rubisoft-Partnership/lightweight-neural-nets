@@ -22,7 +22,7 @@
  */
 #define MAX_CLASSES 16
 
-#define MAX_WEIGHTS 700000
+// #define MAX_WEIGHTS 60000
 
 /**
  * @struct FFCell
@@ -30,10 +30,13 @@
  */
 typedef struct
 {
-    float weights[MAX_WEIGHTS];               /**< All the weights. */
+    // float weights[MAX_WEIGHTS];               /**< All the weights. */
+    // float *weights;               /**< Weights. */
+    float **weights;               /**< Weights. */
     float bias;                   /**< Biases. */
     float *output;                /**< Output layer. */
-    float gradient[MAX_WEIGHTS];              /**< Gradient of each weight for a batch. */
+    // float gradient[MAX_WEIGHTS];              /**< Gradient of each weight for a batch. */
+    float *gradient;              /**< Gradient of each weight for a batch. */
     int num_weights;               /**< Number of weights. */
     int input_size;                /**< Number of inputs. */
     int output_size;               /**< Number of outputs. */

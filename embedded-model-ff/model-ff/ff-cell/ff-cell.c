@@ -55,6 +55,26 @@ static void compute_gradient(FFCell ffcell, const float *const in_pos, const flo
 static void wbrand(FFCell *ffcell);
 static float frand(void);
 
+#define CHUNK_SIZE 1000
+static void chunked_allocate(FFCell *ffcell)
+{
+    ffcell->weights = (float **)calloc(ffcell->num_weights / CHUNK_SIZE, sizeof(*ffcell->weights));
+    if (ffcell->weights == NULL)
+    {
+        printf("Failed to allocate memory for weights\n");
+    }
+    int num_chunks = ffcell->num_weights / CHUNK_SIZE + 1;
+    for (int i = 0; i < num_chunks; i++)
+    {
+        printf("Allocating chunk %d of %d\n", i, num_chunks);
+        ffcell->weights[i] = (float *)calloc(CHUNK_SIZE, sizeof(*ffcell->weights[i]));
+        if (ffcell->weights[i] == NULL)
+        {
+            printf("Failed to allocate memory for weights at chunk %d, chunk size %d\n", i, CHUNK_SIZE);
+        }
+    }
+}
+
 /**
  * Constructs a FF cell with the specified number of inputs, number of outputs, activation function,
  * and threshold.
@@ -77,17 +97,18 @@ FFCell new_ff_cell(const int input_size, const int output_size, float (*act)(flo
     // Adam optimizer
     ffcell.adam = adam_create(beta1, beta2, ffcell.num_weights);
 
-    for (int i = 0; i < ffcell.num_weights; i++)
-    {
-        ffcell.gradient[i] = 0.0;
-        ffcell.weights[i] = 0.0;
-    }
+    // for (int i = 0; i < ffcell.num_weights; i++)
+    // {
+    //     ffcell.gradient[i] = 0.0;
+    //     ffcell.weights[i] = 0.0;
+    // }
 
     printf("Initializing FFCell...\n");
 
     // ffcell.weights = (float *)calloc(ffcell.num_weights, sizeof(*ffcell.weights));   // weights
-    ffcell.output = (float *)calloc(output_size, sizeof(*ffcell.output)); // output neurons
-    // ffcell.gradient = (float *)calloc(ffcell.num_weights, sizeof(*ffcell.gradient)); // gradient of each weight
+    chunked_allocate(&ffcell);
+    ffcell.output = (float *)calloc(output_size, sizeof(*ffcell.output));            // output neurons
+    ffcell.gradient = (float *)calloc(ffcell.num_weights, sizeof(*ffcell.gradient)); // gradient of each weight
     ffcell.input_size = input_size;
     ffcell.output_size = output_size;
     ffcell.act = act;
@@ -163,7 +184,6 @@ float train_ff_cell(FFCell ffcell, FFBatch batch, const float learning_rate, con
     // Performs weight update.
     bprop(ffcell, learning_rate);
 
-
     // Free the positive output buffer.
     free(positive_output_buffer);
 
@@ -181,7 +201,10 @@ void fprop_ff_cell(const FFCell ffcell, const float *const in)
         float sum = 0.0;
         // Calculate the weighted sum of the inputs
         for (int j = 0; j < ffcell.input_size; j++)
-            sum += in[j] * ffcell.weights[i * ffcell.input_size + j];
+        {
+            const int weight_index = i * ffcell.input_size + j;
+            sum += in[j] * ffcell.weights[weight_index / CHUNK_SIZE][weight_index % CHUNK_SIZE];
+        }
         // Store the output of the activation function
         ffcell.output[i] = ffcell.act(sum + ffcell.bias);
         debug_sum += ffcell.output[i]; // for debugging
@@ -214,10 +237,6 @@ static void compute_gradient(FFCell ffcell, const float *const in_pos, const flo
 // Performs backward pass for the FF algorithm.
 static void bprop(FFCell ffcell, const float learning_rate)
 {
-    // Debugging variables statistics about weight updates.
-    int updated_weights = 0;
-    float sum_weight_update = 0.0;
-    float sum_weight_update_squared = 0.0;
 
     // Update the weights for each connection between input and output units
 
@@ -232,25 +251,8 @@ static void bprop(FFCell ffcell, const float learning_rate)
             const float weight_update = learning_rate * adam_weight_update(ffcell.adam, ffcell.gradient[weight_index], weight_index);
 
             // Update the weight
-            ffcell.weights[weight_index] -= weight_update;
-
-            // Update statistics about weight updates.
-            if (weight_update != 0.0)
-            {
-                updated_weights++;
-                sum_weight_update += weight_update;
-                sum_weight_update_squared += weight_update * weight_update;
-            }
+            ffcell.weights[weight_index / CHUNK_SIZE][weight_index % CHUNK_SIZE] -= weight_update;
         }
-    }
-
-    // Log statistics about weight updates.
-    float mean_weight_update = 0.0;
-    float std_weight_update = 0.0;
-    if (updated_weights != 0)
-    {
-        mean_weight_update = sum_weight_update / updated_weights;
-        std_weight_update = sqrt((sum_weight_update_squared / updated_weights) - (mean_weight_update * mean_weight_update));
     }
 }
 
@@ -270,7 +272,9 @@ float pdrelu(const float a)
 static void wbrand(FFCell *ffcell)
 {
     for (int i = 0; i < ffcell->num_weights; i++)
-        ffcell->weights[i] = frand() - 0.5;
+    {
+        ffcell->weights[i / CHUNK_SIZE][i % CHUNK_SIZE] = frand() - 0.5;
+    }
     ffcell->bias = frand() - 0.5;
 }
 
