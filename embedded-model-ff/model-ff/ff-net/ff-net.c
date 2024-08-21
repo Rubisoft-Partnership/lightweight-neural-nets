@@ -21,7 +21,7 @@
 #include <metrics.h>
 #include <assert.h>
 
-int parse_label(const double *target, const int num_classes);
+int parse_label(const float *target, const int num_classes);
 
 /**
  * @brief Builds a FFNet by creating multiple FFCell objects.
@@ -40,8 +40,8 @@ int parse_label(const double *target, const int num_classes);
  * @param loss_suite The loss function suite for the FFNet.
  * @return FFNet The constructed FFNet.
  */
-FFNet *new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double),
-                  const double treshold, const double beta1, const double beta2, LossType loss)
+FFNet *new_ff_net(const int *layer_sizes, int num_layers, float (*act)(float), float (*pdact)(float),
+                  const float treshold, const float beta1, const float beta2, LossType loss)
 {
     printf("Building FFNet with %d layers: ", num_layers);
     FFNet *ffnet = (FFNet *)malloc(sizeof(FFNet));
@@ -81,9 +81,9 @@ void free_ff_net(FFNet *ffnet)
  * @param learning_rate The learning rate for the training.
  * @return The training loss.
  */
-double train_ff_net(FFNet *ffnet, const FFBatch batch, const double learning_rate)
+float train_ff_net(FFNet *ffnet, const FFBatch batch, const float learning_rate)
 {
-    double loss = 0.0;
+    float loss = 0.0;
     loss += train_ff_cell(ffnet->layers[0], batch, learning_rate, ffnet->threshold, ffnet->loss);
     for (int i = 1; i < ffnet->num_cells; i++)
         loss += train_ff_cell(ffnet->layers[i], batch, learning_rate, ffnet->threshold, ffnet->loss);
@@ -91,7 +91,7 @@ double train_ff_net(FFNet *ffnet, const FFBatch batch, const double learning_rat
 }
 
 
-int parse_label(const double *target, const int num_classes)
+int parse_label(const float *target, const int num_classes)
 {
     for (int i = 0; i < num_classes; i++)
     {
@@ -110,10 +110,10 @@ int parse_label(const double *target, const int num_classes)
  * @param input_size The size of the input data.
  * @return int The predicted class index.
  */
-int predict_ff_net(const FFNet *ffnet, const double *input, const int num_classes, const int input_size)
+int predict_ff_net(const FFNet *ffnet, const float *input, const int num_classes, const int input_size)
 {
-    double *netinput = (double *)malloc((input_size) * sizeof(double));
-    double goodnesses[MAX_CLASSES];
+    float *netinput = (float *)malloc((input_size) * sizeof(float));
+    float goodnesses[MAX_CLASSES];
     // For debugging.
     for (int i = 0; i < num_classes; i++)
         goodnesses[i] = 0.0;

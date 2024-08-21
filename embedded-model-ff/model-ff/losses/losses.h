@@ -27,11 +27,11 @@ typedef struct
     // Loss type.
     LossType type;
     // Loss function handler.
-    double (*loss)(const double, const double, const double);
+    float (*loss)(const float, const float, const float);
     // Partial derivative of the loss function for the positive pass.
-    double (*pdloss_pos)(const double, const double, const double);
+    float (*pdloss_pos)(const float, const float, const float);
     // Partial derivative of the loss function for the negative pass.
-    double (*pdloss_neg)(const double, const double, const double);
+    float (*pdloss_neg)(const float, const float, const float);
 } Loss;
 
 /**
@@ -42,7 +42,7 @@ typedef struct
  * @param threshold The threshold value.
  * @return The loss value.
  */
-double ff_loss(const double g_pos, const double g_neg, const double threshold);
+float ff_loss(const float g_pos, const float g_neg, const float threshold);
 
 /**
  * @brief Partial derivative of the FF loss function for the positive pass.
@@ -52,7 +52,7 @@ double ff_loss(const double g_pos, const double g_neg, const double threshold);
  * @param threshold The threshold value.
  * @return The partial derivative of the loss function for the positive pass.
  */
-double ff_pdloss_pos(const double g_pos, const double g_neg, const double threshold);
+float ff_pdloss_pos(const float g_pos, const float g_neg, const float threshold);
 
 /**
  * @brief Partial derivative of the FF loss function for the negative pass.
@@ -62,7 +62,7 @@ double ff_pdloss_pos(const double g_pos, const double g_neg, const double thresh
  * @param threshold The threshold value.
  * @return The partial derivative of the loss function for the negative pass.
  */
-double ff_pdloss_neg(const double g_pos, const double g_neg, const double threshold);
+float ff_pdloss_neg(const float g_pos, const float g_neg, const float threshold);
 
 /**
  * @brief SymBa loss function.
@@ -72,7 +72,7 @@ double ff_pdloss_neg(const double g_pos, const double g_neg, const double thresh
  * @param threshold The threshold value.
  * @return The loss value.
  */
-double symba_loss(const double g_pos, const double g_neg, const double threshold);
+float symba_loss(const float g_pos, const float g_neg, const float threshold);
 
 /**
  * @brief Partial derivative of the SymBa loss function for the positive pass.
@@ -82,7 +82,7 @@ double symba_loss(const double g_pos, const double g_neg, const double threshold
  * @param threshold The threshold value.
  * @return The partial derivative of the loss function for the positive pass.
  */
-double symba_pdloss_pos(const double g_pos, const double g_neg, const double threshold);
+float symba_pdloss_pos(const float g_pos, const float g_neg, const float threshold);
 
 /**
  * @brief Partial derivative of the SymBa loss function for the negative pass.
@@ -92,7 +92,7 @@ double symba_pdloss_pos(const double g_pos, const double g_neg, const double thr
  * @param threshold The threshold value.
  * @return The partial derivative of the loss function for the negative pass.
  */
-double symba_pdloss_neg(const double g_pos, const double g_neg, const double threshold);
+float symba_pdloss_neg(const float g_pos, const float g_neg, const float threshold);
 
 /**
  * @brief Selects a loss function based on the given type.

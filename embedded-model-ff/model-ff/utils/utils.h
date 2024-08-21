@@ -35,7 +35,7 @@ char *read_line_from_file(FILE *const file);
  * @param cols The number of columns in the matrix.
  * @return A dynamically allocated 2D array representing the matrix.
  */
-double **new_matrix(const int rows, const int cols);
+float **new_matrix(const int rows, const int cols);
 
 /**
  * @brief Sets the seed for the random number generator.

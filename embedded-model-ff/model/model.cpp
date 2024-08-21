@@ -67,7 +67,7 @@ void ModelFF::build()
     printf("Network built.\n");
 }
 
-void ModelFF::train(const int &epochs, const int &batch_size, const double &learning_rate)
+void ModelFF::train(const int &epochs, const int &batch_size, const float &learning_rate)
 {
     esp_task_wdt_add(NULL);
     FFBatch batch = new_ff_batch(batch_size, max_units);
@@ -89,11 +89,11 @@ void ModelFF::train(const int &epochs, const int &batch_size, const double &lear
 
     for (int i = 0; i < epochs; i++) // iterate over model epochs
     {
-        double loss = 0.0f;
+        float loss = 0.0f;
         int64_t start_time = esp_timer_get_time();
         loss += train_ff_net(ffnet, batch, learning_rate); // train the model
         int64_t end_time = esp_timer_get_time();
-        double elapsed_time = (end_time - start_time) / 1000.0;
+        float elapsed_time = (end_time - start_time) / 1000.0;
         printf("Training completed in %.2f ms\n", elapsed_time);
         printf("Epoch %d: Loss: %f\n", i, loss);
     }

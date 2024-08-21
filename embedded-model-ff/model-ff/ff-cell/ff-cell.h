@@ -30,15 +30,15 @@
  */
 typedef struct
 {
-    double weights[MAX_WEIGHTS];               /**< All the weights. */
-    double bias;                   /**< Biases. */
-    double *output;                /**< Output layer. */
-    double gradient[MAX_WEIGHTS];              /**< Gradient of each weight for a batch. */
+    float weights[MAX_WEIGHTS];               /**< All the weights. */
+    float bias;                   /**< Biases. */
+    float *output;                /**< Output layer. */
+    float gradient[MAX_WEIGHTS];              /**< Gradient of each weight for a batch. */
     int num_weights;               /**< Number of weights. */
     int input_size;                /**< Number of inputs. */
     int output_size;               /**< Number of outputs. */
-    double (*act)(const double);   /**< Activation function. */
-    double (*pdact)(const double); /**< Derivative of activation function. */
+    float (*act)(const float);   /**< Activation function. */
+    float (*pdact)(const float); /**< Derivative of activation function. */
     Adam adam;                     /**< Adam optimizer. */
 } FFCell;
 
@@ -55,7 +55,7 @@ typedef struct
  * @param beta2 The hyperparameter for the FF algorithm.
  * @return The newly generated FFCell.
  */
-FFCell new_ff_cell(const int input_size, const int output_size, double (*act)(double), double (*pdact)(double), const double beta1, const double beta2);
+FFCell new_ff_cell(const int input_size, const int output_size, float (*act)(float), float (*pdact)(float), const float beta1, const float beta2);
 
 /**
  * @brief Frees the memory of a FFCell.
@@ -72,14 +72,14 @@ void free_ff_cell(FFCell ffcell);
  * @param loss_suite The loss function suite.
  * @return The loss value after training.
  */
-double train_ff_cell(FFCell ffcell, FFBatch batch, const double learning_rate, const double threshold, const LossType loss_suite);
+float train_ff_cell(FFCell ffcell, FFBatch batch, const float learning_rate, const float threshold, const LossType loss_suite);
 
 /**
  * @brief Performs the forward pass for a FFCell.
  * @param ffcell The FFCell.
  * @param in The input values.
  */
-void fprop_ff_cell(const FFCell ffcell, const double *const in);
+void fprop_ff_cell(const FFCell ffcell, const float *const in);
 
 
 /**
@@ -87,11 +87,11 @@ void fprop_ff_cell(const FFCell ffcell, const double *const in);
  * @param a The input value.
  * @return The output value after applying the ReLU activation function.
  */
-double relu(const double a);
+float relu(const float a);
 
 /**
  * @brief Derivative of the ReLU activation function.
  * @param a The input value.
  * @return The derivative of the ReLU activation function at the given input value.
  */
-double pdrelu(const double a);
+float pdrelu(const float a);

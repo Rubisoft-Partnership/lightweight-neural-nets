@@ -25,7 +25,7 @@
  * @param ffcell The FFCell object representing the FF cell.
  * @param in The input data for the forward pass.
  */
-void fprop_ff_cell(const FFCell ffcell, const double *const in);
+void fprop_ff_cell(const FFCell ffcell, const float *const in);
 
 /**
  * Performs the backward pass for a feedforward (FF) cell.
@@ -33,7 +33,7 @@ void fprop_ff_cell(const FFCell ffcell, const double *const in);
  * @param ffcell The FF cell to perform the backward pass on.
  * @param learning_rate The learning rate for the cell.
  */
-static void bprop(FFCell ffcell, const double learning_rate);
+static void bprop(FFCell ffcell, const float learning_rate);
 
 /**
  * Computes the gradient for the given of a sample of the batch for the FF cell and stores it in the gradient array.
@@ -47,13 +47,13 @@ static void bprop(FFCell ffcell, const double learning_rate);
  * @param threshold The threshold value.
  * @param loss_suite The loss function suite to be used.
  */
-static void compute_gradient(FFCell ffcell, const double *const in_pos, const double *const in_neg,
-                             const double *const positive_output_buffer, const double g_pos, const double g_neg,
-                             const double threshold, const Loss loss_suite);
+static void compute_gradient(FFCell ffcell, const float *const in_pos, const float *const in_neg,
+                             const float *const positive_output_buffer, const float g_pos, const float g_neg,
+                             const float threshold, const Loss loss_suite);
 
 // Random number generation for weights.
 static void wbrand(FFCell *ffcell);
-static double frand(void);
+static float frand(void);
 
 /**
  * Constructs a FF cell with the specified number of inputs, number of outputs, activation function,
@@ -67,8 +67,8 @@ static double frand(void);
  * @param beta2 The beta2 parameter for the Adam optimizer.
  * @return The constructed FF cell.
  */
-FFCell new_ff_cell(const int input_size, const int output_size, double (*act)(double),
-                   double (*pdact)(double), const double beta1, const double beta2)
+FFCell new_ff_cell(const int input_size, const int output_size, float (*act)(float),
+                   float (*pdact)(float), const float beta1, const float beta2)
 {
     FFCell ffcell;
     ffcell.num_weights = input_size * output_size; // total number of weights
@@ -85,9 +85,9 @@ FFCell new_ff_cell(const int input_size, const int output_size, double (*act)(do
 
     printf("Initializing FFCell...\n");
 
-    // ffcell.weights = (double *)calloc(ffcell.num_weights, sizeof(*ffcell.weights));   // weights
-    ffcell.output = (double *)calloc(output_size, sizeof(*ffcell.output)); // output neurons
-    // ffcell.gradient = (double *)calloc(ffcell.num_weights, sizeof(*ffcell.gradient)); // gradient of each weight
+    // ffcell.weights = (float *)calloc(ffcell.num_weights, sizeof(*ffcell.weights));   // weights
+    ffcell.output = (float *)calloc(output_size, sizeof(*ffcell.output)); // output neurons
+    // ffcell.gradient = (float *)calloc(ffcell.num_weights, sizeof(*ffcell.gradient)); // gradient of each weight
     ffcell.input_size = input_size;
     ffcell.output_size = output_size;
     ffcell.act = act;
@@ -116,20 +116,20 @@ void free_ff_cell(const FFCell ffcell)
  * @param loss_suite The loss function suite.
  * @return The loss value after training.
  */
-double train_ff_cell(FFCell ffcell, FFBatch batch, const double learning_rate, const double threshold, const LossType loss)
+float train_ff_cell(FFCell ffcell, FFBatch batch, const float learning_rate, const float threshold, const LossType loss)
 {
     Loss loss_suite = select_loss(loss);
 
-    double g_pos = 0.0, g_neg = 0.0;
-    double loss_value = 0.0;
+    float g_pos = 0.0, g_neg = 0.0;
+    float loss_value = 0.0;
 
-    double *positive_output_buffer = malloc(ffcell.output_size * sizeof(*positive_output_buffer));
+    float *positive_output_buffer = malloc(ffcell.output_size * sizeof(*positive_output_buffer));
 
     for (int i = 0; i < batch.size; i++)
     {
         // Get the positive and negative samples from the batch
-        double *pos = batch.pos[i];
-        double *neg = batch.neg[i];
+        float *pos = batch.pos[i];
+        float *neg = batch.neg[i];
 
         // Positive forward pass.
         fprop_ff_cell(ffcell, pos);
@@ -172,13 +172,13 @@ double train_ff_cell(FFCell ffcell, FFBatch batch, const double learning_rate, c
 }
 
 // Performs forward propagation.
-void fprop_ff_cell(const FFCell ffcell, const double *const in)
+void fprop_ff_cell(const FFCell ffcell, const float *const in)
 {
-    double debug_sum = 0.0;
+    float debug_sum = 0.0;
     // Calculate the activation output for each output unit
     for (int i = 0; i < ffcell.output_size; i++)
     {
-        double sum = 0.0;
+        float sum = 0.0;
         // Calculate the weighted sum of the inputs
         for (int j = 0; j < ffcell.input_size; j++)
             sum += in[j] * ffcell.weights[i * ffcell.input_size + j];
@@ -188,13 +188,13 @@ void fprop_ff_cell(const FFCell ffcell, const double *const in)
     }
 }
 
-static void compute_gradient(FFCell ffcell, const double *const in_pos, const double *const in_neg,
-                             const double *const positive_output_buffer, const double g_pos, const double g_neg,
-                             const double threshold, const Loss loss_suite)
+static void compute_gradient(FFCell ffcell, const float *const in_pos, const float *const in_neg,
+                             const float *const positive_output_buffer, const float g_pos, const float g_neg,
+                             const float threshold, const Loss loss_suite)
 {
     // Calculate the partial derivative of the loss with respect to the goodness of the positive and negative pass.
-    const double pdloss_pos = loss_suite.pdloss_pos(g_pos, g_neg, threshold);
-    const double pdloss_neg = loss_suite.pdloss_neg(g_pos, g_neg, threshold);
+    const float pdloss_pos = loss_suite.pdloss_pos(g_pos, g_neg, threshold);
+    const float pdloss_neg = loss_suite.pdloss_neg(g_pos, g_neg, threshold);
 
     /// TODO: change loops to i < ffcell.num_weights
     for (int i = 0; i < ffcell.input_size; i++)
@@ -204,20 +204,20 @@ static void compute_gradient(FFCell ffcell, const double *const in_pos, const do
             int weight_index = j * ffcell.input_size + i;
 
             // Calculate the gradient of the loss with respect to the weight for the positive and negative pass
-            double gradient_pos = pdloss_pos * 2.0 * positive_output_buffer[j] * in_pos[i];
-            double gradient_neg = pdloss_neg * 2.0 * ffcell.output[j] * in_neg[i];
+            float gradient_pos = pdloss_pos * 2.0 * positive_output_buffer[j] * in_pos[i];
+            float gradient_neg = pdloss_neg * 2.0 * ffcell.output[j] * in_neg[i];
             ffcell.gradient[weight_index] += gradient_pos + gradient_neg; // accumulate the gradient
         }
     }
 }
 
 // Performs backward pass for the FF algorithm.
-static void bprop(FFCell ffcell, const double learning_rate)
+static void bprop(FFCell ffcell, const float learning_rate)
 {
     // Debugging variables statistics about weight updates.
     int updated_weights = 0;
-    double sum_weight_update = 0.0;
-    double sum_weight_update_squared = 0.0;
+    float sum_weight_update = 0.0;
+    float sum_weight_update_squared = 0.0;
 
     // Update the weights for each connection between input and output units
 
@@ -229,7 +229,7 @@ static void bprop(FFCell ffcell, const double learning_rate)
             int weight_index = j * ffcell.input_size + i;
 
             // Weight update using Adam optimizer
-            const double weight_update = learning_rate * adam_weight_update(ffcell.adam, ffcell.gradient[weight_index], weight_index);
+            const float weight_update = learning_rate * adam_weight_update(ffcell.adam, ffcell.gradient[weight_index], weight_index);
 
             // Update the weight
             ffcell.weights[weight_index] -= weight_update;
@@ -245,8 +245,8 @@ static void bprop(FFCell ffcell, const double learning_rate)
     }
 
     // Log statistics about weight updates.
-    double mean_weight_update = 0.0;
-    double std_weight_update = 0.0;
+    float mean_weight_update = 0.0;
+    float std_weight_update = 0.0;
     if (updated_weights != 0)
     {
         mean_weight_update = sum_weight_update / updated_weights;
@@ -255,13 +255,13 @@ static void bprop(FFCell ffcell, const double learning_rate)
 }
 
 // ReLU activation function.
-double relu(const double a)
+float relu(const float a)
 {
     return a > 0.0 ? a : 0.0;
 }
 
 // ReLU derivative.
-double pdrelu(const double a)
+float pdrelu(const float a)
 {
     return a > 0.0 ? 1.0 : 0.0;
 }
@@ -274,8 +274,8 @@ static void wbrand(FFCell *ffcell)
     ffcell->bias = frand() - 0.5;
 }
 
-// Returns random double in [0.0 - 1.0]
-static double frand(void)
+// Returns random float in [0.0 - 1.0]
+static float frand(void)
 {
-    return get_random() / (double)RAND_MAX;
+    return get_random() / (float)RAND_MAX;
 }

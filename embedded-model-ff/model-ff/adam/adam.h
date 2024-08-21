@@ -14,10 +14,10 @@
  */
 typedef struct
 {
-    double beta1; /**< Adam hyperparameter: exponential decay rate for the first moment estimate */
-    double beta2; /**< Adam hyperparameter: exponential decay rate for the second moment estimate */
-    double *m; /**< First moment estimate vector */
-    double *v; /**< Second moment estimate vector */
+    float beta1; /**< Adam hyperparameter: exponential decay rate for the first moment estimate */
+    float beta2; /**< Adam hyperparameter: exponential decay rate for the second moment estimate */
+    float *m; /**< First moment estimate vector */
+    float *v; /**< Second moment estimate vector */
     int t; /**< Time step */
 } Adam;
 
@@ -28,7 +28,7 @@ typedef struct
  * @param size The size of the weight vector.
  * @return The created Adam optimizer instance.
  */
-Adam adam_create(double beta1, double beta2, int size);
+Adam adam_create(float beta1, float beta2, int size);
 
 /**
  * @brief Frees the memory allocated for an Adam optimizer instance.
@@ -43,4 +43,4 @@ void adam_free(Adam adam);
  * @param index The index of the weight.
  * @return The weight update value.
  */
-double adam_weight_update(Adam adam, double gradient, int index);
+float adam_weight_update(Adam adam, float gradient, int index);

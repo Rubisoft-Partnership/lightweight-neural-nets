@@ -27,7 +27,7 @@ typedef struct
 {
     FFCell layers[MAX_LAYERS_NUM]; // Array of FFCell blocks in the network.
     int num_cells;                 // Number of cells in the network.
-    double threshold;              // Threshold value for the cells in the network.
+    float threshold;              // Threshold value for the cells in the network.
     LossType loss;                 // Loss function suite for the network.
 } FFNet;
 
@@ -48,7 +48,7 @@ typedef struct
  * @param loss_suite The loss function suite for the FFNet.
  * @return FFNet The constructed FFNet.
  */
-FFNet *new_ff_net(const int *layer_sizes, int num_layers, double (*act)(double), double (*pdact)(double), const double threshold, const double beta1, const double beta2, LossType loss_suite);
+FFNet *new_ff_net(const int *layer_sizes, int num_layers, float (*act)(float), float (*pdact)(float), const float threshold, const float beta1, const float beta2, LossType loss_suite);
 
 /**
  * @brief Frees the memory allocated for a FFNet.
@@ -69,7 +69,7 @@ void free_ff_net(FFNet *ffnet);
  * @param learning_rate The learning rate for the training.
  * @return The training loss.
  */
-double train_ff_net(FFNet *ffnet, const FFBatch batch, const double learning_rate);
+float train_ff_net(FFNet *ffnet, const FFBatch batch, const float learning_rate);
 
 /**
  * @brief Performs inference with a FFNet.
@@ -82,5 +82,5 @@ double train_ff_net(FFNet *ffnet, const FFBatch batch, const double learning_rat
  * @param input_size The size of the input data.
  * @return The predicted class label.
  */
-int predict_ff_net(const FFNet *ffnet, const double *input, const int num_classes, const int input_size);
+int predict_ff_net(const FFNet *ffnet, const float *input, const int num_classes, const int input_size);
 

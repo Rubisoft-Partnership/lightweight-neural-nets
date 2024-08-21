@@ -22,7 +22,7 @@ public:
     void build();
 
     // Train the model for a given number of epochs
-    void train(const int &epochs, const int &batch_size, const double &learning_rate);
+    void train(const int &epochs, const int &batch_size, const float &learning_rate);
 
     // Evaluate the model's performance with the given test data and labels
     // metrics::Metrics evaluate();

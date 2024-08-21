@@ -14,7 +14,7 @@
  * @param size The size of the weight vector.
  * @return The created Adam optimizer.
  */
-Adam adam_create(const double beta1, const double beta2, const int size)
+Adam adam_create(const float beta1, const float beta2, const int size)
 {
     Adam adam;
     adam.beta1 = beta1;
@@ -24,8 +24,8 @@ Adam adam_create(const double beta1, const double beta2, const int size)
     adam.t = 1;
     
     // Allocate memory for m and v 0-initialized
-    adam.m = (double*)calloc(size, sizeof(double));
-    adam.v = (double*)calloc(size, sizeof(double));
+    adam.m = (float*)calloc(size, sizeof(float));
+    adam.v = (float*)calloc(size, sizeof(float));
 
     return adam;
 }
@@ -49,7 +49,7 @@ void adam_free(Adam adam)
  * @param index The index of the weight.
  * @return The updated weight.
  */
-double adam_weight_update(Adam adam, const double gradient, const int index)
+float adam_weight_update(Adam adam, const float gradient, const int index)
 {
     // Increment time step
     adam.t++;
@@ -59,8 +59,8 @@ double adam_weight_update(Adam adam, const double gradient, const int index)
     adam.v[index] = adam.beta2 * adam.v[index] + (1 - adam.beta2) * gradient * gradient;
 
     // Bias correction
-    const double m_hat = adam.m[index] / (1 - pow(adam.beta1, adam.t));
-    const double v_hat = adam.v[index] / (1 - pow(adam.beta2, adam.t));
+    const float m_hat = adam.m[index] / (1 - pow(adam.beta1, adam.t));
+    const float v_hat = adam.v[index] / (1 - pow(adam.beta2, adam.t));
 
     // Weight update using Adam optimizer
     return m_hat / (sqrt(v_hat) + 1e-8);

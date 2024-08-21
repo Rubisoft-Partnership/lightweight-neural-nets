@@ -8,8 +8,8 @@
 #include <stdio.h>
 
 // Static function declarations.
-static double stable_sigmoid(double x);
-static double softplus(double x, double betha);
+static float stable_sigmoid(float x);
+static float softplus(float x, float betha);
 
 /**
  * @brief Calculates the feedforward loss for a given positive and negative gradient and a threshold.
@@ -19,7 +19,7 @@ static double softplus(double x, double betha);
  * @param threshold The threshold value.
  * @return The feedforward loss.
  */
-double ff_loss(const double g_pos, const double g_neg, const double threshold)
+float ff_loss(const float g_pos, const float g_neg, const float threshold)
 {
     return softplus(-g_pos + threshold, 1.0) + softplus(g_neg - threshold, 1.0);
 }
@@ -32,7 +32,7 @@ double ff_loss(const double g_pos, const double g_neg, const double threshold)
  * @param threshold The threshold value.
  * @return The partial derivative of the feedforward loss with respect to the positive gradient.
  */
-double ff_pdloss_pos(const double g_pos, const double g_neg, const double threshold)
+float ff_pdloss_pos(const float g_pos, const float g_neg, const float threshold)
 {
     (void)g_neg; // Unused parameter
     return -stable_sigmoid(threshold - g_pos);
@@ -46,7 +46,7 @@ double ff_pdloss_pos(const double g_pos, const double g_neg, const double thresh
  * @param threshold The threshold value.
  * @return The partial derivative of the feedforward loss with respect to the negative gradient.
  */
-double ff_pdloss_neg(const double g_pos, const double g_neg, const double threshold)
+float ff_pdloss_neg(const float g_pos, const float g_neg, const float threshold)
 {
     (void)g_pos; // Unused parameter
     return stable_sigmoid(g_neg - threshold);
@@ -58,13 +58,13 @@ double ff_pdloss_neg(const double g_pos, const double g_neg, const double thresh
  * @param x The input value.
  * @return The sigmoid value.
  */
-static double stable_sigmoid(double x)
+static float stable_sigmoid(float x)
 {
     if (x >= 0)
         return 1.0 / (1.0 + exp(-x) + 1e-8);
     else
     {
-        const double exp_x = exp(x);
+        const float exp_x = exp(x);
         return exp_x / (1.0 + exp_x + 1e-8);
     }
 }
@@ -76,7 +76,7 @@ static double stable_sigmoid(double x)
  * @param betha The beta value.
  * @return The softplus value.
  */
-static double softplus(double x, double betha)
+static float softplus(float x, float betha)
 {
     return log(1.0 + exp(x * betha)) / betha;
 }
@@ -89,7 +89,7 @@ static double softplus(double x, double betha)
  * @param threshold The threshold value.
  * @return The SymBa loss.
  */
-double symba_loss(const double g_pos, const double g_neg, const double threshold)
+float symba_loss(const float g_pos, const float g_neg, const float threshold)
 {
     return softplus(-threshold * (g_pos - g_neg), 0.05);
 }
@@ -102,7 +102,7 @@ double symba_loss(const double g_pos, const double g_neg, const double threshold
  * @param threshold The threshold value.
  * @return The partial derivative of the SymBa loss with respect to the positive gradient.
  */
-double symba_pdloss_pos(const double g_pos, const double g_neg, const double threshold)
+float symba_pdloss_pos(const float g_pos, const float g_neg, const float threshold)
 {
     return -threshold * stable_sigmoid(-threshold * (g_pos - g_neg));
 }
@@ -115,7 +115,7 @@ double symba_pdloss_pos(const double g_pos, const double g_neg, const double thr
  * @param threshold The threshold value.
  * @return The partial derivative of the SymBa loss with respect to the negative gradient.
  */
-double symba_pdloss_neg(const double g_pos, const double g_neg, const double threshold)
+float symba_pdloss_neg(const float g_pos, const float g_neg, const float threshold)
 {
     return threshold * stable_sigmoid(-threshold * (g_pos - g_neg));
 }

@@ -81,19 +81,19 @@ char *read_line_from_file(FILE *const file)
 
 /// TODO: enforce contiguous memory allocation.
 /**
- * @brief Create a matrix of doubles.
+ * @brief Create a matrix of floats.
  *
- * This function creates a matrix of doubles with the specified number of rows and columns.
+ * This function creates a matrix of floats with the specified number of rows and columns.
  *
  * @param rows The number of rows in the matrix.
  * @param cols The number of columns in the matrix.
  * @return The created matrix.
  */
-double **new_matrix(const int rows, const int cols)
+float **new_matrix(const int rows, const int cols)
 {
-    double **row = (double **)malloc((rows) * sizeof(double *));
+    float **row = (float **)malloc((rows) * sizeof(float *));
     for (int r = 0; r < rows; r++)
-        row[r] = (double *)malloc((cols) * sizeof(double));
+        row[r] = (float *)malloc((cols) * sizeof(float));
     return row;
 }
 

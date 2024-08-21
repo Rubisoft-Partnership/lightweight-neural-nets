@@ -26,9 +26,9 @@
 typedef struct
 {
     // 2D floating point array of input.
-    double **input;
+    float **input;
     // 2D floating point array of target.
-    double **target;
+    float **target;
     // Number of inputs to neural network.
     int feature_len;
     // Number of outputs to neural network.
@@ -41,9 +41,9 @@ typedef struct
 typedef struct
 {
     // 2D floating point array of FF positive sample <input, correct_label>
-    double **pos;
+    float **pos;
     // 2D floating point array of FF negative sample <input, incorrect_label>
-    double **neg;
+    float **neg;
     // Number of samples in the batch.
     int size;
 } FFBatch;
@@ -117,7 +117,7 @@ void free_ff_batch(const FFBatch batch);
  * @param pos The positive sample.
  * @param neg The negative sample.
  */
-void generate_samples(const Data *data, const int row, double *pos, double *neg);
+void generate_samples(const Data *data, const int row, float *pos, float *neg);
 
 /**
  * @brief Generates a batch of feedforward samples.

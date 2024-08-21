@@ -9,9 +9,9 @@
  * @param vec The vector to be normalized.
  * @param size The size of the vector.
  */
-void normalize_vector(double *vec, int size)
+void normalize_vector(float *vec, int size)
 {
-    double norm = 0.0;
+    float norm = 0.0;
     for (int i = 0; i < size; i++)
         norm += vec[i] * vec[i];
     norm = sqrt(norm);
@@ -26,9 +26,9 @@ void normalize_vector(double *vec, int size)
  * @param size The size of the vector.
  * @return The goodness of the layer.
  */
-double goodness(const double *vec, const int size)
+float goodness(const float *vec, const int size)
 {
-    double sum = 0.0;
+    float sum = 0.0;
     for (int i = 0; i < size; i++)
         sum += vec[i] * vec[i];
     return sum;
@@ -43,7 +43,7 @@ double goodness(const double *vec, const int size)
  * @param input_size The size of the input vector.
  * @param num_classes The number of classes.
  */
-void embed_label(double *sample, const double *input, const int label, const int input_size, const int num_classes)
+void embed_label(float *sample, const float *input, const int label, const int input_size, const int num_classes)
 {
     memcpy(sample, input, input_size * sizeof(*input));
     memset(&sample[input_size - num_classes], 0, num_classes * sizeof(*sample));

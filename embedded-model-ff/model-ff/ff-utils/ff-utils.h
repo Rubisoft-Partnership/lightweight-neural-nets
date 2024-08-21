@@ -13,14 +13,14 @@
  * @param input_size The size of the input.
  * @param num_classes The number of classes.
  */
-void embed_label(double *sample, const double *input, const int label, const int input_size, const int num_classes);
+void embed_label(float *sample, const float *input, const int label, const int input_size, const int num_classes);
 
 /**
  * @brief Normalizes a vector.
  * @param output The output vector.
  * @param size The size of the vector.
  */
-void normalize_vector(double *output, int size);
+void normalize_vector(float *output, int size);
 
 /**
  * @brief Calculates the goodness of a vector.
@@ -28,4 +28,4 @@ void normalize_vector(double *output, int size);
  * @param size The size of the vector.
  * @return The goodness value.
  */
-double goodness(const double *vec, const int size);
+float goodness(const float *vec, const int size);
