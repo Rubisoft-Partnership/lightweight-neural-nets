@@ -30,8 +30,8 @@ typedef struct
     float** normalized_confusion_matrix;
 } Metrics;
 
-Metrics generate_metrics(Predictions* predictions);
+void generate_metrics(Predictions* predictions, Metrics* metrics);
 
-void reset_metrics(Metrics metrics);
+void reset_metrics(Metrics* metrics);
 
-void print_metrics(Metrics metrics);
+void print_metrics(Metrics* metrics);

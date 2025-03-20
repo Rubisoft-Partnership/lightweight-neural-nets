@@ -52,6 +52,7 @@ void parse_args(int argc, char **argv);
 
 
 Metrics metrics;
+Predictions predictions;
 
 static void setup(void)
 {
@@ -128,7 +129,7 @@ static void train_loop(void)
 void evaluate(void)
 {
     log_info("Testing FFNet...");
-    init_predictions();
+    init_predictions(&predictions);
     for (int i = 0; i < data.test->rows; i++)
     {
         double *const input = data.test->input[i];
@@ -143,11 +144,11 @@ void evaluate(void)
             }
         }
         const int prediction = predict_ff_net(ffnet, input, num_classes, input_size);
-        add_prediction(ground_truth, prediction);
+        add_prediction(ground_truth, prediction, &predictions);
     }
-    reset_metrics(metrics);
-    metrics = generate_metrics();
-    print_metrics(metrics);
+    generate_metrics(&predictions, &metrics);
+    print_metrics(&metrics);
+    // reset_metrics(&metrics);
 
     // Save the model to a checkpoint file.
     save_ff_net(ffnet, "ffnet.bin", true);
